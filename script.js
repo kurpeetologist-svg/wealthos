@@ -51,8 +51,8 @@ const ui = {
   nextStoryChanges: $('nextStoryChanges'),
   nextStoryMove: $('nextStoryMove'),
 
-  historySummary: $('historySummary'),
-  historyList: $('historyList'),
+  timelineSummary: $('timelineSummary'),
+  timelineGroups: $('timelineGroups'),
   historyManagerList: $('historyManagerList'),
 
   aboutTrigger: $('aboutTrigger'),
@@ -601,52 +601,208 @@ function render(data) {
     ? 'There is one thing worth reviewing today.'
     : 'Nothing requires your attention today.';
 
-  renderHistory(history, stats, money, source);
+  renderTimeline(normalized, history, stats, money, source);
   populateForm(normalized);
 }
 
-function renderHistory(history, stats, money, source) {
-  ui.historySummary.textContent = history.length < 2
-    ? 'Add another month to unlock comparisons.'
-    : `${history.length} months remembered · ${money.format(stats.average)} monthly average`;
 
-  ui.historyList.replaceChildren();
+function createTimelineEvent({ title, description, amount = '', tone = 'neutral' }) {
+  const event = document.createElement('article');
+  event.className = 'timeline-event';
+  event.dataset.tone = tone;
 
-  const reversed = history.slice().reverse().slice(0, 6);
+  const marker = document.createElement('span');
+  marker.className = 'timeline-marker';
+  marker.setAttribute('aria-hidden', 'true');
 
-  reversed.forEach((item, reversedIndex) => {
-    const originalIndex = history.findIndex(entry => entry.month === item.month);
-    const previous = originalIndex > 0 ? history[originalIndex - 1] : null;
-    const difference = previous
-      ? asNumber(item.amount) - asNumber(previous.amount)
-      : null;
+  const copy = document.createElement('div');
+  copy.className = 'timeline-copy';
 
-    const card = document.createElement('article');
-    card.className = 'history-card';
+  const heading = document.createElement('h4');
+  heading.textContent = title;
 
-    const title = reversedIndex === 0 && stats.isRecord
-      ? `Your strongest ${source.toLowerCase()} month yet`
-      : difference === null
-        ? 'The month your history began'
-        : difference > 0
-          ? `${source} moved forward`
-          : difference < 0
-            ? `${source} softened`
-            : `${source} remained steady`;
+  const paragraph = document.createElement('p');
+  paragraph.textContent = description;
 
-    const time = document.createElement('time');
-    time.textContent = formatMonth(item.month);
+  copy.append(heading, paragraph);
+  event.append(marker, copy);
+
+  if (amount) {
+    const value = document.createElement('div');
+    value.className = 'timeline-amount';
+    value.textContent = amount;
+    event.appendChild(value);
+  }
+
+  return event;
+}
+
+function incomeMoments(history, stats, money, source) {
+  const groups = new Map();
+
+  history.forEach((item, index) => {
+    const previous = index > 0 ? history[index - 1] : null;
+    const amount = asNumber(item.amount);
+    const previousAmount = previous ? asNumber(previous.amount) : null;
+    const difference = previousAmount === null ? null : amount - previousAmount;
+    const priorAmounts = history
+      .slice(0, index)
+      .map(entry => asNumber(entry.amount));
+    const isRecord = priorAmounts.length > 0 && amount > Math.max(...priorAmounts);
+
+    let title;
+    let description;
+    let tone = 'neutral';
+
+    if (index === 0) {
+      title = 'Your WealthOS income story began';
+      description = `You recorded ${money.format(amount)} in ${source.toLowerCase()}. This became the first reference point for your Timeline.`;
+    } else if (isRecord) {
+      title = `${source} reached a new monthly high`;
+      description = `You moved beyond every earlier ${source.toLowerCase()} month saved in WealthOS.`;
+      tone = 'growth';
+    } else if (difference > 0) {
+      title = `${source} moved forward`;
+      description = `Your ${source.toLowerCase()} increased by ${money.format(difference)} from the prior month.`;
+      tone = 'growth';
+    } else if (difference < 0) {
+      title = `${source} softened`;
+      description = `Your ${source.toLowerCase()} was ${money.format(Math.abs(difference))} lower than the prior month. One month does not define the full trend.`;
+      tone = 'attention';
+    } else {
+      title = `${source} remained steady`;
+      description = `Your ${source.toLowerCase()} matched the prior month.`;
+    }
+
+    if (!groups.has(item.month)) groups.set(item.month, []);
+    groups.get(item.month).push({
+      title,
+      description,
+      amount: money.format(amount),
+      tone
+    });
+  });
+
+  return groups;
+}
+
+function addCurrentFinancialMoments(data, groups, money) {
+  const currentMonth = data.income.currentMonth || nowMonth;
+  if (!groups.has(currentMonth)) groups.set(currentMonth, []);
+  const currentEvents = groups.get(currentMonth);
+
+  const taxEstimate = asNumber(data.taxes.estimate);
+  const taxReserved = asNumber(data.taxes.reserved);
+  const taxShortfall = Math.max(0, taxEstimate - taxReserved);
+  const taxDays = daysUntil(data.taxes.dueDate);
+
+  if (taxEstimate > 0) {
+    if (taxShortfall === 0) {
+      currentEvents.push({
+        title: 'Your tax reserve became fully funded',
+        description: `You have set aside the full estimated payment due ${formatDate(data.taxes.dueDate)}.`,
+        amount: money.format(taxReserved),
+        tone: 'progress'
+      });
+    } else {
+      currentEvents.push({
+        title: 'Your tax reserve still has a gap',
+        description: `${money.format(taxShortfall)} remains before the selected due date${taxDays === null ? '.' : `, currently ${Math.abs(taxDays)} day${Math.abs(taxDays) === 1 ? '' : 's'} ${taxDays < 0 ? 'past due' : 'away'}.`}`,
+        amount: money.format(taxReserved),
+        tone: 'attention'
+      });
+    }
+  }
+
+  const emergencyBalance = asNumber(data.emergency.balance);
+  const essentials = Math.max(1, asNumber(data.emergency.essentials, 1));
+  const targetMonths = Math.max(1, asNumber(data.emergency.targetMonths, 1));
+  const targetAmount = essentials * targetMonths;
+  const monthsCovered = emergencyBalance / essentials;
+
+  if (emergencyBalance >= targetAmount) {
+    currentEvents.push({
+      title: 'Your emergency fund reached its target',
+      description: `Your safety net now covers approximately ${monthsCovered.toFixed(1)} months of essential expenses.`,
+      amount: money.format(emergencyBalance),
+      tone: 'progress'
+    });
+  }
+
+  if (data.challenge.enabled && asNumber(data.challenge.target) > 0) {
+    const saved = asNumber(data.challenge.saved);
+    const target = asNumber(data.challenge.target);
+    const percentage = Math.min(100, Math.round((saved / target) * 100));
+
+    currentEvents.push({
+      title: percentage >= 100
+        ? `Your ${data.challenge.name} challenge is complete`
+        : `Your ${data.challenge.name} challenge reached ${percentage}%`,
+      description: percentage >= 100
+        ? 'You reached the full target you set for yourself.'
+        : `${money.format(Math.max(0, target - saved))} remains before the challenge is complete.`,
+      amount: money.format(saved),
+      tone: 'progress'
+    });
+  }
+}
+
+function renderTimeline(data, history, stats, money, source) {
+  ui.timelineGroups.replaceChildren();
+
+  const groups = incomeMoments(history, stats, money, source);
+  addCurrentFinancialMoments(data, groups, money);
+
+  const orderedMonths = [...groups.keys()]
+    .sort((a, b) => b.localeCompare(a));
+
+  const totalMoments = [...groups.values()]
+    .reduce((sum, events) => sum + events.length, 0);
+
+  ui.timelineSummary.textContent = totalMoments === 0
+    ? 'Your first financial moment will appear after you save an entry.'
+    : `${totalMoments} financial moment${totalMoments === 1 ? '' : 's'} remembered across ${orderedMonths.length} month${orderedMonths.length === 1 ? '' : 's'}.`;
+
+  if (orderedMonths.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'timeline-empty';
 
     const heading = document.createElement('h3');
-    heading.textContent = title;
+    heading.textContent = 'Your Timeline begins here.';
 
-    const detail = document.createElement('p');
-    detail.textContent = difference === null
-      ? money.format(asNumber(item.amount))
-      : `${money.format(asNumber(item.amount))} · ${difference >= 0 ? '+' : ''}${money.format(difference)} vs prior month`;
+    const paragraph = document.createElement('p');
+    paragraph.textContent = 'Save your first month in About You, and WealthOS will begin remembering the moments behind your numbers.';
 
-    card.append(time, heading, detail);
-    ui.historyList.appendChild(card);
+    empty.append(heading, paragraph);
+    ui.timelineGroups.appendChild(empty);
+    return;
+  }
+
+  orderedMonths.forEach(month => {
+    const monthSection = document.createElement('section');
+    monthSection.className = 'timeline-month';
+
+    const monthHeading = document.createElement('div');
+    monthHeading.className = 'timeline-month-heading';
+
+    const heading = document.createElement('h3');
+    heading.textContent = formatMonth(month);
+
+    const count = document.createElement('p');
+    const events = groups.get(month);
+    count.textContent = `${events.length} moment${events.length === 1 ? '' : 's'}`;
+
+    monthHeading.append(heading, count);
+
+    const eventList = document.createElement('div');
+    eventList.className = 'timeline-events';
+
+    events.forEach(eventData => {
+      eventList.appendChild(createTimelineEvent(eventData));
+    });
+
+    monthSection.append(monthHeading, eventList);
+    ui.timelineGroups.appendChild(monthSection);
   });
 }
 
@@ -865,7 +1021,7 @@ document.querySelectorAll('.signal-button').forEach(button => {
 try {
   render(loadData());
 } catch (error) {
-  console.error('WealthOS could not complete its initial render.', error);
+  console.error('WealthOS v0.8.2 could not complete its initial render.', error);
 
   // Keep the failure visible and understandable instead of leaving blank cards.
   ui.growthTitle.textContent = 'WealthOS needs a quick refresh';

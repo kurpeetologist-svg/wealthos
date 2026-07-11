@@ -1,21 +1,30 @@
-# WealthOS v0.8.1 — Stability Release
+# WealthOS v0.8.2 — Timeline Release
 
-This release fixes the blank Signal cards seen in v0.8.
+This release transforms the former Financial History section into **Your Timeline**.
 
-## Fixes
-- Removed reliance on browser-created global variables for HTML element IDs
-- Removed the `closePanel` element/function name conflict
-- Added explicit element validation
-- Added safe data normalization
-- Added migration from v0.6 and v0.7 localStorage data
-- Preserved the v0.8 design and feature scope
-- Added a visible fallback message if a future rendering error occurs
+## New
+- Renamed Financial History to Timeline
+- Groups Stories by month
+- Converts saved income entries into narrative financial moments
+- Adds current tax-reserve, emergency-fund, and Savings Challenge moments
+- Uses calm language rather than raw transaction-style records
+- Shows how many moments WealthOS remembers
+- Preserves About You, Signals, Stories, rules-based Next Steps, and saved-data migration
+
+## Timeline question
+Headquarters answers:
+
+`What should I know today?`
+
+Timeline answers:
+
+`How did I get here?`
 
 ## Scope
-No new product features were added. This release focuses only on reliable rendering and saved-data compatibility.
+No new financial recommendation rules or financial calculations were added in this release.
 
 ## Publish
-Replace these files in the GitHub repository:
+Replace:
 - index.html
 - styles.css
 - script.js
@@ -23,4 +32,4 @@ Replace these files in the GitHub repository:
 
 Suggested commit message:
 
-`Stabilize v0.8 rendering and saved-data migration`
+`Transform financial history into a monthly Story Timeline`

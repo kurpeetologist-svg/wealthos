@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS v0.8 — historical tracking and smarter financial Stories.">
-  <title>WealthOS v0.8.1</title>
+  <title>WealthOS v0.8.2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -125,15 +125,15 @@
           </article>
         </div>
 
-        <section class="history-section">
-          <div class="history-heading">
+        <section class="timeline-section" id="timeline">
+          <div class="timeline-heading">
             <div>
               <p class="eyebrow">Stories</p>
-              <h2>Your Financial History</h2>
+              <h2>Your Timeline</h2>
             </div>
-            <p id="historySummary"></p>
+            <p id="timelineSummary">The moments shaping your financial life.</p>
           </div>
-          <div class="history-list" id="historyList"></div>
+          <div class="timeline-groups" id="timelineGroups"></div>
         </section>
       </div>
     </section>
@@ -206,7 +206,8 @@
       </section>
 
       <section class="form-section history-manager">
-        <h3>Income history</h3>
+        <h3>Timeline data</h3>
+        <p class="form-help">Earlier income months become Stories on your Timeline. Remove an entry only when it is incorrect.</p>
         <div id="historyManagerList"></div>
       </section>
 
@@ -218,7 +219,7 @@
   </aside>
 
   <footer>
-    <span>WealthOS v0.8.1</span>
+    <span>WealthOS v0.8.2</span>
     <span>Your history stays in this browser.</span>
   </footer>
 
