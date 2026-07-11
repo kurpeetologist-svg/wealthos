@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.9.2-data';
-const LEGACY_KEYS=['wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.9.2.1-data';
+const LEGACY_KEYS=['wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -104,33 +104,46 @@ function render(data){
   $('growthStoryChanged').textContent=s.prev?`${source} moved from ${fmt.format(prev)} to ${fmt.format(cur)}.`:`You recorded ${fmt.format(cur)} for ${formatMonth(data.income.currentMonth)}.`;
   $('growthStoryMatters').textContent=s.isRecord?'This establishes a new reference point for future progress.':`Your recorded monthly average is ${fmt.format(s.avg)}.`;
   $('growthStoryNext').textContent='Keep checking in so WealthOS can distinguish a pattern from a single month.';
+  $('growthSource').textContent='Source: Monthly Check-ins · WealthOS calculates the comparison.';
 
   const td=daysUntil(data.taxes.dueDate),te=n(data.taxes.estimate),tr=n(data.taxes.reserved),short=Math.max(0,te-tr),funded=te>0&&tr>=te;
-  $('attentionTitle').textContent=te===0?'Your tax reserve is ready when you are':funded?'Your quarterly tax payment is fully reserved':'Your quarterly tax reserve has room to grow';
-  $('attentionValue').textContent=td===null?'Not set':td<0?`${Math.abs(td)} days late`:`${td} days`;
-  $('attentionChange').textContent=te===0?'Add details in About You':funded?`${fmt.format(tr)} reserved`:`${fmt.format(short)} remaining`;
-  $('attentionPersonal').textContent=te===0?'Add a tax estimate whenever this becomes relevant to you.':funded?'You have set aside the full estimated amount.':'Your reserve is still building.';
+  $('attentionTitle').textContent=te===0?'Add tax details when they become relevant':funded?'Your quarterly tax payment is fully reserved':'Your quarterly tax reserve has room to grow';
+  $('attentionValue').textContent=te===0?'Ready when you are':td===null?'Date not added':td<0?`${Math.abs(td)} days late`:`${td} days`;
+  $('attentionChange').textContent=te===0?'WealthOS will help you prepare':funded?`${fmt.format(tr)} reserved`:`${fmt.format(short)} remaining`;
+  $('attentionPersonal').textContent=te===0?'You can add an estimate and due date whenever this becomes part of your financial life.':funded?'You have set aside the full estimated amount.':'Your reserve is still building.';
   $('attentionStoryChanged').textContent=te===0?'No tax estimate has been added yet.':`Your current estimate is ${fmt.format(te)}.`;
   $('attentionStoryMatters').textContent=funded?'The payment should not interrupt your normal cash flow.':'This can become part of your Focus when you are ready.';
-  $('attentionStoryNext').textContent=funded?'Keep the reserve untouched until the payment clears.':'Update the estimate or reserve in About You.';
+  $('attentionStoryNext').textContent=te===0?'Add details only when taxes become relevant to you.':funded?'Keep the reserve untouched until the payment clears.':'Update the estimate or reserve.';
+  $('attentionSource').textContent='Source: Tax details in About You · WealthOS calculates timing and coverage.';
+  $('attentionAction').textContent=te===0?'Add tax details':'Update tax reserve';
 
   const eb=n(data.emergency.balance),ess=n(data.emergency.essentials),tm=n(data.emergency.targetMonths,6),months=ess>0?eb/ess:0,target=ess*tm,remaining=Math.max(0,target-eb),complete=ess>0&&eb>=target;
   if(data.challenge.enabled&&n(data.challenge.target)>0){
     const saved=n(data.challenge.saved),targetC=n(data.challenge.target),rem=Math.max(0,targetC-saved),per=Math.min(100,Math.round(saved/targetC*100));
-    $('progressTitle').textContent=rem===0?`Your ${data.challenge.name} challenge is complete`:`Your ${data.challenge.name} challenge is moving forward`;
-    $('progressValue').textContent=fmt.format(saved);$('progressChange').textContent=`${per}% of ${fmt.format(targetC)} saved`;$('progressPersonal').textContent=rem===0?'You reached the full target you set for yourself.':`${fmt.format(rem)} remains.`;
+    $('progressTitle').textContent=rem===0?`Your ${data.challenge.name} challenge is complete`:saved===0?`Your ${data.challenge.name} challenge is ready to begin`:`Your ${data.challenge.name} challenge is moving forward`;
+    $('progressValue').textContent=fmt.format(saved);
+    $('progressChange').textContent=`${per}% of ${fmt.format(targetC)} saved`;
+    $('progressPersonal').textContent=rem===0?'You reached the full target you set for yourself.':saved===0?'Your first contribution will begin this chapter.':`${fmt.format(rem)} remains.`;
+    $('progressSource').textContent='Source: Savings Challenge and recorded contributions.';
+    $('progressAction').textContent=rem===0?'Update goal':saved===0?'Record first contribution':'Record contribution';
   }else{
-    $('progressTitle').textContent=complete?'Your emergency fund is complete':'Your emergency fund is still building';
-    $('progressValue').textContent=fmt.format(eb);$('progressChange').textContent=ess>0?`${months.toFixed(1)} months covered`:'Add monthly essentials';$('progressPersonal').textContent=complete?`You reached your ${tm}-month target.`:ess>0?`${fmt.format(remaining)} remains before your target.`:'Add essential expenses in About You to calculate coverage.';
+    $('progressTitle').textContent=complete?'Your emergency fund is complete':ess>0?'Your emergency fund is still building':'Set an emergency-fund target when you are ready';
+    $('progressValue').textContent=ess>0?fmt.format(eb):'Ready when you are';
+    $('progressChange').textContent=ess>0?`${months.toFixed(1)} months covered`:'Add monthly essentials';
+    $('progressPersonal').textContent=complete?`You reached your ${tm}-month target.`:ess>0?`${fmt.format(remaining)} remains before your target.`:'WealthOS can calculate coverage once you add your essential expenses.';
+    $('progressSource').textContent='Source: Emergency-fund balance, essential expenses, and target.';
+    $('progressAction').textContent=ess>0?'Update emergency fund':'Set emergency-fund target';
   }
-  $('progressStoryChanged').textContent='This moment reflects the progress currently saved in WealthOS.';$('progressStoryMatters').textContent='Progress becomes easier to understand when it is remembered over time.';$('progressStoryNext').textContent='Keep your check-in current.';
+  $('progressStoryChanged').textContent='This moment reflects the progress currently saved in WealthOS.';
 
   let next;
   if(te>0&&short>0&&td!==null&&td<=30)next={t:'Continue building your tax reserve',v:fmt.format(short),c:'Worth reviewing',p:'This is the clearest current priority.'};
   else if(ess>0&&!complete)next={t:'Continue building your emergency fund',v:fmt.format(Math.min(remaining,n(data.emergency.monthlyContribution)||remaining)),c:`${months.toFixed(1)} of ${tm} months covered`,p:'Your emergency fund remains a strong next foundation.'};
   else if(data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved))next={t:`Continue your ${data.challenge.name} challenge`,v:fmt.format(n(data.challenge.target)-n(data.challenge.saved)),c:'Remaining goal',p:'Your next contribution keeps the challenge moving.'};
   else next={t:'No financial action is required today',v:'On track',c:'Review when something changes',p:'Your current information does not require an immediate step.'};
-  $('nextTitle').textContent=next.t;$('nextValue').textContent=next.v;$('nextChange').textContent=next.c;$('nextPersonal').textContent=next.p;$('nextStoryWhy').textContent=next.p;$('nextStoryChanges').textContent='This recommendation is based only on the information you chose to add.';$('nextStoryMove').textContent='Update About You whenever your priorities change.';
+  $('nextTitle').textContent=next.t;$('nextValue').textContent=next.v;$('nextChange').textContent=next.c;$('nextPersonal').textContent=next.p;$('nextStoryWhy').textContent=next.p;$('nextStoryChanges').textContent='This recommendation is based only on the information you chose to add.';$('nextStoryMove').textContent='Complete the linked action or update your information when priorities change.';
+  $('nextSource').textContent='Source: Growth, Attention, and Progress Signals · WealthOS selects one priority.';
+  $('nextAction').textContent=te>0&&short>0?'Update tax reserve':ess>0&&!complete?'Update emergency fund':data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved)?'Record contribution':'Review About You';
   renderTimeline(data,h,fmt,source);
   renderSnapshot(data,fmt,'weekly');
   populateAbout(data);
@@ -243,6 +256,11 @@ function saveCheckin(event){
     data.income.current=income;
     data.income.currentMonth=nowMonth;
     data.spending.monthly=spent;
+    if(saved>0&&data.challenge.enabled&&n(data.challenge.target)>0){
+      data.challenge.saved=Math.min(n(data.challenge.target),n(data.challenge.saved)+saved);
+    }else if(saved>0){
+      data.emergency.balance=n(data.emergency.balance)+saved;
+    }
     data.checkins.push({id:Date.now(),type,date,income,spent,saved,note});
   }
 
@@ -251,6 +269,55 @@ function saveCheckin(event){
   closeCheckin();
   render(data);
   location.hash='spendingSnapshot';
+}
+
+
+function openAboutSection(sectionTitle){
+  $('aboutPanel').classList.add('open');
+  $('panelBackdrop').hidden=false;
+  const headings=[...$('aboutForm').querySelectorAll('.form-section h3')];
+  const target=headings.find(h=>h.textContent.trim()===sectionTitle);
+  if(target)setTimeout(()=>target.closest('.form-section').scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+function openContribution(){
+  const data=loadData();
+  const hasChallenge=data.challenge.enabled&&n(data.challenge.target)>0;
+  $('contributionTitle').textContent=hasChallenge?'Record a contribution':'Update your emergency fund';
+  $('contributionHelp').textContent=hasChallenge
+    ? `This will update your ${data.challenge.name||'Savings'} challenge.`
+    : 'This will add to your current emergency-fund balance.';
+  $('contributionAmount').value='';
+  $('contributionModal').classList.add('open');
+  $('contributionModal').setAttribute('aria-hidden','false');
+}
+function closeContribution(){
+  $('contributionModal').classList.remove('open');
+  $('contributionModal').setAttribute('aria-hidden','true');
+}
+function saveContribution(event){
+  event.preventDefault();
+  const amount=Math.max(0,n($('contributionAmount').value));
+  if(amount<=0)return;
+  const data=loadData();
+  if(data.challenge.enabled&&n(data.challenge.target)>0){
+    data.challenge.saved=Math.min(n(data.challenge.target),n(data.challenge.saved)+amount);
+  }else{
+    data.emergency.balance=n(data.emergency.balance)+amount;
+  }
+  data.checkins.push({id:Date.now(),type:'contribution',date:new Date().toISOString().slice(0,10),amount});
+  saveData(data);
+  closeContribution();
+  render(data);
+  location.hash='focus';
+}
+function routeNextAction(){
+  const data=loadData();
+  const te=n(data.taxes.estimate),tr=n(data.taxes.reserved),short=Math.max(0,te-tr);
+  const ess=n(data.emergency.essentials),complete=ess>0&&n(data.emergency.balance)>=ess*n(data.emergency.targetMonths,6);
+  if(te>0&&short>0){openAboutSection('Quarterly taxes');return}
+  if(ess>0&&!complete){openAboutSection('Emergency fund');return}
+  if(data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved)){openContribution();return}
+  openAboutSection('You');
 }
 
 function populateAbout(d){
@@ -286,4 +353,16 @@ $('closeCheckin').addEventListener('click',closeCheckin);
 $('cancelCheckin').addEventListener('click',closeCheckin);
 $('checkinForm').addEventListener('submit',saveCheckin);
 $('checkinModal').addEventListener('click',event=>{if(event.target===$('checkinModal'))closeCheckin()});
+$('checkInYourselfCard').addEventListener('click',()=>document.querySelector('.checkin-options').scrollIntoView({behavior:'smooth',block:'center'}));
+$('attentionAction').addEventListener('click',()=>openAboutSection('Quarterly taxes'));
+$('progressAction').addEventListener('click',()=>{
+  const data=loadData();
+  if(data.challenge.enabled&&n(data.challenge.target)>0)openContribution();
+  else openAboutSection('Emergency fund');
+});
+$('nextAction').addEventListener('click',routeNextAction);
+$('closeContribution').addEventListener('click',closeContribution);
+$('cancelContribution').addEventListener('click',closeContribution);
+$('contributionForm').addEventListener('submit',saveContribution);
+$('contributionModal').addEventListener('click',event=>{if(event.target===$('contributionModal'))closeContribution()});
 render(loadData());

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.9.2</title>
+  <title>WealthOS Private Preview v0.9.2.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -70,7 +70,7 @@
             <button class="signal-button" type="button" aria-expanded="false">
               <div class="signal-topline">
                 <span class="signal-category">Growth</span>
-                <span class="signal-action">Open story <b>+</b></span>
+                <span class="signal-action">Understand why <b>+</b></span>
               </div>
               <h3 id="growthTitle"></h3>
               <div class="signal-number" id="growthValue"></div>
@@ -81,7 +81,7 @@
               <div class="story-content">
                 <div><span>What changed</span><p id="growthStoryChanged"></p></div>
                 <div><span>Why it matters</span><p id="growthStoryMatters"></p></div>
-                <div><span>Continue the momentum</span><p id="growthStoryNext"></p></div>
+                <div><span>Continue the momentum</span><p id="growthStoryNext"></p><p class="signal-source" id="growthSource"></p></div>
               </div>
             </div>
           </article>
@@ -90,7 +90,7 @@
             <button class="signal-button" type="button" aria-expanded="false">
               <div class="signal-topline">
                 <span class="signal-category">Attention</span>
-                <span class="signal-action">Open story <b>+</b></span>
+                <span class="signal-action">Review <b>+</b></span>
               </div>
               <h3 id="attentionTitle"></h3>
               <div class="signal-number" id="attentionValue"></div>
@@ -101,7 +101,7 @@
               <div class="story-content">
                 <div><span>What changed</span><p id="attentionStoryChanged"></p></div>
                 <div><span>Why it matters</span><p id="attentionStoryMatters"></p></div>
-                <div><span>Continue the momentum</span><p id="attentionStoryNext"></p></div>
+                <div><span>Continue the momentum</span><p id="attentionStoryNext"></p><p class="signal-source" id="attentionSource"></p><button class="inline-action" id="attentionAction" type="button">Add tax details</button></div>
               </div>
             </div>
           </article>
@@ -110,7 +110,7 @@
             <button class="signal-button" type="button" aria-expanded="false">
               <div class="signal-topline">
                 <span class="signal-category">Progress</span>
-                <span class="signal-action">Open story <b>+</b></span>
+                <span class="signal-action">Continue <b>+</b></span>
               </div>
               <h3 id="progressTitle"></h3>
               <div class="signal-number" id="progressValue"></div>
@@ -121,7 +121,7 @@
               <div class="story-content">
                 <div><span>What changed</span><p id="progressStoryChanged"></p></div>
                 <div><span>Why it matters</span><p id="progressStoryMatters"></p></div>
-                <div><span>Continue the momentum</span><p id="progressStoryNext"></p></div>
+                <div><span>Continue the momentum</span><p id="progressStoryNext"></p><p class="signal-source" id="progressSource"></p><button class="inline-action" id="progressAction" type="button">Record contribution</button></div>
               </div>
             </div>
           </article>
@@ -130,7 +130,7 @@
             <button class="signal-button" type="button" aria-expanded="false">
               <div class="signal-topline">
                 <span class="signal-category">Next Step</span>
-                <span class="signal-action">See reasoning <b>+</b></span>
+                <span class="signal-action">Take the next step <b>+</b></span>
               </div>
               <h3 id="nextTitle"></h3>
               <div class="signal-number" id="nextValue"></div>
@@ -141,7 +141,7 @@
               <div class="story-content">
                 <div><span>Why this step</span><p id="nextStoryWhy"></p></div>
                 <div><span>What it changes</span><p id="nextStoryChanges"></p></div>
-                <div><span>Your next move</span><p id="nextStoryMove"></p></div>
+                <div><span>Your next move</span><p id="nextStoryMove"></p><p class="signal-source" id="nextSource"></p><button class="inline-action" id="nextAction" type="button">Take action</button></div>
               </div>
             </div>
           </article>
@@ -185,11 +185,11 @@
               <h3>Choose what feels right for you.</h3>
             </div>
             <div class="connection-grid">
-              <article>
+              <button class="connection-card active-connection" id="checkInYourselfCard" type="button">
                 <h4>Check in yourself</h4>
                 <p>Take a few moments to reflect and enter your latest totals.</p>
                 <span>Available now</span>
-              </article>
+              </button>
               <article class="future-option">
                 <h4>Connect your accounts</h4>
                 <p>Let WealthOS keep your information updated automatically.</p>
@@ -369,6 +369,26 @@
     </div>
   </section>
 
+  <section class="contribution-modal" id="contributionModal" aria-hidden="true">
+    <div class="contribution-shell">
+      <div class="checkin-modal-top">
+        <div>
+          <p class="eyebrow">Progress</p>
+          <h2 id="contributionTitle">Record a contribution</h2>
+        </div>
+        <button class="close-button" id="closeContribution" type="button">Close</button>
+      </div>
+      <form id="contributionForm">
+        <label>Amount contributed<input id="contributionAmount" type="number" min="0" step="0.01"></label>
+        <p class="form-help" id="contributionHelp">This will update your active Savings Challenge.</p>
+        <div class="checkin-modal-actions">
+          <button class="secondary-button" id="cancelContribution" type="button">Not now</button>
+          <button class="primary-button" type="submit">Save contribution</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
   <aside class="about-panel" id="aboutPanel" aria-hidden="true">
     <div class="panel-header">
       <div>
@@ -447,7 +467,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.9.2</span>
+    <span>Version 0.9.2.1</span>
   </footer>
 
   <script src="script.js"></script>

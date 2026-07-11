@@ -1,44 +1,43 @@
-# WealthOS v0.9.2 — Check-in Experience
+# WealthOS v0.9.2.1 — Actionable Signals
 
-## New interaction
+## Fixes
 
-Spending is no longer entered in About You.
+### Check-in source
+“Check in yourself” is now a real clickable route and moves the user to Weekly and Monthly Check-ins.
 
-Users now update WealthOS through a dedicated Check-in experience:
+### Signal actions
+Each Signal now has an intent-based action:
 
-### Weekly Check-in
-- Approximate spending this week
-- Optional note
-- Designed to take about 30 seconds
+- Growth — Understand why
+- Attention — Review
+- Progress — Continue
+- Next Step — Take the next step
 
-### Monthly Check-in
-- Income this month
-- Spending this month
-- Savings this month, optional
-- Optional note
-- Designed to take about 60 seconds
+### Signal provenance
+Every Signal reveals its source:
 
-## What updates after a check-in
-- Spending Snapshot
-- Income Signal
-- Timeline
-- Saved browser history
+- Growth: Monthly Check-ins
+- Attention: Tax details
+- Progress: Savings Challenge or emergency fund
+- Next Step: Derived from the other Signals
 
-## Data source choice
+### Progress corrections
+- A challenge at 0% now says “ready to begin”
+- Users can record a first contribution
+- Monthly savings can update an active Savings Challenge
+- Contributions are saved in local browser history
 
-The product now introduces two paths:
-
-- **Check in yourself** — available now
-- **Connect your accounts** — visible as a future convenience, not a fake active feature
+### Attention corrections
+- “Not set” has been replaced with welcoming starting language
+- Users can jump directly to tax details
 
 ## Principle
 
-**Reflection happens through check-ins, not settings.**
+**Every Signal must reveal its source and offer a next action.**
 
-Settings define who the user is. Check-ins record how they are doing.
+Nothing in WealthOS should exist without an origin.
 
 ## Publish
-
 Replace:
 - index.html
 - styles.css
@@ -47,4 +46,4 @@ Replace:
 
 Suggested commit:
 
-`Introduce weekly and monthly financial check-ins`
+`Make Signals actionable and explain their data sources`
