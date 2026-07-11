@@ -1,43 +1,34 @@
-# WealthOS v0.9.2.1 — Actionable Signals
+# WealthOS v0.9.4 — Lesson
 
-## Fixes
+## New
 
-### Check-in source
-“Check in yourself” is now a real clickable route and moves the user to Weekly and Monthly Check-ins.
+A quiet financial-literacy feature now appears between Today’s Focus and Check-in.
 
-### Signal actions
-Each Signal now has an intent-based action:
+### Lesson
+- One educational idea rotates each day
+- Available to both first-time and returning users
+- Covers saving, spending, debt, investing, credit, income, and planning
+- Includes an optional **Learn why**
+- Remains general and educational rather than pretending to be personalized advice
 
-- Growth — Understand why
-- Attention — Review
-- Progress — Continue
-- Next Step — Take the next step
+## Why it belongs
 
-### Signal provenance
-Every Signal reveals its source:
+WealthOS is a financial literacy product.
 
-- Growth: Monthly Check-ins
-- Attention: Tax details
-- Progress: Savings Challenge or emergency fund
-- Next Step: Derived from the other Signals
+Every visit should leave someone understanding one useful idea they can carry into a future decision.
 
-### Progress corrections
-- A challenge at 0% now says “ready to begin”
-- Users can record a first contribution
-- Monthly savings can update an active Savings Challenge
-- Contributions are saved in local browser history
+## Design choice
 
-### Attention corrections
-- “Not set” has been replaced with welcoming starting language
-- Users can jump directly to tax details
+Lesson is not a pop-up.
+
+It does not interrupt the Lobby or force the user to engage. It remains calm, visible, and optional.
 
 ## Principle
 
-**Every Signal must reveal its source and offer a next action.**
-
-Nothing in WealthOS should exist without an origin.
+**Teach through curiosity, not authority.**
 
 ## Publish
+
 Replace:
 - index.html
 - styles.css
@@ -46,4 +37,4 @@ Replace:
 
 Suggested commit:
 
-`Make Signals actionable and explain their data sources`
+`Add a daily financial literacy Lesson`

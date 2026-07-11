@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.9.2.1-data';
-const LEGACY_KEYS=['wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.9.4-data';
+const LEGACY_KEYS=['wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -87,8 +87,96 @@ function showState(isReturning){
   $('aboutTrigger').hidden=!isReturning;
   $('focusIntro').textContent=isReturning?'Four Signals to help you understand what matters today.':"We'll surface the four most important things to know after your first check-in.";
 }
+
+const lessons=[
+  {
+    category:'Saving',
+    title:'An emergency fund is not about expecting the worst.',
+    summary:'It is about giving yourself more choices when life changes.',
+    why:'Cash set aside for emergencies can reduce the need to rely on debt or make rushed decisions when an unexpected expense appears.',
+    keep:'The right target is personal. Start with an amount that feels achievable, then build from there.'
+  },
+  {
+    category:'Investing',
+    title:'Time can matter more than finding the perfect investment.',
+    summary:'Starting consistently gives compounding more time to work.',
+    why:'Investment growth can build on earlier growth over long periods. Waiting for a perfect moment can mean losing valuable time.',
+    keep:'Investing involves risk. A diversified approach and a long-term view may help, but choices should fit your goals and circumstances.'
+  },
+  {
+    category:'Spending',
+    title:'A spending total becomes useful when it has context.',
+    summary:'The same amount can mean very different things depending on income, obligations, and priorities.',
+    why:'Comparing spending with income and personal goals provides more meaning than labeling a purchase good or bad.',
+    keep:'A Snapshot is meant to create awareness—not guilt. One week does not define your habits.'
+  },
+  {
+    category:'Saving',
+    title:'Small automatic transfers can turn intention into a habit.',
+    summary:'Consistency often matters more than beginning with a large amount.',
+    why:'Moving money regularly reduces the number of times you need to make the same saving decision.',
+    keep:'Choose an amount that leaves enough room for essential expenses and adjust it when your circumstances change.'
+  },
+  {
+    category:'Debt',
+    title:'The minimum payment keeps an account current, but it may not reduce debt quickly.',
+    summary:'Paying more than the minimum can reduce the time and interest needed to repay a balance.',
+    why:'Interest may continue accumulating while a balance remains. Additional principal payments can shorten the repayment period.',
+    keep:'Always protect essential expenses first, and review the specific terms and interest rate of each debt.'
+  },
+  {
+    category:'Income',
+    title:'A raise does not have to become a full lifestyle upgrade.',
+    summary:'Saving part of every increase can support both present comfort and future goals.',
+    why:'Lifestyle expenses can quietly expand to absorb higher income, leaving long-term progress unchanged.',
+    keep:'Enjoying part of an increase is reasonable. The lesson is to choose the allocation intentionally.'
+  },
+  {
+    category:'Planning',
+    title:'A financial goal becomes clearer when it has an amount and a timeframe.',
+    summary:'Specific goals make it easier to understand the next manageable contribution.',
+    why:'A defined target can be divided into smaller weekly or monthly actions instead of remaining an abstract intention.',
+    keep:'Timelines can change. Adjusting a goal is part of planning—not a sign of failure.'
+  },
+  {
+    category:'Spending',
+    title:'Recurring expenses deserve occasional attention because they are easy to stop noticing.',
+    summary:'A small monthly charge can become meaningful when repeated over a year.',
+    why:'Subscriptions and recurring services continue without requiring a new decision each month.',
+    keep:'The goal is not to cancel everything. Keep what provides enough value and reconsider what no longer does.'
+  },
+  {
+    category:'Credit',
+    title:'Credit utilization is a snapshot, not a measure of your worth.',
+    summary:'Lower reported balances may support credit health, but they do not define financial success.',
+    why:'Credit scoring models often consider how much revolving credit is being used relative to available limits.',
+    keep:'Credit factors vary by scoring model. Paying on time and avoiding unaffordable debt remain important foundations.'
+  },
+  {
+    category:'Financial Confidence',
+    title:'Knowing where you stand is already a financial action.',
+    summary:'Clarity makes the next decision easier, even when nothing changes immediately.',
+    why:'Avoiding financial information can increase uncertainty. A brief check-in turns the unknown into something understandable.',
+    keep:'You do not need to solve everything today. One honest check-in is enough for this moment.'
+  }
+];
+
+function renderLesson(){
+  const now=new Date();
+  const start=new Date(now.getFullYear(),0,0);
+  const day=Math.floor((now-start)/86400000);
+  const lesson=lessons[day%lessons.length];
+
+  $('lessonCategory').textContent=lesson.category;
+  $('lessonTitle').textContent=lesson.title;
+  $('lessonSummary').textContent=lesson.summary;
+  $('lessonWhy').textContent=lesson.why;
+  $('lessonKeepInMind').textContent=lesson.keep;
+}
+
 function render(data){
   greeting();
+  renderLesson();
   const returning=hasMeaningfulData(data);
   showState(returning);
   if(!returning)return;
@@ -353,7 +441,6 @@ $('closeCheckin').addEventListener('click',closeCheckin);
 $('cancelCheckin').addEventListener('click',closeCheckin);
 $('checkinForm').addEventListener('submit',saveCheckin);
 $('checkinModal').addEventListener('click',event=>{if(event.target===$('checkinModal'))closeCheckin()});
-$('checkInYourselfCard').addEventListener('click',()=>document.querySelector('.checkin-options').scrollIntoView({behavior:'smooth',block:'center'}));
 $('attentionAction').addEventListener('click',()=>openAboutSection('Quarterly taxes'));
 $('progressAction').addEventListener('click',()=>{
   const data=loadData();
@@ -365,4 +452,9 @@ $('closeContribution').addEventListener('click',closeContribution);
 $('cancelContribution').addEventListener('click',closeContribution);
 $('contributionForm').addEventListener('submit',saveContribution);
 $('contributionModal').addEventListener('click',event=>{if(event.target===$('contributionModal'))closeContribution()});
+$('lessonToggle').addEventListener('click',()=>{
+  const card=$('lessonCard');
+  const open=card.classList.toggle('open');
+  $('lessonToggle').setAttribute('aria-expanded',String(open));
+});
 render(loadData());

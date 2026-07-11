@@ -332,3 +332,201 @@ textarea:focus{
   .contribution-modal{align-items:end;padding:0}
   .contribution-shell{width:100%;padding:26px}
 }
+
+/* v0.9.3 — simplified How WealthOS learns section */
+.connection-choice{
+  padding:34px;
+}
+
+.automatic-updates-card{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:36px;
+  margin-top:22px;
+  padding:30px;
+  border:1px solid var(--line);
+  background:#fff;
+}
+
+.automatic-updates-card>div{
+  max-width:760px;
+}
+
+.automatic-updates-card h3{
+  margin:0 0 10px;
+  font-size:clamp(1.45rem,2.5vw,2.1rem);
+  line-height:1.1;
+  letter-spacing:-.025em;
+}
+
+.automatic-updates-card p{
+  margin:0;
+  color:var(--muted);
+}
+
+.automatic-updates-card>span{
+  flex:0 0 auto;
+  color:var(--evergreen);
+  font-size:.68rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  white-space:nowrap;
+}
+
+@media(max-width:700px){
+  .automatic-updates-card{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:22px;
+  }
+}
+
+/* v0.9.4 — Lesson */
+.lesson-section{
+  margin-top:88px;
+  padding-top:70px;
+  border-top:1px solid var(--line);
+}
+.lesson-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:28px;
+  margin-bottom:36px;
+}
+.lesson-heading h2{
+  margin:0;
+  font-size:clamp(2.8rem,5vw,5rem);
+  line-height:1;
+  letter-spacing:-.045em;
+}
+.lesson-heading>p{
+  max-width:390px;
+  margin:0;
+  color:var(--muted);
+  text-align:right;
+}
+.lesson-card{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:
+    "copy toggle"
+    "detail detail";
+  gap:28px;
+  padding:38px;
+  border:1px solid var(--line);
+  background:#fff;
+}
+.lesson-copy{
+  grid-area:copy;
+  max-width:800px;
+}
+.lesson-category{
+  margin:0 0 18px;
+  color:var(--evergreen);
+  font-size:.68rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+.lesson-copy h3{
+  max-width:760px;
+  margin:0 0 16px;
+  font:600 clamp(2rem,4vw,3.5rem)/1.05 Newsreader,serif;
+  letter-spacing:-.025em;
+}
+.lesson-copy>p:last-child{
+  max-width:680px;
+  margin:0;
+  color:var(--muted);
+  font-size:1rem;
+}
+.lesson-toggle{
+  grid-area:toggle;
+  align-self:start;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:.78rem;
+  font-weight:700;
+}
+.lesson-toggle b{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--line);
+  border-radius:50%;
+  font-weight:400;
+  transition:transform .3s ease;
+}
+.lesson-card.open .lesson-toggle b{
+  transform:rotate(45deg);
+}
+.lesson-detail{
+  grid-area:detail;
+  display:grid;
+  grid-template-rows:0fr;
+  overflow:hidden;
+  transition:grid-template-rows .4s ease;
+}
+.lesson-card.open .lesson-detail{
+  grid-template-rows:1fr;
+}
+.lesson-detail-inner{
+  min-height:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1px;
+  margin-top:8px;
+  background:var(--line);
+  border-top:1px solid var(--line);
+}
+.lesson-detail-inner>div{
+  padding:24px;
+  background:var(--paper);
+}
+.lesson-detail-inner span{
+  display:block;
+  margin-bottom:8px;
+  color:var(--muted);
+  font-size:.63rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+.lesson-detail-inner p{
+  margin:0;
+}
+@media(max-width:900px){
+  .lesson-heading{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .lesson-heading>p{
+    text-align:left;
+  }
+}
+@media(max-width:700px){
+  .lesson-card{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "copy"
+      "toggle"
+      "detail";
+    padding:28px;
+  }
+  .lesson-toggle{
+    justify-content:space-between;
+  }
+  .lesson-detail-inner{
+    grid-template-columns:1fr;
+  }
+}

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.9.2.1</title>
+  <title>WealthOS Private Preview v0.9.4</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -147,6 +147,41 @@
           </article>
         </div>
 
+        <section class="lesson-section" id="lesson">
+          <div class="lesson-heading">
+            <div>
+              <p class="eyebrow">Financial Literacy</p>
+              <h2>Lesson</h2>
+            </div>
+            <p>One useful idea to carry into your next financial decision.</p>
+          </div>
+
+          <article class="lesson-card" id="lessonCard">
+            <div class="lesson-copy">
+              <p class="lesson-category" id="lessonCategory"></p>
+              <h3 id="lessonTitle"></h3>
+              <p id="lessonSummary"></p>
+            </div>
+
+            <button class="lesson-toggle" id="lessonToggle" type="button" aria-expanded="false">
+              Learn why <b>+</b>
+            </button>
+
+            <div class="lesson-detail" id="lessonDetail">
+              <div class="lesson-detail-inner">
+                <div>
+                  <span>Why it matters</span>
+                  <p id="lessonWhy"></p>
+                </div>
+                <div>
+                  <span>Keep in mind</span>
+                  <p id="lessonKeepInMind"></p>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+
         <section class="checkin-section" id="checkin">
           <div class="checkin-heading">
             <div>
@@ -180,22 +215,15 @@
           </div>
 
           <div class="connection-choice" id="connectionChoice" hidden>
-            <div>
-              <p class="starting-kicker">How WealthOS learns</p>
-              <h3>Choose what feels right for you.</h3>
-            </div>
-            <div class="connection-grid">
-              <button class="connection-card active-connection" id="checkInYourselfCard" type="button">
-                <h4>Check in yourself</h4>
-                <p>Take a few moments to reflect and enter your latest totals.</p>
-                <span>Available now</span>
-              </button>
-              <article class="future-option">
-                <h4>Connect your accounts</h4>
-                <p>Let WealthOS keep your information updated automatically.</p>
-                <span>Coming later</span>
-              </article>
-            </div>
+            <p class="starting-kicker">How WealthOS learns</p>
+
+            <article class="automatic-updates-card">
+              <div>
+                <h3>Automatic updates</h3>
+                <p>Coming later, you'll be able to securely connect your financial accounts so WealthOS can keep your information up to date automatically.</p>
+              </div>
+              <span>Coming later</span>
+            </article>
           </div>
         </section>
 
@@ -467,7 +495,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.9.2.1</span>
+    <span>Version 0.9.4</span>
   </footer>
 
   <script src="script.js"></script>
