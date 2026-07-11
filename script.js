@@ -1164,7 +1164,7 @@ document.querySelectorAll('.signal-button').forEach(button => {
 try {
   render(loadData());
 } catch (error) {
-  console.error('WealthOS v0.8.3 could not complete its initial render.', error);
+  console.error('WealthOS v0.8.3.1 could not complete its initial render.', error);
 
   // Keep the failure visible and understandable instead of leaving blank cards.
   ui.growthTitle.textContent = 'WealthOS needs a quick refresh';

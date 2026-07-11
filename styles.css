@@ -275,3 +275,131 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:28px 4vw;back
   .timeline-event-action{grid-column:2;justify-content:space-between}
   .timeline-story-inner{grid-template-columns:1fr}
 }
+
+/* v0.8.3.1 — Timeline layout correction */
+
+.timeline-month{
+  grid-template-columns:150px minmax(0,1fr);
+  gap:40px;
+}
+
+.timeline-events{
+  min-width:0;
+}
+
+.timeline-event{
+  display:block;
+  padding:0;
+}
+
+.timeline-event-button{
+  width:100%;
+  display:grid;
+  grid-template-columns:16px minmax(0,1fr) auto;
+  grid-template-areas:
+    "marker copy amount"
+    ". action action";
+  column-gap:20px;
+  row-gap:18px;
+  align-items:start;
+  padding:30px 0 26px;
+}
+
+.timeline-event-button .timeline-marker{
+  grid-area:marker;
+}
+
+.timeline-copy{
+  grid-area:copy;
+  min-width:0;
+  max-width:760px;
+}
+
+.timeline-copy h4{
+  max-width:680px;
+  margin:0 0 10px;
+  font-size:clamp(1.15rem,1.7vw,1.5rem);
+  line-height:1.2;
+  letter-spacing:-.025em;
+}
+
+.timeline-copy p{
+  max-width:680px;
+  margin:0;
+  color:var(--muted);
+  font-size:.96rem;
+  line-height:1.6;
+}
+
+.timeline-amount{
+  grid-area:amount;
+  align-self:start;
+  padding:0;
+  font-size:1.05rem;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.timeline-event-action{
+  grid-area:action !important;
+  width:100%;
+  margin:0 !important;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:10px;
+}
+
+.story-tone{
+  margin-top:16px;
+}
+
+.timeline-story-inner{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.timeline-story-block{
+  padding:24px;
+}
+
+@media(max-width:900px){
+  .timeline-month{
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+
+  .timeline-month-heading h3{
+    position:static;
+  }
+
+  .timeline-event-button{
+    grid-template-columns:16px minmax(0,1fr);
+    grid-template-areas:
+      "marker copy"
+      ". amount"
+      ". action";
+  }
+
+  .timeline-amount{
+    justify-self:start;
+  }
+
+  .timeline-event-action{
+    justify-content:space-between;
+  }
+}
+
+@media(max-width:620px){
+  .timeline-event-button{
+    padding:24px 0;
+    column-gap:14px;
+  }
+
+  .timeline-copy h4{
+    font-size:1.18rem;
+  }
+
+  .timeline-story-inner{
+    grid-template-columns:1fr;
+  }
+}

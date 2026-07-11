@@ -1,26 +1,18 @@
-# WealthOS v0.8.3 — Stories Engine Release
+# WealthOS v0.8.3.1 — Timeline Layout Patch
 
-This release turns Timeline moments into expandable financial Stories.
+This patch fixes the compressed and messy Timeline Story layout introduced in v0.8.3.
 
-## New
-- Every Timeline moment can now be opened
-- Each Story explains:
-  - What happened
-  - Why it matters
-  - What it says about the user’s trajectory
-  - How to continue the momentum
-- Story language changes based on Growth, Attention, Progress, or Reflection
-- Income growth, declines, records, tax reserves, emergency funds, and Savings Challenges each receive tailored narratives
-- One Story opens at a time to preserve calm and focus
-
-## Product architecture
-- Lobby: arrival and reassurance
-- Headquarters: what should I know today?
-- Timeline: how did I get here?
-- Stories: why does this moment matter?
+## Fixes
+- Full-width Story copy
+- Clean amount alignment
+- Read Story control moved to its own row
+- Wider text measure
+- Better spacing between title, summary, label, and action
+- Improved desktop and mobile Timeline behavior
+- Expanded Stories remain intact
 
 ## Scope
-No new financial recommendation rules or account types were added.
+No new features or calculations were added.
 
 ## Publish
 Replace:
@@ -31,4 +23,4 @@ Replace:
 
 Suggested commit message:
 
-`Add expandable Stories to the financial Timeline`
+`Fix compressed Timeline Story layout`
