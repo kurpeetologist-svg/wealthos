@@ -1,26 +1,50 @@
-# WealthOS v0.9.1 — Spending Snapshot Private Preview
+# WealthOS v0.9.2 — Check-in Experience
 
-## New
-- Spending Snapshot after the Timeline
-- Daily, Weekly, and Monthly views
-- Manual spending totals in About You
-- Spending placed in context against monthly income
-- Honest starting language when history is limited
+## New interaction
 
-## Intentionally deferred
-- Merchant and category analysis
-- DoorDash observations
-- Forecasts
-- Gentle Experiments
-- Bank connections
-- AI recommendations
+Spending is no longer entered in About You.
+
+Users now update WealthOS through a dedicated Check-in experience:
+
+### Weekly Check-in
+- Approximate spending this week
+- Optional note
+- Designed to take about 30 seconds
+
+### Monthly Check-in
+- Income this month
+- Spending this month
+- Savings this month, optional
+- Optional note
+- Designed to take about 60 seconds
+
+## What updates after a check-in
+- Spending Snapshot
+- Income Signal
+- Timeline
+- Saved browser history
+
+## Data source choice
+
+The product now introduces two paths:
+
+- **Check in yourself** — available now
+- **Connect your accounts** — visible as a future convenience, not a fake active feature
 
 ## Principle
-**Earn intelligence. Do not assume it.**
 
-Memory comes before patterns. Patterns come before insight.
+**Reflection happens through check-ins, not settings.**
+
+Settings define who the user is. Check-ins record how they are doing.
 
 ## Publish
-Replace `index.html`, `styles.css`, `script.js`, and `README.md`.
 
-Suggested commit: `Add restrained Spending Snapshot to Private Preview`
+Replace:
+- index.html
+- styles.css
+- script.js
+- README.md
+
+Suggested commit:
+
+`Introduce weekly and monthly financial check-ins`

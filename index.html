@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.9.1</title>
+  <title>WealthOS Private Preview v0.9.2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -147,6 +147,58 @@
           </article>
         </div>
 
+        <section class="checkin-section" id="checkin">
+          <div class="checkin-heading">
+            <div>
+              <p class="eyebrow">Check-in</p>
+              <h2>Take a moment.</h2>
+            </div>
+            <p>A check-in is a short reflection—not a full accounting exercise.</p>
+          </div>
+
+          <div id="firstVisitCheckin" class="starting-card checkin-start">
+            <p class="starting-kicker">Your first check-in</p>
+            <h3>Begin with where you stand today.</h3>
+            <p>After you begin your story, you can return here for quick weekly or monthly updates.</p>
+            <button class="begin-button secondary-begin" type="button" data-begin-story>
+              Begin Your Story <span>→</span>
+            </button>
+          </div>
+
+          <div id="returningCheckin" class="checkin-options" hidden>
+            <button class="checkin-option" type="button" data-open-checkin="weekly">
+              <span class="checkin-option-label">Weekly Check-in</span>
+              <strong>How has this week looked?</strong>
+              <span>About 30 seconds</span>
+            </button>
+
+            <button class="checkin-option" type="button" data-open-checkin="monthly">
+              <span class="checkin-option-label">Monthly Check-in</span>
+              <strong>Close the month with clarity.</strong>
+              <span>About 60 seconds</span>
+            </button>
+          </div>
+
+          <div class="connection-choice" id="connectionChoice" hidden>
+            <div>
+              <p class="starting-kicker">How WealthOS learns</p>
+              <h3>Choose what feels right for you.</h3>
+            </div>
+            <div class="connection-grid">
+              <article>
+                <h4>Check in yourself</h4>
+                <p>Take a few moments to reflect and enter your latest totals.</p>
+                <span>Available now</span>
+              </article>
+              <article class="future-option">
+                <h4>Connect your accounts</h4>
+                <p>Let WealthOS keep your information updated automatically.</p>
+                <span>Coming later</span>
+              </article>
+            </div>
+          </div>
+        </section>
+
         <section class="timeline-section" id="timeline">
           <div class="timeline-heading">
             <div>
@@ -190,16 +242,19 @@
 
           <div id="returningSnapshot" hidden>
             <div class="snapshot-controls" role="group" aria-label="Spending period">
-              <button class="period-button" type="button" data-period="daily">Daily</button>
-              <button class="period-button active" type="button" data-period="weekly">Weekly</button>
+              <button class="period-button active" type="button" data-period="daily">Daily</button>
+              <button class="period-button" type="button" data-period="weekly">Weekly</button>
               <button class="period-button" type="button" data-period="monthly">Monthly</button>
             </div>
+
             <div class="snapshot-card">
               <p class="snapshot-period" id="snapshotPeriod">This week</p>
               <p class="snapshot-label">You spent</p>
               <div class="snapshot-value" id="snapshotValue">—</div>
               <p class="snapshot-context" id="snapshotContext"></p>
-              <div class="snapshot-note"><p id="snapshotNote"></p></div>
+              <div class="snapshot-note">
+                <p id="snapshotNote"></p>
+              </div>
             </div>
           </div>
         </section>
@@ -274,6 +329,46 @@
     </div>
   </section>
 
+  <section class="checkin-modal" id="checkinModal" aria-hidden="true">
+    <div class="checkin-modal-shell">
+      <div class="checkin-modal-top">
+        <div>
+          <p class="eyebrow">Check-in</p>
+          <h2 id="checkinModalTitle">Weekly Check-in</h2>
+        </div>
+        <button class="close-button" id="closeCheckin" type="button">Close</button>
+      </div>
+
+      <form id="checkinForm">
+        <input id="checkinType" type="hidden" value="weekly">
+
+        <div id="weeklyFields">
+          <p class="checkin-question">About how much did you spend this week?</p>
+          <label>Approximate total<input id="weeklySpentInput" type="number" min="0" step="0.01" placeholder="0"></label>
+          <p class="form-help">An estimate is enough. This is reflection, not reconciliation.</p>
+        </div>
+
+        <div id="monthlyFields" hidden>
+          <p class="checkin-question">How did this month come together?</p>
+          <label>Income this month<input id="monthlyIncomeInput" type="number" min="0" step="0.01"></label>
+          <label>Spent this month<input id="monthlySpentInput" type="number" min="0" step="0.01"></label>
+          <label>Saved this month, optional<input id="monthlySavedInput" type="number" min="0" step="0.01"></label>
+          <p class="form-help">Approximate totals are welcome. You can refine them later.</p>
+        </div>
+
+        <label class="checkin-note-label">
+          Anything important happen financially? <span>Optional</span>
+          <textarea id="checkinNoteInput" rows="3" placeholder="A new client, an unexpected bill, a milestone..."></textarea>
+        </label>
+
+        <div class="checkin-modal-actions">
+          <button class="secondary-button" id="cancelCheckin" type="button">Not now</button>
+          <button class="primary-button" type="submit">Save Check-in</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
   <aside class="about-panel" id="aboutPanel" aria-hidden="true">
     <div class="panel-header">
       <div>
@@ -339,14 +434,6 @@
       </section>
 
       <section class="form-section">
-        <h3>Spending Snapshot</h3>
-        <p class="form-help">Enter simple totals for now. WealthOS will place them in context against your current monthly income.</p>
-        <label>Spent today<input id="spendingDaily" type="number" min="0" step="0.01"></label>
-        <label>Spent this week<input id="spendingWeekly" type="number" min="0" step="0.01"></label>
-        <label>Spent this month<input id="spendingMonthly" type="number" min="0" step="0.01"></label>
-      </section>
-
-      <section class="form-section">
         <h3>Timeline data</h3>
         <div id="historyManagerList"></div>
       </section>
@@ -360,7 +447,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.9.1</span>
+    <span>Version 0.9.2</span>
   </footer>
 
   <script src="script.js"></script>

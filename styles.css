@@ -65,3 +65,202 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:28px 4vw;back
 .snapshot-note p{max-width:680px;margin:0;color:var(--muted)}
 @media(max-width:900px){.snapshot-heading{align-items:flex-start;flex-direction:column}.snapshot-heading>p{text-align:left}}
 @media(max-width:620px){.snapshot-card{min-height:340px;padding:26px}.snapshot-controls{display:flex;width:100%}.period-button{flex:1}}
+
+.checkin-section{
+  margin-top:88px;
+  padding-top:70px;
+  border-top:1px solid var(--line);
+}
+.checkin-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:28px;
+  margin-bottom:36px;
+}
+.checkin-heading h2{
+  margin:0;
+  font-size:clamp(2.8rem,5vw,5rem);
+  line-height:1;
+  letter-spacing:-.045em;
+}
+.checkin-heading>p{
+  max-width:390px;
+  margin:0;
+  color:var(--muted);
+  text-align:right;
+}
+.checkin-options{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.checkin-option{
+  min-height:240px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  padding:28px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--ink);
+  text-align:left;
+  cursor:pointer;
+}
+.checkin-option:hover,
+.checkin-option:focus-visible{
+  border-color:var(--evergreen);
+  outline:none;
+}
+.checkin-option-label{
+  color:var(--evergreen);
+  font-size:.68rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+.checkin-option strong{
+  max-width:430px;
+  margin:34px 0 12px;
+  font-size:clamp(1.5rem,2.8vw,2.35rem);
+  line-height:1.1;
+  letter-spacing:-.03em;
+}
+.checkin-option>span:last-child{
+  margin-top:auto;
+  color:var(--muted);
+  font-size:.78rem;
+}
+.connection-choice{
+  margin-top:22px;
+  padding:30px;
+  border:1px solid var(--line);
+  background:var(--paper);
+}
+.connection-choice h3{
+  margin:0;
+  font-size:1.5rem;
+}
+.connection-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1px;
+  margin-top:24px;
+  background:var(--line);
+  border:1px solid var(--line);
+}
+.connection-grid article{
+  padding:24px;
+  background:#fff;
+}
+.connection-grid h4{
+  margin:0 0 8px;
+  font-size:1rem;
+}
+.connection-grid p{
+  margin:0 0 20px;
+  color:var(--muted);
+}
+.connection-grid span{
+  color:var(--evergreen);
+  font-size:.68rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+.future-option{
+  opacity:.62;
+}
+.checkin-modal{
+  position:fixed;
+  inset:0;
+  z-index:320;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:rgba(27,32,28,.42);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s ease;
+}
+.checkin-modal.open{
+  opacity:1;
+  pointer-events:auto;
+}
+.checkin-modal-shell{
+  width:min(660px,100%);
+  max-height:90vh;
+  overflow-y:auto;
+  padding:34px;
+  background:var(--surface);
+  border:1px solid var(--line);
+}
+.checkin-modal-top{
+  display:flex;
+  justify-content:space-between;
+  gap:24px;
+  align-items:flex-start;
+  margin-bottom:34px;
+}
+.checkin-modal-top h2{
+  margin:0;
+  font-size:clamp(2rem,5vw,3.5rem);
+  line-height:1;
+  letter-spacing:-.04em;
+}
+.checkin-question{
+  margin:0 0 18px;
+  font:600 1.45rem/1.2 Newsreader,serif;
+}
+.checkin-note-label{
+  margin-top:30px;
+}
+.checkin-note-label span{
+  font-weight:500;
+}
+textarea{
+  width:100%;
+  padding:12px 13px;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--ink);
+  resize:vertical;
+  font:inherit;
+}
+textarea:focus{
+  outline:2px solid var(--evergreen-soft);
+  border-color:var(--evergreen);
+}
+.checkin-modal-actions{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:32px;
+}
+@media(max-width:900px){
+  .checkin-heading{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .checkin-heading>p{
+    text-align:left;
+  }
+}
+@media(max-width:700px){
+  .checkin-options,
+  .connection-grid{
+    grid-template-columns:1fr;
+  }
+  .checkin-option{
+    min-height:210px;
+  }
+  .checkin-modal{
+    align-items:end;
+    padding:0;
+  }
+  .checkin-modal-shell{
+    width:100%;
+    max-height:94vh;
+    padding:26px;
+  }
+}

@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.9.1-data';
-const LEGACY_KEYS=['wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.9.2-data';
+const LEGACY_KEYS=['wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -16,7 +16,8 @@ const blankData=()=>({
   taxes:{dueDate:'',estimate:0,reserved:0},
   emergency:{balance:0,essentials:0,targetMonths:6,monthlyContribution:0},
   challenge:{enabled:false,name:'',target:0,saved:0,startDate:'',durationWeeks:12,frequency:'weekly'},
-  spending:{daily:0,weekly:0,monthly:0}
+  spending:{daily:0,weekly:0,monthly:0},
+  checkins:[]
 });
 
 function n(v,f=0){const x=Number(v);return Number.isFinite(x)?x:f}
@@ -41,6 +42,7 @@ function migrate(raw){
   d.emergency={balance:n(raw.emergency?.balance),essentials:n(raw.emergency?.essentials),targetMonths:Math.max(1,n(raw.emergency?.targetMonths,6)),monthlyContribution:n(raw.emergency?.monthlyContribution)};
   d.challenge={enabled:Boolean(raw.challenge?.enabled),name:String(raw.challenge?.name||''),target:n(raw.challenge?.target),saved:n(raw.challenge?.saved),startDate:String(raw.challenge?.startDate||''),durationWeeks:Math.max(1,n(raw.challenge?.durationWeeks,12)),frequency:['weekly','biweekly','monthly'].includes(raw.challenge?.frequency)?raw.challenge.frequency:'weekly'};
   d.spending={daily:Math.max(0,n(raw.spending?.daily)),weekly:Math.max(0,n(raw.spending?.weekly)),monthly:Math.max(0,n(raw.spending?.monthly))};
+  d.checkins=Array.isArray(raw.checkins)?raw.checkins:[];
   return d;
 }
 function loadData(){
@@ -79,6 +81,7 @@ function stats(h){
 function showState(isReturning){
   $('firstVisitLobby').hidden=isReturning;$('returningLobby').hidden=!isReturning;
   $('firstVisitFocus').hidden=isReturning;$('signalGrid').hidden=!isReturning;
+  $('firstVisitCheckin').hidden=isReturning;$('returningCheckin').hidden=!isReturning;$('connectionChoice').hidden=!isReturning;
   $('firstVisitTimeline').hidden=isReturning;$('timelineGroups').hidden=!isReturning;
   $('firstVisitSnapshot').hidden=isReturning;$('returningSnapshot').hidden=!isReturning;
   $('aboutTrigger').hidden=!isReturning;
@@ -148,12 +151,31 @@ function renderTimeline(data,h,fmt,source){
   const rev=[...h].reverse();$('timelineSummary').textContent=`${rev.length} chapter${rev.length===1?'':'s'} remembered.`;
   rev.forEach((x,i)=>{
     const prev=h[h.findIndex(y=>y.month===x.month)-1],diff=prev?x.amount-prev.amount:null;
-    const month=document.createElement('section');month.className='timeline-month';
+    const month=document.createElement('section');month.className='timeline-month';month.dataset.month=x.month;
     const heading=document.createElement('div');heading.className='timeline-month-heading';heading.innerHTML=`<h3>${formatMonth(x.month)}</h3><p>1 chapter</p>`;
     const events=document.createElement('div');events.className='timeline-events';
     const title=i===0&&stats(h).isRecord?`${source} reached a new monthly high`:diff===null?'Your first chapter began':diff>0?`${source} moved forward`:diff<0?`${source} softened`:`${source} remained steady`;
     const desc=diff===null?`You recorded your first ${source.toLowerCase()} check-in.`:`Your ${source.toLowerCase()} changed by ${fmt.format(Math.abs(diff))} from the prior month.`;
     events.append(timelineEvent(title,desc,fmt.format(x.amount)));month.append(heading,events);groups.append(month);
+  });
+
+  const checkins=[...(data.checkins||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  checkins.slice(0,8).forEach(checkin=>{
+    const monthKey=String(checkin.date||'').slice(0,7);
+    let monthSection=[...groups.querySelectorAll('.timeline-month')].find(section=>section.dataset.month===monthKey);
+    if(!monthSection){
+      monthSection=document.createElement('section');monthSection.className='timeline-month';monthSection.dataset.month=monthKey;
+      const heading=document.createElement('div');heading.className='timeline-month-heading';heading.innerHTML=`<h3>${formatMonth(monthKey)}</h3><p>Check-in</p>`;
+      const events=document.createElement('div');events.className='timeline-events';monthSection.append(heading,events);groups.prepend(monthSection);
+    }
+    const events=monthSection.querySelector('.timeline-events');
+    const isWeekly=checkin.type==='weekly';
+    const title=isWeekly?'Weekly check-in completed':'Monthly check-in completed';
+    const amount=isWeekly?fmt.format(n(checkin.spent)):fmt.format(n(checkin.spent));
+    const description=isWeekly
+      ? `You reflected on approximately ${fmt.format(n(checkin.spent))} of spending this week.`
+      : `You closed the month with ${fmt.format(n(checkin.income))} of income and ${fmt.format(n(checkin.spent))} of spending.`;
+    events.append(timelineEvent(title,description,amount));
   });
 }
 function renderSnapshot(data,fmt,period){
@@ -179,8 +201,60 @@ function renderSnapshot(data,fmt,period){
     : 'This is a snapshot, not a judgment. As WealthOS remembers more check-ins, it will become better at showing what is typical for you.';
   document.querySelectorAll('.period-button').forEach(button=>button.classList.toggle('active',button.dataset.period===period));
 }
+
+function openCheckin(type){
+  const data=loadData();
+  $('checkinType').value=type;
+  $('checkinModalTitle').textContent=type==='weekly'?'Weekly Check-in':'Monthly Check-in';
+  $('weeklyFields').hidden=type!=='weekly';
+  $('monthlyFields').hidden=type!=='monthly';
+
+  if(type==='weekly'){
+    $('weeklySpentInput').value=data.spending?.weekly||'';
+  }else{
+    $('monthlyIncomeInput').value=data.income?.current??'';
+    $('monthlySpentInput').value=data.spending?.monthly||'';
+    $('monthlySavedInput').value='';
+  }
+
+  $('checkinNoteInput').value='';
+  $('checkinModal').classList.add('open');
+  $('checkinModal').setAttribute('aria-hidden','false');
+}
+function closeCheckin(){
+  $('checkinModal').classList.remove('open');
+  $('checkinModal').setAttribute('aria-hidden','true');
+}
+function saveCheckin(event){
+  event.preventDefault();
+  const data=loadData();
+  const type=$('checkinType').value;
+  const date=new Date().toISOString().slice(0,10);
+  const note=$('checkinNoteInput').value.trim();
+
+  if(type==='weekly'){
+    const spent=Math.max(0,n($('weeklySpentInput').value));
+    data.spending.weekly=spent;
+    data.checkins.push({id:Date.now(),type,date,spent,note});
+  }else{
+    const income=Math.max(0,n($('monthlyIncomeInput').value));
+    const spent=Math.max(0,n($('monthlySpentInput').value));
+    const saved=Math.max(0,n($('monthlySavedInput').value));
+    data.income.current=income;
+    data.income.currentMonth=nowMonth;
+    data.spending.monthly=spent;
+    data.checkins.push({id:Date.now(),type,date,income,spent,saved,note});
+  }
+
+  data.onboardingComplete=true;
+  saveData(data);
+  closeCheckin();
+  render(data);
+  location.hash='spendingSnapshot';
+}
+
 function populateAbout(d){
-  fillCurrency($('currencyInput'),d.profile.currency);$('nameInput').value=d.profile.name;$('incomeSourceName').value=d.income.source;$('incomeMonth').value=d.income.currentMonth;$('incomeCurrent').value=d.income.current??'';$('taxDueDate').value=d.taxes.dueDate;$('taxEstimate').value=d.taxes.estimate;$('taxReserved').value=d.taxes.reserved;$('emergencyBalance').value=d.emergency.balance;$('essentialExpenses').value=d.emergency.essentials||'';$('targetMonths').value=d.emergency.targetMonths;$('emergencyContribution').value=d.emergency.monthlyContribution;$('challengeEnabled').checked=d.challenge.enabled;$('challengeName').value=d.challenge.name;$('challengeTarget').value=d.challenge.target;$('challengeSaved').value=d.challenge.saved;$('challengeStart').value=d.challenge.startDate;$('challengeDuration').value=d.challenge.durationWeeks;$('challengeFrequency').value=d.challenge.frequency;$('spendingDaily').value=d.spending?.daily||'';$('spendingWeekly').value=d.spending?.weekly||'';$('spendingMonthly').value=d.spending?.monthly||'';toggleChallenge();renderHistoryManager(d);
+  fillCurrency($('currencyInput'),d.profile.currency);$('nameInput').value=d.profile.name;$('incomeSourceName').value=d.income.source;$('incomeMonth').value=d.income.currentMonth;$('incomeCurrent').value=d.income.current??'';$('taxDueDate').value=d.taxes.dueDate;$('taxEstimate').value=d.taxes.estimate;$('taxReserved').value=d.taxes.reserved;$('emergencyBalance').value=d.emergency.balance;$('essentialExpenses').value=d.emergency.essentials||'';$('targetMonths').value=d.emergency.targetMonths;$('emergencyContribution').value=d.emergency.monthlyContribution;$('challengeEnabled').checked=d.challenge.enabled;$('challengeName').value=d.challenge.name;$('challengeTarget').value=d.challenge.target;$('challengeSaved').value=d.challenge.saved;$('challengeStart').value=d.challenge.startDate;$('challengeDuration').value=d.challenge.durationWeeks;$('challengeFrequency').value=d.challenge.frequency;toggleChallenge();renderHistoryManager(d);
 }
 function renderHistoryManager(d){
   const box=$('historyManagerList');box.innerHTML='';(d.incomeHistory||[]).sort((a,b)=>b.month.localeCompare(a.month)).forEach(x=>{const row=document.createElement('div');row.className='history-manager-row';row.innerHTML=`<span>${formatMonth(x.month)}</span><strong>${money(d.profile.currency).format(x.amount)}</strong><button class="delete-history" type="button">Remove</button>`;row.querySelector('button').onclick=()=>{const latest=loadData();latest.incomeHistory=latest.incomeHistory.filter(y=>y.month!==x.month);saveData(latest);render(latest)};box.append(row)});
@@ -188,7 +262,7 @@ function renderHistoryManager(d){
 function readAbout(){
   const d=loadData(),newMonth=$('incomeMonth').value||nowMonth;
   if(d.income.current!==null&&d.income.currentMonth!==newMonth)d.incomeHistory.push({month:d.income.currentMonth,amount:n(d.income.current)});
-  d.onboardingComplete=true;d.profile={name:$('nameInput').value.trim(),currency:$('currencyInput').value};d.income={source:$('incomeSourceName').value.trim()||'Income',currentMonth:newMonth,current:n($('incomeCurrent').value)};d.taxes={dueDate:$('taxDueDate').value,estimate:n($('taxEstimate').value),reserved:n($('taxReserved').value)};d.emergency={balance:n($('emergencyBalance').value),essentials:n($('essentialExpenses').value),targetMonths:n($('targetMonths').value,6),monthlyContribution:n($('emergencyContribution').value)};d.challenge={enabled:$('challengeEnabled').checked,name:$('challengeName').value.trim(),target:n($('challengeTarget').value),saved:n($('challengeSaved').value),startDate:$('challengeStart').value,durationWeeks:n($('challengeDuration').value,12),frequency:$('challengeFrequency').value};d.spending={daily:Math.max(0,n($('spendingDaily').value)),weekly:Math.max(0,n($('spendingWeekly').value)),monthly:Math.max(0,n($('spendingMonthly').value))};return d;
+  d.onboardingComplete=true;d.profile={name:$('nameInput').value.trim(),currency:$('currencyInput').value};d.income={source:$('incomeSourceName').value.trim()||'Income',currentMonth:newMonth,current:n($('incomeCurrent').value)};d.taxes={dueDate:$('taxDueDate').value,estimate:n($('taxEstimate').value),reserved:n($('taxReserved').value)};d.emergency={balance:n($('emergencyBalance').value),essentials:n($('essentialExpenses').value),targetMonths:n($('targetMonths').value,6),monthlyContribution:n($('emergencyContribution').value)};d.challenge={enabled:$('challengeEnabled').checked,name:$('challengeName').value.trim(),target:n($('challengeTarget').value),saved:n($('challengeSaved').value),startDate:$('challengeStart').value,durationWeeks:n($('challengeDuration').value,12),frequency:$('challengeFrequency').value};return d;
 }
 function toggleChallenge(){const on=$('challengeEnabled').checked;$('challengeFields').style.opacity=on?'1':'.45';$('challengeFields').querySelectorAll('input,select').forEach(x=>x.disabled=!on)}
 function openOnboarding(){$('onboarding').classList.add('open');$('onboarding').setAttribute('aria-hidden','false');showStep(1)}
@@ -207,4 +281,9 @@ $('challengeEnabled').onchange=toggleChallenge;$('aboutForm').onsubmit=e=>{e.pre
 $('clearPreviewButton').onclick=()=>{if(confirm('Start fresh on this browser? This removes the saved Private Preview data.')){localStorage.removeItem(STORAGE_KEY);for(const k of LEGACY_KEYS)localStorage.removeItem(k);$('closePanel').click();render(blankData());location.hash='lobby'}};
 document.querySelectorAll('.signal-button').forEach(b=>b.onclick=()=>{const card=b.closest('.signal-card'),open=card.classList.toggle('open');b.setAttribute('aria-expanded',String(open))});
 document.querySelectorAll('.period-button').forEach(button=>button.addEventListener('click',()=>{const data=loadData();renderSnapshot(data,money(data.profile.currency),button.dataset.period)}));
+document.querySelectorAll('[data-open-checkin]').forEach(button=>button.addEventListener('click',()=>openCheckin(button.dataset.openCheckin)));
+$('closeCheckin').addEventListener('click',closeCheckin);
+$('cancelCheckin').addEventListener('click',closeCheckin);
+$('checkinForm').addEventListener('submit',saveCheckin);
+$('checkinModal').addEventListener('click',event=>{if(event.target===$('checkinModal'))closeCheckin()});
 render(loadData());
