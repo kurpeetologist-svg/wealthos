@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.9-data';
-const LEGACY_KEYS=['wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.9.1-data';
+const LEGACY_KEYS=['wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -15,7 +15,8 @@ const blankData=()=>({
   incomeHistory:[],
   taxes:{dueDate:'',estimate:0,reserved:0},
   emergency:{balance:0,essentials:0,targetMonths:6,monthlyContribution:0},
-  challenge:{enabled:false,name:'',target:0,saved:0,startDate:'',durationWeeks:12,frequency:'weekly'}
+  challenge:{enabled:false,name:'',target:0,saved:0,startDate:'',durationWeeks:12,frequency:'weekly'},
+  spending:{daily:0,weekly:0,monthly:0}
 });
 
 function n(v,f=0){const x=Number(v);return Number.isFinite(x)?x:f}
@@ -39,6 +40,7 @@ function migrate(raw){
   d.taxes={dueDate:String(raw.taxes?.dueDate||''),estimate:n(raw.taxes?.estimate),reserved:n(raw.taxes?.reserved)};
   d.emergency={balance:n(raw.emergency?.balance),essentials:n(raw.emergency?.essentials),targetMonths:Math.max(1,n(raw.emergency?.targetMonths,6)),monthlyContribution:n(raw.emergency?.monthlyContribution)};
   d.challenge={enabled:Boolean(raw.challenge?.enabled),name:String(raw.challenge?.name||''),target:n(raw.challenge?.target),saved:n(raw.challenge?.saved),startDate:String(raw.challenge?.startDate||''),durationWeeks:Math.max(1,n(raw.challenge?.durationWeeks,12)),frequency:['weekly','biweekly','monthly'].includes(raw.challenge?.frequency)?raw.challenge.frequency:'weekly'};
+  d.spending={daily:Math.max(0,n(raw.spending?.daily)),weekly:Math.max(0,n(raw.spending?.weekly)),monthly:Math.max(0,n(raw.spending?.monthly))};
   return d;
 }
 function loadData(){
@@ -78,6 +80,7 @@ function showState(isReturning){
   $('firstVisitLobby').hidden=isReturning;$('returningLobby').hidden=!isReturning;
   $('firstVisitFocus').hidden=isReturning;$('signalGrid').hidden=!isReturning;
   $('firstVisitTimeline').hidden=isReturning;$('timelineGroups').hidden=!isReturning;
+  $('firstVisitSnapshot').hidden=isReturning;$('returningSnapshot').hidden=!isReturning;
   $('aboutTrigger').hidden=!isReturning;
   $('focusIntro').textContent=isReturning?'Four Signals to help you understand what matters today.':"We'll surface the four most important things to know after your first check-in.";
 }
@@ -126,6 +129,7 @@ function render(data){
   else next={t:'No financial action is required today',v:'On track',c:'Review when something changes',p:'Your current information does not require an immediate step.'};
   $('nextTitle').textContent=next.t;$('nextValue').textContent=next.v;$('nextChange').textContent=next.c;$('nextPersonal').textContent=next.p;$('nextStoryWhy').textContent=next.p;$('nextStoryChanges').textContent='This recommendation is based only on the information you chose to add.';$('nextStoryMove').textContent='Update About You whenever your priorities change.';
   renderTimeline(data,h,fmt,source);
+  renderSnapshot(data,fmt,'weekly');
   populateAbout(data);
 }
 function timelineEvent(title,description,amount){
@@ -152,8 +156,31 @@ function renderTimeline(data,h,fmt,source){
     events.append(timelineEvent(title,desc,fmt.format(x.amount)));month.append(heading,events);groups.append(month);
   });
 }
+function renderSnapshot(data,fmt,period){
+  const labels={daily:'Today',weekly:'This week',monthly:'This month'};
+  const values={daily:n(data.spending?.daily),weekly:n(data.spending?.weekly),monthly:n(data.spending?.monthly)};
+  const amount=values[period]||0;
+  const monthlyIncome=n(data.income?.current);
+  let monthlyEquivalent=amount;
+  if(period==='daily')monthlyEquivalent=amount*30;
+  if(period==='weekly')monthlyEquivalent=amount*4.345;
+  $('snapshotPeriod').textContent=labels[period];
+  $('snapshotValue').textContent=fmt.format(amount);
+  if(monthlyIncome>0){
+    const percent=(period==='monthly'?amount:monthlyEquivalent)/monthlyIncome*100;
+    $('snapshotContext').textContent=period==='monthly'
+      ? `${percent.toFixed(0)}% of this month's income has been spent.`
+      : `At this pace, spending equals about ${percent.toFixed(0)}% of monthly income.`;
+  }else{
+    $('snapshotContext').textContent='Add monthly income to place this spending in context.';
+  }
+  $('snapshotNote').textContent=amount===0
+    ? 'Your Snapshot is ready for its first spending check-in. Add a simple total in About You whenever you are ready.'
+    : 'This is a snapshot, not a judgment. As WealthOS remembers more check-ins, it will become better at showing what is typical for you.';
+  document.querySelectorAll('.period-button').forEach(button=>button.classList.toggle('active',button.dataset.period===period));
+}
 function populateAbout(d){
-  fillCurrency($('currencyInput'),d.profile.currency);$('nameInput').value=d.profile.name;$('incomeSourceName').value=d.income.source;$('incomeMonth').value=d.income.currentMonth;$('incomeCurrent').value=d.income.current??'';$('taxDueDate').value=d.taxes.dueDate;$('taxEstimate').value=d.taxes.estimate;$('taxReserved').value=d.taxes.reserved;$('emergencyBalance').value=d.emergency.balance;$('essentialExpenses').value=d.emergency.essentials||'';$('targetMonths').value=d.emergency.targetMonths;$('emergencyContribution').value=d.emergency.monthlyContribution;$('challengeEnabled').checked=d.challenge.enabled;$('challengeName').value=d.challenge.name;$('challengeTarget').value=d.challenge.target;$('challengeSaved').value=d.challenge.saved;$('challengeStart').value=d.challenge.startDate;$('challengeDuration').value=d.challenge.durationWeeks;$('challengeFrequency').value=d.challenge.frequency;toggleChallenge();renderHistoryManager(d);
+  fillCurrency($('currencyInput'),d.profile.currency);$('nameInput').value=d.profile.name;$('incomeSourceName').value=d.income.source;$('incomeMonth').value=d.income.currentMonth;$('incomeCurrent').value=d.income.current??'';$('taxDueDate').value=d.taxes.dueDate;$('taxEstimate').value=d.taxes.estimate;$('taxReserved').value=d.taxes.reserved;$('emergencyBalance').value=d.emergency.balance;$('essentialExpenses').value=d.emergency.essentials||'';$('targetMonths').value=d.emergency.targetMonths;$('emergencyContribution').value=d.emergency.monthlyContribution;$('challengeEnabled').checked=d.challenge.enabled;$('challengeName').value=d.challenge.name;$('challengeTarget').value=d.challenge.target;$('challengeSaved').value=d.challenge.saved;$('challengeStart').value=d.challenge.startDate;$('challengeDuration').value=d.challenge.durationWeeks;$('challengeFrequency').value=d.challenge.frequency;$('spendingDaily').value=d.spending?.daily||'';$('spendingWeekly').value=d.spending?.weekly||'';$('spendingMonthly').value=d.spending?.monthly||'';toggleChallenge();renderHistoryManager(d);
 }
 function renderHistoryManager(d){
   const box=$('historyManagerList');box.innerHTML='';(d.incomeHistory||[]).sort((a,b)=>b.month.localeCompare(a.month)).forEach(x=>{const row=document.createElement('div');row.className='history-manager-row';row.innerHTML=`<span>${formatMonth(x.month)}</span><strong>${money(d.profile.currency).format(x.amount)}</strong><button class="delete-history" type="button">Remove</button>`;row.querySelector('button').onclick=()=>{const latest=loadData();latest.incomeHistory=latest.incomeHistory.filter(y=>y.month!==x.month);saveData(latest);render(latest)};box.append(row)});
@@ -161,7 +188,7 @@ function renderHistoryManager(d){
 function readAbout(){
   const d=loadData(),newMonth=$('incomeMonth').value||nowMonth;
   if(d.income.current!==null&&d.income.currentMonth!==newMonth)d.incomeHistory.push({month:d.income.currentMonth,amount:n(d.income.current)});
-  d.onboardingComplete=true;d.profile={name:$('nameInput').value.trim(),currency:$('currencyInput').value};d.income={source:$('incomeSourceName').value.trim()||'Income',currentMonth:newMonth,current:n($('incomeCurrent').value)};d.taxes={dueDate:$('taxDueDate').value,estimate:n($('taxEstimate').value),reserved:n($('taxReserved').value)};d.emergency={balance:n($('emergencyBalance').value),essentials:n($('essentialExpenses').value),targetMonths:n($('targetMonths').value,6),monthlyContribution:n($('emergencyContribution').value)};d.challenge={enabled:$('challengeEnabled').checked,name:$('challengeName').value.trim(),target:n($('challengeTarget').value),saved:n($('challengeSaved').value),startDate:$('challengeStart').value,durationWeeks:n($('challengeDuration').value,12),frequency:$('challengeFrequency').value};return d;
+  d.onboardingComplete=true;d.profile={name:$('nameInput').value.trim(),currency:$('currencyInput').value};d.income={source:$('incomeSourceName').value.trim()||'Income',currentMonth:newMonth,current:n($('incomeCurrent').value)};d.taxes={dueDate:$('taxDueDate').value,estimate:n($('taxEstimate').value),reserved:n($('taxReserved').value)};d.emergency={balance:n($('emergencyBalance').value),essentials:n($('essentialExpenses').value),targetMonths:n($('targetMonths').value,6),monthlyContribution:n($('emergencyContribution').value)};d.challenge={enabled:$('challengeEnabled').checked,name:$('challengeName').value.trim(),target:n($('challengeTarget').value),saved:n($('challengeSaved').value),startDate:$('challengeStart').value,durationWeeks:n($('challengeDuration').value,12),frequency:$('challengeFrequency').value};d.spending={daily:Math.max(0,n($('spendingDaily').value)),weekly:Math.max(0,n($('spendingWeekly').value)),monthly:Math.max(0,n($('spendingMonthly').value))};return d;
 }
 function toggleChallenge(){const on=$('challengeEnabled').checked;$('challengeFields').style.opacity=on?'1':'.45';$('challengeFields').querySelectorAll('input,select').forEach(x=>x.disabled=!on)}
 function openOnboarding(){$('onboarding').classList.add('open');$('onboarding').setAttribute('aria-hidden','false');showStep(1)}
@@ -179,4 +206,5 @@ $('aboutTrigger').onclick=()=>{$('aboutPanel').classList.add('open');$('panelBac
 $('challengeEnabled').onchange=toggleChallenge;$('aboutForm').onsubmit=e=>{e.preventDefault();const d=readAbout();saveData(d);render(d);$('closePanel').click()};
 $('clearPreviewButton').onclick=()=>{if(confirm('Start fresh on this browser? This removes the saved Private Preview data.')){localStorage.removeItem(STORAGE_KEY);for(const k of LEGACY_KEYS)localStorage.removeItem(k);$('closePanel').click();render(blankData());location.hash='lobby'}};
 document.querySelectorAll('.signal-button').forEach(b=>b.onclick=()=>{const card=b.closest('.signal-card'),open=card.classList.toggle('open');b.setAttribute('aria-expanded',String(open))});
+document.querySelectorAll('.period-button').forEach(button=>button.addEventListener('click',()=>{const data=loadData();renderSnapshot(data,money(data.profile.currency),button.dataset.period)}));
 render(loadData());

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview</title>
+  <title>WealthOS Private Preview v0.9.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -168,6 +168,41 @@
 
           <div class="timeline-groups" id="timelineGroups" hidden></div>
         </section>
+
+        <section class="snapshot-section" id="spendingSnapshot">
+          <div class="snapshot-heading">
+            <div>
+              <p class="eyebrow">Spending</p>
+              <h2>Spending Snapshot</h2>
+            </div>
+            <p>Understand your spending in context—not in isolation.</p>
+          </div>
+
+          <div id="firstVisitSnapshot" class="starting-card snapshot-start">
+            <p class="starting-kicker">A clearer picture begins here</p>
+            <h3>Every purchase tells part of your story.</h3>
+            <p>After your first check-in, WealthOS can begin showing how your spending relates to your income.</p>
+            <p>As you return, this Snapshot will become more useful and more personal.</p>
+            <button class="begin-button secondary-begin" type="button" data-begin-story>
+              Begin Your Story <span>→</span>
+            </button>
+          </div>
+
+          <div id="returningSnapshot" hidden>
+            <div class="snapshot-controls" role="group" aria-label="Spending period">
+              <button class="period-button" type="button" data-period="daily">Daily</button>
+              <button class="period-button active" type="button" data-period="weekly">Weekly</button>
+              <button class="period-button" type="button" data-period="monthly">Monthly</button>
+            </div>
+            <div class="snapshot-card">
+              <p class="snapshot-period" id="snapshotPeriod">This week</p>
+              <p class="snapshot-label">You spent</p>
+              <div class="snapshot-value" id="snapshotValue">—</div>
+              <p class="snapshot-context" id="snapshotContext"></p>
+              <div class="snapshot-note"><p id="snapshotNote"></p></div>
+            </div>
+          </div>
+        </section>
       </div>
     </section>
   </main>
@@ -304,6 +339,14 @@
       </section>
 
       <section class="form-section">
+        <h3>Spending Snapshot</h3>
+        <p class="form-help">Enter simple totals for now. WealthOS will place them in context against your current monthly income.</p>
+        <label>Spent today<input id="spendingDaily" type="number" min="0" step="0.01"></label>
+        <label>Spent this week<input id="spendingWeekly" type="number" min="0" step="0.01"></label>
+        <label>Spent this month<input id="spendingMonthly" type="number" min="0" step="0.01"></label>
+      </section>
+
+      <section class="form-section">
         <h3>Timeline data</h3>
         <div id="historyManagerList"></div>
       </section>
@@ -317,7 +360,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.9.0</span>
+    <span>Version 0.9.1</span>
   </footer>
 
   <script src="script.js"></script>

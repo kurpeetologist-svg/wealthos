@@ -1,62 +1,26 @@
-# WealthOS v0.9.0 — Private Preview
+# WealthOS v0.9.1 — Spending Snapshot Private Preview
 
-## First-visit experience
+## New
+- Spending Snapshot after the Timeline
+- Daily, Weekly, and Monthly views
+- Manual spending totals in About You
+- Spending placed in context against monthly income
+- Honest starting language when history is limited
 
-New users no longer see demo figures or blank financial cards.
+## Intentionally deferred
+- Merchant and category analysis
+- DoorDash observations
+- Forecasts
+- Gentle Experiments
+- Bank connections
+- AI recommendations
 
-They see:
+## Principle
+**Earn intelligence. Do not assume it.**
 
-- Good morning!
-- Let's see where you stand today.
-- Every financial story begins somewhere.
-- Today is a great place to start.
-- Begin Your Story
-
-The guided first check-in collects only enough information to begin:
-- optional preferred name
-- currency
-- first income month and amount
-- optional Savings Challenge
-
-## Returning users
-
-Returning users keep:
-- saved profile
-- income history
-- Today’s Focus
-- Signals
-- Timeline
-- Stories
-- Savings Challenge
-- About You
-
-## Saving and retention
-
-Private Preview data is saved in the browser using `localStorage`.
-
-- It persists after closing and reopening the browser.
-- It remains separate for every tester and device.
-- Existing v0.6–v0.8 data is automatically migrated.
-- It does not sync between devices.
-- Clearing site data or using a different browser removes access to the local copy.
-
-Secure login, cloud backup, and cross-device sync belong to the next infrastructure phase.
-
-## Language principles
-
-- The Lobby welcomes. It doesn't analyze.
-- Every blank state feels like the beginning of a story.
-- Never punish someone for being new.
-- Prefer check-in, chapter, Story, Focus, and Timeline over accounting language.
+Memory comes before patterns. Patterns come before insight.
 
 ## Publish
+Replace `index.html`, `styles.css`, `script.js`, and `README.md`.
 
-Replace:
-- index.html
-- styles.css
-- script.js
-- README.md
-
-Suggested commit:
-
-`Launch WealthOS Private Preview first-visit experience`
+Suggested commit: `Add restrained Spending Snapshot to Private Preview`
