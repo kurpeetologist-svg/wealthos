@@ -1,27 +1,26 @@
-# WealthOS v0.8.2 — Timeline Release
+# WealthOS v0.8.3 — Stories Engine Release
 
-This release transforms the former Financial History section into **Your Timeline**.
+This release turns Timeline moments into expandable financial Stories.
 
 ## New
-- Renamed Financial History to Timeline
-- Groups Stories by month
-- Converts saved income entries into narrative financial moments
-- Adds current tax-reserve, emergency-fund, and Savings Challenge moments
-- Uses calm language rather than raw transaction-style records
-- Shows how many moments WealthOS remembers
-- Preserves About You, Signals, Stories, rules-based Next Steps, and saved-data migration
+- Every Timeline moment can now be opened
+- Each Story explains:
+  - What happened
+  - Why it matters
+  - What it says about the user’s trajectory
+  - How to continue the momentum
+- Story language changes based on Growth, Attention, Progress, or Reflection
+- Income growth, declines, records, tax reserves, emergency funds, and Savings Challenges each receive tailored narratives
+- One Story opens at a time to preserve calm and focus
 
-## Timeline question
-Headquarters answers:
-
-`What should I know today?`
-
-Timeline answers:
-
-`How did I get here?`
+## Product architecture
+- Lobby: arrival and reassurance
+- Headquarters: what should I know today?
+- Timeline: how did I get here?
+- Stories: why does this moment matter?
 
 ## Scope
-No new financial recommendation rules or financial calculations were added in this release.
+No new financial recommendation rules or account types were added.
 
 ## Publish
 Replace:
@@ -32,4 +31,4 @@ Replace:
 
 Suggested commit message:
 
-`Transform financial history into a monthly Story Timeline`
+`Add expandable Stories to the financial Timeline`

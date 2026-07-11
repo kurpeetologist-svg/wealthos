@@ -606,10 +606,25 @@ function render(data) {
 }
 
 
-function createTimelineEvent({ title, description, amount = '', tone = 'neutral' }) {
+
+function createTimelineEvent({
+  title,
+  description,
+  amount = '',
+  tone = 'neutral',
+  happened = '',
+  matters = '',
+  trajectory = '',
+  momentum = ''
+}) {
   const event = document.createElement('article');
   event.className = 'timeline-event';
   event.dataset.tone = tone;
+
+  const button = document.createElement('button');
+  button.className = 'timeline-event-button';
+  button.type = 'button';
+  button.setAttribute('aria-expanded', 'false');
 
   const marker = document.createElement('span');
   marker.className = 'timeline-marker';
@@ -624,18 +639,88 @@ function createTimelineEvent({ title, description, amount = '', tone = 'neutral'
   const paragraph = document.createElement('p');
   paragraph.textContent = description;
 
-  copy.append(heading, paragraph);
-  event.append(marker, copy);
+  const toneLabel = document.createElement('span');
+  toneLabel.className = 'story-tone';
+  toneLabel.textContent = tone === 'growth'
+    ? 'Momentum'
+    : tone === 'attention'
+      ? 'Worth reviewing'
+      : tone === 'progress'
+        ? 'Progress'
+        : 'Reflection';
+
+  copy.append(heading, paragraph, toneLabel);
+
+  const action = document.createElement('span');
+  action.className = 'timeline-event-action';
+  action.innerHTML = '<span>Read story</span><b>+</b>';
+
+  button.append(marker, copy);
 
   if (amount) {
     const value = document.createElement('div');
     value.className = 'timeline-amount';
     value.textContent = amount;
-    event.appendChild(value);
+    button.appendChild(value);
+  } else {
+    button.appendChild(action);
   }
+
+  if (amount) {
+    action.style.gridColumn = '3';
+    action.style.marginTop = '42px';
+    button.appendChild(action);
+  }
+
+  const story = document.createElement('div');
+  story.className = 'timeline-story';
+
+  const inner = document.createElement('div');
+  inner.className = 'timeline-story-inner';
+
+  const sections = [
+    ['What happened', happened || description],
+    ['Why it matters', matters || 'This moment adds context to the broader direction of your financial life.'],
+    ['Your trajectory', trajectory || 'WealthOS will keep comparing future months against this point in your Timeline.'],
+    ['Continue the momentum', momentum || 'Keep your information current so the next chapter reflects what actually changed.']
+  ];
+
+  sections.forEach(([label, text]) => {
+    const block = document.createElement('div');
+    block.className = 'timeline-story-block';
+
+    const sectionLabel = document.createElement('span');
+    sectionLabel.textContent = label;
+
+    const sectionText = document.createElement('p');
+    sectionText.textContent = text;
+
+    block.append(sectionLabel, sectionText);
+    inner.appendChild(block);
+  });
+
+  story.appendChild(inner);
+  event.append(button, story);
+
+  button.addEventListener('click', () => {
+    const wasOpen = event.classList.contains('open');
+
+    document.querySelectorAll('.timeline-event.open').forEach(openEvent => {
+      if (openEvent !== event) {
+        openEvent.classList.remove('open');
+        openEvent
+          .querySelector('.timeline-event-button')
+          .setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    event.classList.toggle('open', !wasOpen);
+    button.setAttribute('aria-expanded', String(!wasOpen));
+  });
 
   return event;
 }
+
 
 function incomeMoments(history, stats, money, source) {
   const groups = new Map();
@@ -650,37 +735,73 @@ function incomeMoments(history, stats, money, source) {
       .map(entry => asNumber(entry.amount));
     const isRecord = priorAmounts.length > 0 && amount > Math.max(...priorAmounts);
 
-    let title;
-    let description;
-    let tone = 'neutral';
+    let moment;
 
     if (index === 0) {
-      title = 'Your WealthOS income story began';
-      description = `You recorded ${money.format(amount)} in ${source.toLowerCase()}. This became the first reference point for your Timeline.`;
+      moment = {
+        title: 'Your WealthOS income story began',
+        description: `You recorded ${money.format(amount)} in ${source.toLowerCase()}.`,
+        amount: money.format(amount),
+        tone: 'neutral',
+        happened: `You saved your first ${source.toLowerCase()} entry for ${formatMonth(item.month)}.`,
+        matters: 'This became the baseline WealthOS will use to understand future movement.',
+        trajectory: 'There is not enough history yet to define a pattern, and that is completely normal.',
+        momentum: 'Return next month and record the next figure so your Timeline can begin showing direction.'
+      };
     } else if (isRecord) {
-      title = `${source} reached a new monthly high`;
-      description = `You moved beyond every earlier ${source.toLowerCase()} month saved in WealthOS.`;
-      tone = 'growth';
+      moment = {
+        title: `${source} reached a new monthly high`,
+        description: `You moved beyond every earlier ${source.toLowerCase()} month saved in WealthOS.`,
+        amount: money.format(amount),
+        tone: 'growth',
+        happened: `Your ${source.toLowerCase()} reached ${money.format(amount)}, exceeding the prior saved high.`,
+        matters: 'This is not simply a higher number. It marks a new reference point for your future progress.',
+        trajectory: difference > 0
+          ? `You improved by ${money.format(difference)} from the prior month and established a stronger baseline.`
+          : 'This month now becomes the level future months will be measured against.',
+        momentum: 'Decide how much of the increase should support taxes, savings, or another priority before it blends into normal spending.'
+      };
     } else if (difference > 0) {
-      title = `${source} moved forward`;
-      description = `Your ${source.toLowerCase()} increased by ${money.format(difference)} from the prior month.`;
-      tone = 'growth';
+      moment = {
+        title: `${source} moved forward`,
+        description: `Your ${source.toLowerCase()} increased by ${money.format(difference)} from the prior month.`,
+        amount: money.format(amount),
+        tone: 'growth',
+        happened: `Your ${source.toLowerCase()} rose from ${money.format(previousAmount)} to ${money.format(amount)}.`,
+        matters: 'A single increase does not guarantee a trend, but it creates more room for obligations and chosen goals.',
+        trajectory: stats.streak >= 3
+          ? `This became part of a ${stats.streak}-month growth streak.`
+          : 'The direction is positive, and another month will show whether it is becoming a pattern.',
+        momentum: 'Protect part of the increase before allocating the rest.'
+      };
     } else if (difference < 0) {
-      title = `${source} softened`;
-      description = `Your ${source.toLowerCase()} was ${money.format(Math.abs(difference))} lower than the prior month. One month does not define the full trend.`;
-      tone = 'attention';
+      moment = {
+        title: `${source} softened`,
+        description: `Your ${source.toLowerCase()} was ${money.format(Math.abs(difference))} lower than the prior month.`,
+        amount: money.format(amount),
+        tone: 'attention',
+        happened: `Your ${source.toLowerCase()} moved from ${money.format(previousAmount)} to ${money.format(amount)}.`,
+        matters: 'A softer month deserves context, not panic. Seasonal changes and timing can affect a single period.',
+        trajectory: amount >= stats.average
+          ? 'Despite the decline, this month remained at or above your recorded average.'
+          : 'This month fell below your recorded average, making the next entry especially useful for context.',
+        momentum: 'Review what changed, but wait for another month before treating this as a lasting direction.'
+      };
     } else {
-      title = `${source} remained steady`;
-      description = `Your ${source.toLowerCase()} matched the prior month.`;
+      moment = {
+        title: `${source} remained steady`,
+        description: `Your ${source.toLowerCase()} matched the prior month.`,
+        amount: money.format(amount),
+        tone: 'neutral',
+        happened: `You recorded the same ${source.toLowerCase()} amount for two consecutive months.`,
+        matters: 'Stability can be valuable when your obligations and savings goals remain supported.',
+        trajectory: 'Your current baseline is holding steady.',
+        momentum: 'Keep recording the next month so WealthOS can identify when stability begins to shift.'
+      };
     }
 
     if (!groups.has(item.month)) groups.set(item.month, []);
-    groups.get(item.month).push({
-      title,
-      description,
-      amount: money.format(amount),
-      tone
-    });
+    groups.get(item.month).push(moment);
   });
 
   return groups;
@@ -702,14 +823,22 @@ function addCurrentFinancialMoments(data, groups, money) {
         title: 'Your tax reserve became fully funded',
         description: `You have set aside the full estimated payment due ${formatDate(data.taxes.dueDate)}.`,
         amount: money.format(taxReserved),
-        tone: 'progress'
+        tone: 'progress',
+        happened: `Your reserved amount reached the full ${money.format(taxEstimate)} estimate.`,
+        matters: 'The payment should not need to draw from your everyday cash.',
+        trajectory: 'You are entering the due date with the obligation already accounted for.',
+        momentum: 'Keep the reserve untouched until the payment clears.'
       });
     } else {
       currentEvents.push({
         title: 'Your tax reserve still has a gap',
         description: `${money.format(taxShortfall)} remains before the selected due date${taxDays === null ? '.' : `, currently ${Math.abs(taxDays)} day${Math.abs(taxDays) === 1 ? '' : 's'} ${taxDays < 0 ? 'past due' : 'away'}.`}`,
         amount: money.format(taxReserved),
-        tone: 'attention'
+        tone: 'attention',
+        happened: `You reserved ${money.format(taxReserved)} against an estimated ${money.format(taxEstimate)} payment.`,
+        matters: 'The remaining gap could otherwise come from general cash when the payment is due.',
+        trajectory: 'This is the most time-sensitive unfinished obligation in your current Timeline.',
+        momentum: `Close the remaining ${money.format(taxShortfall)} gap before ${formatDate(data.taxes.dueDate)}.`
       });
     }
   }
@@ -725,7 +854,11 @@ function addCurrentFinancialMoments(data, groups, money) {
       title: 'Your emergency fund reached its target',
       description: `Your safety net now covers approximately ${monthsCovered.toFixed(1)} months of essential expenses.`,
       amount: money.format(emergencyBalance),
-      tone: 'progress'
+      tone: 'progress',
+      happened: `Your emergency balance reached ${money.format(emergencyBalance)}.`,
+      matters: 'You created a stronger buffer against short-term income disruption or unexpected expenses.',
+      trajectory: 'The foundation you selected for yourself is now complete.',
+      momentum: 'Choose where future emergency-fund contributions should go next.'
     });
   }
 
@@ -742,7 +875,17 @@ function addCurrentFinancialMoments(data, groups, money) {
         ? 'You reached the full target you set for yourself.'
         : `${money.format(Math.max(0, target - saved))} remains before the challenge is complete.`,
       amount: money.format(saved),
-      tone: 'progress'
+      tone: 'progress',
+      happened: `You have saved ${money.format(saved)} toward a ${money.format(target)} target.`,
+      matters: percentage >= 100
+        ? 'The money is now ready for the purpose you chose.'
+        : 'The challenge turns a future goal into a visible commitment you can keep moving forward.',
+      trajectory: percentage >= 100
+        ? 'This chapter is complete.'
+        : `You are ${percentage}% of the way there.`,
+      momentum: percentage >= 100
+        ? 'Close the challenge or define the next goal when you are ready.'
+        : `Make the next planned contribution toward ${data.challenge.name}.`
     });
   }
 }
@@ -1021,7 +1164,7 @@ document.querySelectorAll('.signal-button').forEach(button => {
 try {
   render(loadData());
 } catch (error) {
-  console.error('WealthOS v0.8.2 could not complete its initial render.', error);
+  console.error('WealthOS v0.8.3 could not complete its initial render.', error);
 
   // Keep the failure visible and understandable instead of leaving blank cards.
   ui.growthTitle.textContent = 'WealthOS needs a quick refresh';
