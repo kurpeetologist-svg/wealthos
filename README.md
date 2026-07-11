@@ -1,14 +1,15 @@
-# WealthOS Headquarters v0.1
+# WealthOS v0.3
 
-A living prototype of WealthOS Headquarters.
+## Architecture
+- Lobby — arrival and reassurance
+- Headquarters — today's Signals
+- Stories — financial journey
 
-## Included
-- Calm opening briefing
-- Growth, Attention, Progress, and Next Step Signals
-- Expandable Stories
-- Recent Stories
+## Design principles
 - No charts
 - No gradients
 - No sidebar
+- Calm before complexity
+- Decisions first. Data second.
 
 Open `index.html` in a browser.
