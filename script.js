@@ -96,7 +96,7 @@ const currencies = [
 const nowMonth = new Date().toISOString().slice(0, 7);
 
 const defaults = {
-  profile: { name: 'Kurt', currency: 'USD' },
+  profile: { name: '', currency: 'USD' },
   income: { source: 'Total income', currentMonth: nowMonth, current: 9240 },
   incomeHistory: [
     { month: '2026-04', amount: 6800 },
@@ -295,19 +295,18 @@ function trendStats(history) {
 }
 
 function updateGreeting(name) {
-  const hour = new Date().getHours();
-  const daypart = hour < 12
-    ? 'Good morning'
-    : hour < 18
-      ? 'Good afternoon'
-      : 'Good evening';
-
-  ui.greeting.textContent = `${daypart}, ${name}.`;
-  ui.todayDate.textContent = new Intl.DateTimeFormat(undefined, {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric'
-  }).format(new Date());
+  const hour=new Date().getHours();
+  const daypart=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
+  ui.greeting.textContent=daypart+'.';
+  const thoughts=[
+    "Let's see where you stand today.",
+    "Let's focus on what matters today.",
+    "One decision at a time.",
+    "Progress begins with clarity."
+  ];
+  const idx=(new Date().getDate()-1)%thoughts.length;
+  ui.reflection.textContent=thoughts[idx];
+  ui.todayDate.textContent=new Intl.DateTimeFormat(undefined,{weekday:'long',month:'long',day:'numeric'}).format(new Date());
 }
 
 function contributionPeriods(durationWeeks, frequency) {
@@ -448,11 +447,7 @@ function render(data) {
     ? 'Choose how much of this increase should support taxes, savings, or your active challenge.'
     : 'Keep recording each month so WealthOS can distinguish a pattern from a one-month change.';
 
-  ui.reflection.textContent = stats.streak >= 3
-    ? 'Consistency is becoming a pattern.'
-    : stats.isRecord
-      ? 'A new record deserves a quiet moment.'
-      : 'Quiet months build strong years.';
+
 
   const taxDays = daysUntil(normalized.taxes.dueDate);
   const taxEstimate = asNumber(normalized.taxes.estimate);
@@ -1164,7 +1159,7 @@ document.querySelectorAll('.signal-button').forEach(button => {
 try {
   render(loadData());
 } catch (error) {
-  console.error('WealthOS v0.8.4 could not complete its initial render.', error);
+  console.error('WealthOS v0.8.5 could not complete its initial render.', error);
 
   // Keep the failure visible and understandable instead of leaving blank cards.
   ui.growthTitle.textContent = 'WealthOS needs a quick refresh';
