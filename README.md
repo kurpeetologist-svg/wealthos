@@ -1,28 +1,26 @@
-# WealthOS v0.8
+# WealthOS v0.8.1 — Stability Release
 
-## New
-- “Settings” renamed to **About You**
-- Monthly income history stored in the browser
-- Current month can be added or updated
-- Previous month calculated automatically
-- Historical high calculated automatically
-- Consecutive growth streaks detected automatically
-- Monthly average calculated automatically
-- Growth Signal and Story use remembered history
-- Financial History section added to Headquarters
-- History entries can be removed from About You
+This release fixes the blank Signal cards seen in v0.8.
 
-## Historical language
-WealthOS only says “your strongest month since you started WealthOS” when the current amount is higher than every earlier saved month.
+## Fixes
+- Removed reliance on browser-created global variables for HTML element IDs
+- Removed the `closePanel` element/function name conflict
+- Added explicit element validation
+- Added safe data normalization
+- Added migration from v0.6 and v0.7 localStorage data
+- Preserved the v0.8 design and feature scope
+- Added a visible fallback message if a future rendering error occurs
 
-## Storage
-All information remains in browser localStorage on the current device and browser.
-
-Do not enter bank credentials, account numbers, Social Security numbers, passwords, or other highly sensitive information.
+## Scope
+No new product features were added. This release focuses only on reliable rendering and saved-data compatibility.
 
 ## Publish
-Replace:
+Replace these files in the GitHub repository:
 - index.html
 - styles.css
 - script.js
 - README.md
+
+Suggested commit message:
+
+`Stabilize v0.8 rendering and saved-data migration`
