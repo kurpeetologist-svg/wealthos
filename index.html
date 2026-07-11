@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="WealthOS v0.8.4 — a financial literacy product designed to build confidence with money, one decision at a time.">
-  <title>WealthOS v0.8.5</title>
+  <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
+  <title>WealthOS Private Preview</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -13,37 +13,59 @@
 <body>
   <header class="brandbar">
     <a class="brand" href="#lobby">Wealth<span>OS</span></a>
-    <button class="about-trigger" id="aboutTrigger" type="button">About You</button>
+    <div class="brand-actions">
+      <span class="preview-label">Private Preview</span>
+      <button class="about-trigger" id="aboutTrigger" type="button" hidden>About You</button>
+    </div>
   </header>
 
   <main>
     <section class="lobby" id="lobby">
       <div class="lobby-inner">
-        <p class="eyebrow">Lobby</p>
-        <h1 id="greeting">Good morning, Kurt.</h1>
-        <p class="reflection" id="reflection">Quiet months build strong years.</p>
-        <p class="financial-state" id="financialState"></p>
-        <p class="attention-state" id="attentionState"></p>
-        <div class="lobby-date" id="todayDate"></div>
+        <h1 id="greeting">Good morning!</h1>
+        <p class="reflection" id="reflection">Let's see where you stand today.</p>
 
-        <a class="enter-link" href="#headquarters">
-          <span>Your Focus is ready.</span>
-          <b>↓</b>
-        </a>
+        <div id="firstVisitLobby" class="first-visit-lobby">
+          <div class="welcome-rule"></div>
+          <p class="beginning-copy">Every financial story begins somewhere.</p>
+          <p class="beginning-support">Today is a great place to start.</p>
+          <button class="begin-button" id="beginStoryButton" type="button">
+            Begin Your Story <span>→</span>
+          </button>
+        </div>
+
+        <div id="returningLobby" hidden>
+          <p class="financial-state" id="financialState"></p>
+          <p class="attention-state" id="attentionState"></p>
+          <div class="lobby-date" id="todayDate"></div>
+          <a class="enter-link" href="#focus">
+            <span>Your Focus is ready.</span>
+            <b>↓</b>
+          </a>
+        </div>
       </div>
     </section>
 
-    <section class="headquarters" id="headquarters">
+    <section class="focus-section starting-state" id="focus">
       <div class="section-shell">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Headquarters</p>
             <h2>Today’s Focus</h2>
           </div>
-          <p>Four Signals to help you understand what matters today.</p>
+          <p id="focusIntro">We'll surface the four most important things to know after your first check-in.</p>
         </div>
 
-        <div class="signal-grid">
+        <div id="firstVisitFocus" class="starting-card">
+          <p class="starting-kicker">Your first check-in</p>
+          <h3>Clarity begins with understanding where you stand.</h3>
+          <p>Begin your story, and WealthOS will turn your information into calm, useful Signals.</p>
+          <button class="begin-button secondary-begin" type="button" data-begin-story>
+            Begin Your Story <span>→</span>
+          </button>
+        </div>
+
+        <div class="signal-grid" id="signalGrid" hidden>
           <article class="signal-card" data-signal="growth">
             <button class="signal-button" type="button" aria-expanded="false">
               <div class="signal-topline">
@@ -131,15 +153,91 @@
               <p class="eyebrow">Stories</p>
               <h2>Your Timeline</h2>
             </div>
-            <p id="timelineSummary">The moments shaping your financial life.</p>
+            <p id="timelineSummary">Your Timeline is waiting for its first chapter.</p>
           </div>
-          <div class="timeline-groups" id="timelineGroups"></div>
+
+          <div id="firstVisitTimeline" class="starting-card timeline-start">
+            <p class="starting-kicker">Your first chapter</p>
+            <h3>Every month becomes a chapter.</h3>
+            <p>We'll remember the moments that shaped your financial journey.</p>
+            <p>Your first chapter is waiting.</p>
+            <button class="begin-button secondary-begin" type="button" data-begin-story>
+              Begin Your Story <span>→</span>
+            </button>
+          </div>
+
+          <div class="timeline-groups" id="timelineGroups" hidden></div>
         </section>
       </div>
     </section>
   </main>
 
   <div class="panel-backdrop" id="panelBackdrop" hidden></div>
+
+  <section class="onboarding" id="onboarding" aria-hidden="true">
+    <div class="onboarding-shell">
+      <div class="onboarding-top">
+        <div class="brand">Wealth<span>OS</span></div>
+        <button class="close-button" id="closeOnboarding" type="button">Close</button>
+      </div>
+
+      <form id="onboardingForm">
+        <div class="onboarding-step active" data-step="1">
+          <p class="eyebrow">Begin Your Story</p>
+          <h2>Welcome to WealthOS.</h2>
+          <p>Before we can help you understand your financial life, let's learn a little about yours.</p>
+          <button class="primary-button onboarding-next" type="button">Continue</button>
+        </div>
+
+        <div class="onboarding-step" data-step="2">
+          <p class="step-count">1 of 4</p>
+          <h2>What should we call you?</h2>
+          <label>Preferred name, optional<input id="onboardingName" type="text" autocomplete="given-name"></label>
+          <div class="step-actions">
+            <button class="secondary-button onboarding-back" type="button">Back</button>
+            <button class="primary-button onboarding-next" type="button">Continue</button>
+          </div>
+        </div>
+
+        <div class="onboarding-step" data-step="3">
+          <p class="step-count">2 of 4</p>
+          <h2>Which currency do you use?</h2>
+          <label>Currency<select id="onboardingCurrency"></select></label>
+          <div class="step-actions">
+            <button class="secondary-button onboarding-back" type="button">Back</button>
+            <button class="primary-button onboarding-next" type="button">Continue</button>
+          </div>
+        </div>
+
+        <div class="onboarding-step" data-step="4">
+          <p class="step-count">3 of 4</p>
+          <h2>Let's record your first check-in.</h2>
+          <label>Income source name<input id="onboardingIncomeSource" type="text" placeholder="Total income, Salary, Business #1..."></label>
+          <label>Month<input id="onboardingIncomeMonth" type="month"></label>
+          <label>Amount<input id="onboardingIncomeAmount" type="number" min="0" step="0.01"></label>
+          <div class="step-actions">
+            <button class="secondary-button onboarding-back" type="button">Back</button>
+            <button class="primary-button onboarding-next" type="button">Continue</button>
+          </div>
+        </div>
+
+        <div class="onboarding-step" data-step="5">
+          <p class="step-count">4 of 4</p>
+          <h2>Would you like to begin a Savings Challenge?</h2>
+          <label class="choice-row"><input type="radio" name="challengeChoice" value="yes"> Yes, let's begin one</label>
+          <label class="choice-row"><input type="radio" name="challengeChoice" value="later" checked> Maybe later</label>
+          <div id="onboardingChallengeFields" hidden>
+            <label>What are you saving for?<input id="onboardingChallengeName" type="text" placeholder="Emergency fund, Travel, Home..."></label>
+            <label>Target amount<input id="onboardingChallengeTarget" type="number" min="0" step="0.01"></label>
+          </div>
+          <div class="step-actions">
+            <button class="secondary-button onboarding-back" type="button">Back</button>
+            <button class="primary-button" type="submit">Finish</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
 
   <aside class="about-panel" id="aboutPanel" aria-hidden="true">
     <div class="panel-header">
@@ -162,7 +260,7 @@
         <label>Income source name<input id="incomeSourceName" type="text"></label>
         <label>Current month<input id="incomeMonth" type="month"></label>
         <label>Current amount<input id="incomeCurrent" type="number" min="0" step="0.01"></label>
-        <p class="form-help">Saving adds or updates this month in your history. WealthOS calculates comparisons and records automatically.</p>
+        <p class="form-help">Saving adds or updates this month in your Timeline.</p>
       </section>
 
       <section class="form-section">
@@ -205,22 +303,21 @@
         </div>
       </section>
 
-      <section class="form-section history-manager">
+      <section class="form-section">
         <h3>Timeline data</h3>
-        <p class="form-help">Earlier income months become Stories on your Timeline. Remove an entry only when it is incorrect.</p>
         <div id="historyManagerList"></div>
       </section>
 
       <div class="panel-actions">
-        <button class="secondary-button" id="resetButton" type="button">Reset demo</button>
+        <button class="secondary-button" id="clearPreviewButton" type="button">Start fresh</button>
         <button class="primary-button" type="submit">Save changes</button>
       </div>
     </form>
   </aside>
 
   <footer>
-    <span>WealthOS v0.8.5</span>
-    <span>Your history stays in this browser.</span>
+    <span>WealthOS · Private Preview</span>
+    <span>Version 0.9.0</span>
   </footer>
 
   <script src="script.js"></script>
