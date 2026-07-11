@@ -3,31 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="WealthOS Headquarters v0.3 — Lobby, Headquarters, and Stories.">
-  <title>WealthOS v0.3</title>
+  <meta name="description" content="WealthOS v0.6 — personalized financial Signals and saved settings.">
+  <title>WealthOS v0.6</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="brandbar">
-    <a href="#lobby">WealthOS</a>
+    <a class="brand" href="#lobby">Wealth<span>OS</span></a>
+    <button class="settings-trigger" id="settingsTrigger" type="button">Settings</button>
   </header>
 
   <main>
     <section class="lobby" id="lobby">
       <div class="lobby-inner">
-        <p class="lobby-label">Lobby</p>
-        <h1>Good morning, Kurt.</h1>
-        <p class="daily-reflection">Quiet months build strong years.</p>
-        <p class="financial-state">
-          Your financial life is moving in the right direction.
-        </p>
-        <p class="attention-state">
-          Nothing requires your attention today.
-        </p>
-        <div class="lobby-date">Monday, July 13</div>
+        <p class="eyebrow">Lobby</p>
+        <h1 id="greeting">Good morning, Kurt.</h1>
+        <p class="reflection">Quiet months build strong years.</p>
+        <p class="financial-state" id="financialState">Your financial life is moving in the right direction.</p>
+        <p class="attention-state" id="attentionState">Nothing requires your attention today.</p>
+        <div class="lobby-date" id="todayDate"></div>
 
         <a class="enter-link" href="#headquarters">
           <span>Your briefing is ready.</span>
@@ -48,116 +45,116 @@
 
         <div class="signal-grid">
           <article class="signal-card" data-signal="growth">
-            <button class="signal-button" aria-expanded="false">
+            <button class="signal-button" type="button" aria-expanded="false">
               <div class="signal-topline">
                 <span class="signal-category">Growth</span>
                 <span class="signal-action">Open story <b>+</b></span>
               </div>
-              <h3>Consulting income reached a new monthly high</h3>
-              <div class="signal-number">$9,240</div>
-              <div class="signal-change">+27% vs last month</div>
-              <p class="signal-personal">This is your strongest consulting month since you started WealthOS.</p>
+              <h3 id="growthTitle">Consulting income reached a new monthly high</h3>
+              <div class="signal-number" id="growthValue">$9,240</div>
+              <div class="signal-change" id="growthChange">+27% vs last month</div>
+              <p class="signal-personal" id="growthPersonal">This is your strongest consulting month since you started WealthOS.</p>
             </button>
             <div class="story-drawer">
               <div class="story-content">
                 <div>
                   <span>What changed</span>
-                  <p>Your consulting income increased by $1,963 compared with last month.</p>
+                  <p id="growthStoryChanged"></p>
                 </div>
                 <div>
                   <span>Why it matters</span>
-                  <p>Consulting now represents 24% of your total monthly income.</p>
+                  <p id="growthStoryMatters"></p>
                 </div>
                 <div>
                   <span>Continue the momentum</span>
-                  <p>Set aside 30% before allocating the remainder.</p>
+                  <p id="growthStoryNext"></p>
                 </div>
               </div>
             </div>
           </article>
 
           <article class="signal-card" data-signal="attention">
-            <button class="signal-button" aria-expanded="false">
+            <button class="signal-button" type="button" aria-expanded="false">
               <div class="signal-topline">
                 <span class="signal-category">Attention</span>
                 <span class="signal-action">Open story <b>+</b></span>
               </div>
-              <h3>Your quarterly tax payment is due soon</h3>
-              <div class="signal-number">8 days</div>
-              <div class="signal-change">$2,480 already reserved</div>
-              <p class="signal-personal">You have already set aside the full estimated amount.</p>
+              <h3 id="attentionTitle">Your quarterly tax payment is due soon</h3>
+              <div class="signal-number" id="attentionValue">8 days</div>
+              <div class="signal-change" id="attentionChange">$2,480 already reserved</div>
+              <p class="signal-personal" id="attentionPersonal">You have already set aside the full estimated amount.</p>
             </button>
             <div class="story-drawer">
               <div class="story-content">
                 <div>
                   <span>What changed</span>
-                  <p>Your estimate increased by $310 after stronger consulting revenue.</p>
+                  <p id="attentionStoryChanged"></p>
                 </div>
                 <div>
                   <span>Why it matters</span>
-                  <p>The payment should not disrupt your normal cash flow.</p>
+                  <p id="attentionStoryMatters"></p>
                 </div>
                 <div>
                   <span>Continue the momentum</span>
-                  <p>Schedule the payment now and keep the reserve untouched.</p>
+                  <p id="attentionStoryNext"></p>
                 </div>
               </div>
             </div>
           </article>
 
           <article class="signal-card" data-signal="progress">
-            <button class="signal-button" aria-expanded="false">
+            <button class="signal-button" type="button" aria-expanded="false">
               <div class="signal-topline">
                 <span class="signal-category">Progress</span>
                 <span class="signal-action">Open story <b>+</b></span>
               </div>
-              <h3>Your emergency fund is complete</h3>
-              <div class="signal-number">$24,300</div>
-              <div class="signal-change">6 months of expenses covered</div>
-              <p class="signal-personal">You reached your target two months earlier than planned.</p>
+              <h3 id="progressTitle">Your emergency fund is complete</h3>
+              <div class="signal-number" id="progressValue">$24,300</div>
+              <div class="signal-change" id="progressChange">6 months of expenses covered</div>
+              <p class="signal-personal" id="progressPersonal">You reached your target two months earlier than planned.</p>
             </button>
             <div class="story-drawer">
               <div class="story-content">
                 <div>
                   <span>What changed</span>
-                  <p>You added $1,050 this month and crossed your original target.</p>
+                  <p id="progressStoryChanged"></p>
                 </div>
                 <div>
                   <span>Why it matters</span>
-                  <p>You now have enough liquidity to absorb most short-term disruptions.</p>
+                  <p id="progressStoryMatters"></p>
                 </div>
                 <div>
                   <span>Continue the momentum</span>
-                  <p>Redirect next month's contribution toward long-term investing.</p>
+                  <p id="progressStoryNext"></p>
                 </div>
               </div>
             </div>
           </article>
 
           <article class="signal-card" data-signal="next">
-            <button class="signal-button" aria-expanded="false">
+            <button class="signal-button" type="button" aria-expanded="false">
               <div class="signal-topline">
                 <span class="signal-category">Next Step</span>
                 <span class="signal-action">See reasoning <b>+</b></span>
               </div>
-              <h3>Increase your Roth IRA contribution</h3>
-              <div class="signal-number">$500</div>
-              <div class="signal-change">Recommended before month-end</div>
-              <p class="signal-personal">Your completed emergency fund creates room for this contribution.</p>
+              <h3 id="nextTitle">Increase your Roth IRA contribution</h3>
+              <div class="signal-number" id="nextValue">$500</div>
+              <div class="signal-change" id="nextChange">Recommended before month-end</div>
+              <p class="signal-personal" id="nextPersonal">Your completed emergency fund creates room for this contribution.</p>
             </button>
             <div class="story-drawer">
               <div class="story-content">
                 <div>
                   <span>Why this step</span>
-                  <p>Your cash reserve is complete and cash flow remains positive.</p>
+                  <p id="nextStoryWhy"></p>
                 </div>
                 <div>
                   <span>What it changes</span>
-                  <p>This would bring your year-to-date Roth IRA contributions to $3,900.</p>
+                  <p id="nextStoryChanges"></p>
                 </div>
                 <div>
                   <span>Your next move</span>
-                  <p>Schedule a $500 transfer before July 31.</p>
+                  <p id="nextStoryMove"></p>
                 </div>
               </div>
             </div>
@@ -165,41 +162,73 @@
         </div>
       </div>
     </section>
-
-    <section class="journey">
-      <div class="section-shell">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Stories</p>
-            <h2>Your Journey</h2>
-          </div>
-          <p>The moments shaping your financial life.</p>
-        </div>
-
-        <div class="journey-grid">
-          <article>
-            <span>July 2026</span>
-            <h3>Consulting became a dependable second income stream</h3>
-            <p>Your consulting income has now grown for four consecutive months.</p>
-          </article>
-          <article>
-            <span>June 2026</span>
-            <h3>You completed your emergency fund</h3>
-            <p>Your financial safety net now covers six months of essential expenses.</p>
-          </article>
-          <article>
-            <span>May 2026</span>
-            <h3>You reached your strongest savings rate of the year</h3>
-            <p>You saved 31% of total income while maintaining normal lifestyle spending.</p>
-          </article>
-        </div>
-      </div>
-    </section>
   </main>
 
+  <div class="settings-backdrop" id="settingsBackdrop" hidden></div>
+
+  <aside class="settings-panel" id="settingsPanel" aria-hidden="true">
+    <div class="settings-header">
+      <div>
+        <p class="eyebrow">Personalization</p>
+        <h2>Your settings</h2>
+      </div>
+      <button class="close-button" id="closeSettings" type="button">Close</button>
+    </div>
+
+    <form id="settingsForm">
+      <section class="form-section">
+        <h3>About you</h3>
+        <label>
+          Preferred name
+          <input id="nameInput" type="text" value="Kurt">
+        </label>
+        <label>
+          Currency
+          <select id="currencyInput">
+            <option value="USD">USD — US Dollar</option>
+            <option value="PHP">PHP — Philippine Peso</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="form-section">
+        <h3>Consulting income</h3>
+        <label>Current month<input id="consultingCurrent" type="number" min="0" step="1"></label>
+        <label>Previous month<input id="consultingPrevious" type="number" min="0" step="1"></label>
+        <label>Previous record<input id="consultingRecord" type="number" min="0" step="1"></label>
+      </section>
+
+      <section class="form-section">
+        <h3>Quarterly taxes</h3>
+        <label>Due date<input id="taxDueDate" type="date"></label>
+        <label>Estimated payment<input id="taxEstimate" type="number" min="0" step="1"></label>
+        <label>Amount reserved<input id="taxReserved" type="number" min="0" step="1"></label>
+      </section>
+
+      <section class="form-section">
+        <h3>Emergency fund</h3>
+        <label>Current balance<input id="emergencyBalance" type="number" min="0" step="1"></label>
+        <label>Monthly essential expenses<input id="essentialExpenses" type="number" min="1" step="1"></label>
+        <label>Target months<input id="targetMonths" type="number" min="1" max="24" step="1"></label>
+      </section>
+
+      <section class="form-section">
+        <h3>Next step</h3>
+        <label>Action title<input id="nextActionTitle" type="text"></label>
+        <label>Amount<input id="nextActionAmount" type="number" min="0" step="1"></label>
+        <label>Deadline<input id="nextActionDeadline" type="date"></label>
+      </section>
+
+      <div class="settings-actions">
+        <button class="secondary-button" id="resetButton" type="button">Reset demo</button>
+        <button class="primary-button" type="submit">Save changes</button>
+      </div>
+    </form>
+  </aside>
+
   <footer>
-    <span>WealthOS v0.3</span>
-    <span>Decisions first. Data second.</span>
+    <span>WealthOS v0.6</span>
+    <span>Your data stays in this browser.</span>
   </footer>
 
   <script src="script.js"></script>
