@@ -1,45 +1,33 @@
-# WealthOS v0.15.0 — Behind the Number
+# WealthOS v0.15.1 — Context Library
 
-This release adds contextual financial education immediately after a meaningful action.
+This release implements Behind the Number as a conversational completion experience.
+
+## What changed
+
+- Behind the Number no longer looks like a separate feature card.
+- WealthOS speaks immediately after confirming an action.
+- Every explanation includes:
+  - a concise concept
+  - a short explanation
+- A reusable Context Library replaces a handful of disconnected examples.
+- Merchant names and notes can later support alias-based context matching.
+- Weekly and Monthly Check-ins use the same Context Library structure.
 
 ## Lesson vs. Behind the Number
 
-### Lesson
-- independent financial-literacy curriculum
-- complete concepts
-- available whether or not the user has just acted
+**Lesson** is a deeper, independent financial-literacy curriculum.
 
-### Behind the Number
-- triggered by the user’s action
-- immediate
-- brief
-- contextual
-- requires no separate reading task
+**Behind the Number** is an immediate conversation caused by the user’s action.
 
-## Current triggers
+## Included
 
-### Quick Add
-Categories trigger concise explanations about:
-
-- discretionary spending
-- variable and fixed expenses
-- recurring expenses
-- sinking funds
-- housing
-- transportation
-- health costs
-- taxes
-
-### Check-ins
-Weekly and Monthly Check-ins receive a short explanation of the financial concept behind the newly recorded totals.
+- `CONTEXT_LIBRARY.md`
+- updated Founder Changelog
+- updated WealthOS Design System
 
 ## Principle
 
-**Lessons build long-term literacy. Context explains the user’s financial life in the moment.**
-
-## Retention
-
-Saved data migrates automatically from v0.14.1 and earlier versions.
+**Context should feel like WealthOS speaking—not like another feature asking for attention.**
 
 ## Publish
 
@@ -52,7 +40,8 @@ Replace:
 - FOUNDER_CHANGELOG.md
 - WEALTHOS_DESIGN_SYSTEM.md
 - PROTECTED_IDEAS.md
+- CONTEXT_LIBRARY.md
 
 Suggested commit:
 
-`Add Behind the Number contextual explanations`
+`Integrate Behind the Number with a reusable Context Library`

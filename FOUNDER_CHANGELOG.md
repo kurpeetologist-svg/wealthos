@@ -189,3 +189,29 @@ A brief explanation triggered by a user’s action and presented immediately ins
 ### Principle
 
 **Lessons build long-term literacy. Context explains the user’s financial life in the moment.**
+
+## v0.15.1 — Context Library
+
+### Why this exists
+
+The first Behind the Number release contained the correct content, but it did not deliver the intended experience clearly enough.
+
+The feature still looked like another card rather than WealthOS speaking in response to the user.
+
+### What changed
+
+- The completion experience now pauses after confirmation.
+- WealthOS says, “One thing worth knowing…”
+- A financial concept and brief explanation follow naturally.
+- A reusable Context Library replaces a short list of disconnected examples.
+- Categories, aliases, check-ins, and future financial actions can use the same architecture.
+
+### What we learned
+
+Correct content is not enough.
+
+Placement, timing, and voice determine whether contextual education feels like a conversation or another reading exercise.
+
+### Principle
+
+**Context should feel like WealthOS speaking—not like another feature asking for attention.**

@@ -73,3 +73,18 @@ Behind the Number should:
 - avoid assigning another task
 - explain rather than praise
 - disappear after the moment unless later preserved as part of a Reflection Receipt
+
+## Context Voice
+
+Behind the Number is not presented as a standalone card or destination.
+
+The interaction sequence is:
+
+1. Confirm the action.
+2. Create a short visual pause.
+3. Say, “One thing worth knowing…”
+4. Name the concept.
+5. Explain it in one brief paragraph.
+6. Let the user leave or continue naturally.
+
+The product should feel as though WealthOS noticed the action and responded, not as though another feature was inserted into the page.

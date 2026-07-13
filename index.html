@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.15.0</title>
+  <title>WealthOS Private Preview v0.15.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -614,18 +614,22 @@
     </div>
   </section>
 
-  <section class="expense-toast" id="expenseToast" role="status" aria-live="polite">
-    <div class="expense-toast-header">
+  <section class="expense-toast context-conversation" id="expenseToast" role="status" aria-live="polite">
+    <button class="expense-toast-close" id="expenseToastClose" type="button" aria-label="Close">×</button>
+
+    <div class="conversation-confirmation">
       <span class="expense-toast-mark">✓</span>
       <div>
         <strong id="expenseToastTitle">Purchase recorded.</strong>
         <p id="expenseToastText">Your Spending Snapshot has been updated.</p>
       </div>
-      <button class="expense-toast-close" id="expenseToastClose" type="button" aria-label="Close">×</button>
     </div>
 
-    <div class="action-context">
-      <span>Behind the number</span>
+    <div class="conversation-pause" aria-hidden="true"></div>
+
+    <div class="conversation-context">
+      <span>One thing worth knowing…</span>
+      <h3 id="expenseContextTitle"></h3>
       <p id="expenseContextText"></p>
     </div>
 
@@ -657,8 +661,9 @@
           <p id="loopContextText"></p>
         </div>
 
-        <div class="inline-action-context">
-          <span>Behind the number</span>
+        <div class="loop-conversation-context">
+          <span>One thing worth knowing…</span>
+          <h3 id="loopActionContextTitle"></h3>
           <p id="loopActionContext"></p>
         </div>
 
@@ -788,7 +793,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.15.0</span>
+    <span>Version 0.15.1</span>
   </footer>
 
   <script src="script.js"></script>

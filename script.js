@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.15.0-data';
-const LEGACY_KEYS=['wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.15.1-data';
+const LEGACY_KEYS=['wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -279,45 +279,158 @@ function timelineEvent(title,description,amount,isFresh=false){
 }
 
 
-const actionContexts={
-  Coffee:'Coffee is usually discretionary spending: optional spending rather than a fixed obligation such as rent or insurance.',
-  'Food & Dining':'Dining is generally a variable expense, which means its total can change more easily than a fixed cost such as housing.',
-  Groceries:'Groceries are usually essential spending, but the amount can still vary with household size, location, and shopping habits.',
-  Transportation:'Transportation may combine fixed costs, such as a car payment, with variable costs, such as fuel, fares, and rides.',
-  Housing:'Housing is often a household’s largest fixed expense. Because it is difficult to change quickly, it strongly shapes monthly cash flow.',
-  Utilities:'Utilities are recurring obligations, but some portions may vary with usage, season, and local rates.',
-  Shopping:'Shopping is commonly categorized as discretionary spending unless the purchase was necessary for work, health, or daily living.',
-  Health:'Health spending can include predictable costs, such as premiums, and less predictable costs, such as deductibles or urgent care.',
-  Entertainment:'Entertainment is discretionary spending. That does not make it bad; it means the amount can be adjusted when priorities change.',
-  Travel:'A sinking fund can spread a future travel cost across smaller contributions instead of placing the full expense in one month.',
-  Subscriptions:'Subscriptions are recurring expenses. Their individual amounts may look small, but repeated charges accumulate across a year.',
-  Taxes:'Taxes may be withheld from pay, paid through estimated installments, or settled when a return is filed, depending on income and local rules.',
-  Other:'Categorizing a purchase helps WealthOS compare similar spending over time and explain where money is going.'
+const CONTEXT_LIBRARY={
+  expense:{
+    Coffee:{
+      concept:'Discretionary spending',
+      explanation:'Coffee is usually discretionary spending: optional spending rather than a fixed obligation such as rent or insurance.',
+      aliases:['cafe','espresso','latte','tea']
+    },
+    'Food & Dining':{
+      concept:'Variable expenses',
+      explanation:'Dining is generally a variable expense, which means its total can change more easily than a fixed cost such as housing.',
+      aliases:['restaurant','takeout','delivery','doordash','lunch','dinner']
+    },
+    Groceries:{
+      concept:'Essential but variable',
+      explanation:'Groceries are usually essential spending, but the amount can still vary with household size, location, and shopping habits.',
+      aliases:['supermarket','market','food store']
+    },
+    Transportation:{
+      concept:'Mixed expenses',
+      explanation:'Transportation may combine fixed costs, such as a car payment, with variable costs, such as fuel, fares, and rides.',
+      aliases:['gas','uber','lyft','train','bus','parking']
+    },
+    Housing:{
+      concept:'Fixed expenses',
+      explanation:'Housing is often a household’s largest fixed expense. Because it is difficult to change quickly, it strongly shapes monthly cash flow.',
+      aliases:['rent','mortgage','hoa']
+    },
+    Utilities:{
+      concept:'Recurring obligations',
+      explanation:'Utilities are recurring obligations, but some portions may vary with usage, season, and local rates.',
+      aliases:['electricity','water','internet','phone','gas bill']
+    },
+    Shopping:{
+      concept:'Discretionary or necessary',
+      explanation:'Shopping is commonly discretionary unless the purchase was necessary for work, health, or daily living. Context determines the category.',
+      aliases:['clothes','shoes','retail']
+    },
+    Health:{
+      concept:'Predictable and unpredictable costs',
+      explanation:'Health spending can include predictable costs, such as premiums, and less predictable costs, such as deductibles or urgent care.',
+      aliases:['doctor','pharmacy','medicine','medical']
+    },
+    Entertainment:{
+      concept:'Discretionary spending',
+      explanation:'Entertainment is discretionary spending. That does not make it bad; it means the amount can be adjusted when priorities change.',
+      aliases:['movie','concert','games']
+    },
+    Travel:{
+      concept:'Sinking funds',
+      explanation:'A sinking fund can spread a future travel cost across smaller contributions instead of placing the full expense in one month.',
+      aliases:['flight','hotel','vacation','trip']
+    },
+    Subscriptions:{
+      concept:'Recurring expenses',
+      explanation:'Subscriptions are recurring expenses. Their individual amounts may look small, but repeated charges accumulate across a year.',
+      aliases:['netflix','spotify','membership','software']
+    },
+    Taxes:{
+      concept:'Tax payments',
+      explanation:'Taxes may be withheld from pay, paid through estimated installments, or settled when a return is filed, depending on income and local rules.',
+      aliases:['irs','withholding','estimated tax','income tax']
+    },
+    Debt:{
+      concept:'Principal and interest',
+      explanation:'A debt payment can include both principal, which reduces the amount owed, and interest, which is the cost of borrowing.',
+      aliases:['credit card','loan','minimum payment']
+    },
+    Insurance:{
+      concept:'Risk transfer',
+      explanation:'Insurance exchanges a predictable premium for protection against certain larger, less predictable financial losses.',
+      aliases:['premium','deductible','coverage']
+    },
+    Investment:{
+      concept:'Risk and return',
+      explanation:'Investing accepts uncertainty in pursuit of future growth. Returns are not guaranteed, and time horizon affects how much volatility a person may be able to tolerate.',
+      aliases:['stocks','index fund','brokerage','401k','ira']
+    },
+    Other:{
+      concept:'Financial categorization',
+      explanation:'Categorizing a purchase helps WealthOS compare similar spending over time and explain where money is going.',
+      aliases:[]
+    }
+  },
+
+  checkin:{
+    weekly:{
+      concept:'Reference point versus pattern',
+      explanation:'A weekly spending total is a short-term reference point. Several weekly records are needed before WealthOS can distinguish a one-time event from a recurring pattern.'
+    },
+    monthlySaving:{
+      concept:'Saving within cash flow',
+      explanation:'Saving redirects part of current cash flow toward a future purpose. Repeated contributions make progress easier to measure.'
+    },
+    monthlyNegative:{
+      concept:'Negative cash flow',
+      explanation:'When recorded spending exceeds income, monthly cash flow is negative. One month does not define financial health, but the difference is worth understanding.'
+    },
+    monthly:{
+      concept:'Cash flow',
+      explanation:'A monthly check-in compares money coming in with money going out. That relationship is the foundation of cash-flow planning.'
+    }
+  },
+
+  savings:{
+    contribution:{
+      concept:'Consistent contributions',
+      explanation:'A contribution turns a future goal into measurable progress. Consistency often matters more than making every contribution large.'
+    },
+    emergency:{
+      concept:'Liquidity',
+      explanation:'Emergency savings are designed to remain accessible. Their purpose is to create options when an essential cost or income disruption appears.'
+    }
+  },
+
+  income:{
+    paycheck:{
+      concept:'Gross versus net income',
+      explanation:'Gross income is earned before deductions. Net income is the amount received after taxes, benefits, and other deductions.'
+    }
+  }
 };
 
+function normalizeContextText(value){
+  return String(value||'').trim().toLowerCase();
+}
+
+function expenseContextEntry(expense){
+  const category=expense.category||'Other';
+  if(CONTEXT_LIBRARY.expense[category])return CONTEXT_LIBRARY.expense[category];
+
+  const haystack=normalizeContextText(`${expense.merchant||''} ${expense.note||''} ${category}`);
+  for(const entry of Object.values(CONTEXT_LIBRARY.expense)){
+    if((entry.aliases||[]).some(alias=>haystack.includes(normalizeContextText(alias))))return entry;
+  }
+  return CONTEXT_LIBRARY.expense.Other;
+}
+
 function contextForExpense(expense){
-  return actionContexts[expense.category]||actionContexts.Other;
+  return expenseContextEntry(expense);
 }
 
 function contextForCheckin(type,data){
-  const latest=(data.checkins||[]).at(-1)||{};
-  if(type==='weekly'){
-    return 'A weekly spending total is a short-term reference point. Several weekly records are needed before WealthOS can distinguish a one-time event from a recurring pattern.';
-  }
+  if(type==='weekly')return CONTEXT_LIBRARY.checkin.weekly;
 
+  const latest=(data.checkins||[]).at(-1)||{};
   const income=n(latest.income);
   const spent=n(latest.spent);
   const saved=n(latest.saved);
 
-  if(saved>0){
-    return 'Saving is part of cash flow: it redirects money from present spending toward a future purpose. Repeated contributions make progress easier to measure.';
-  }
-
-  if(income>0&&spent>income){
-    return 'When recorded spending exceeds income, monthly cash flow is negative. One month does not define financial health, but the difference is worth understanding.';
-  }
-
-  return 'A monthly check-in compares money coming in with money going out. That relationship is the foundation of cash-flow planning.';
+  if(saved>0)return CONTEXT_LIBRARY.checkin.monthlySaving;
+  if(income>0&&spent>income)return CONTEXT_LIBRARY.checkin.monthlyNegative;
+  return CONTEXT_LIBRARY.checkin.monthly;
 }
 
 function localDateKey(date=new Date()){const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');return `${y}-${m}-${d}`}
@@ -354,7 +467,9 @@ function showExpenseToast(expense,data){
   const fmt=money(data.profile.currency);
   $('expenseToastTitle').textContent=`${expense.category} recorded.`;
   $('expenseToastText').textContent=`${fmt.format(expense.amount)} was added to today, this week, and this month.`;
-  $('expenseContextText').textContent=contextForExpense(expense);
+  const context=contextForExpense(expense);
+  $('expenseContextTitle').textContent=context.concept;
+  $('expenseContextText').textContent=context.explanation;
   $('expenseToast').classList.add('show');
   clearTimeout(expenseToastTimer);
   expenseToastTimer=setTimeout(()=>$('expenseToast').classList.remove('show'),9000);
@@ -736,7 +851,8 @@ function openLoop(type,data){
   $('loopContextLabel').textContent=payload.label;
   $('loopContextValue').textContent=payload.value;
   $('loopContextText').textContent=payload.context;
-  $('loopActionContext').textContent=payload.actionContext;
+  $('loopActionContextTitle').textContent=payload.actionContext.concept;
+  $('loopActionContext').textContent=payload.actionContext.explanation;
   $('loopLessonCategory').textContent=payload.lesson.category;
   $('loopLessonTitle').textContent=payload.lesson.title;
   $('loopLessonSummary').textContent=payload.lesson.summary;
