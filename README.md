@@ -1,88 +1,26 @@
-# WealthOS v0.21.1 — Record Integrity & Recurring Activity
+# WealthOS v0.21.2 — Recurring Bill Save Fix
 
-This release replaces v0.21.0 and combines Record Integrity with recurring financial expectations.
+This release replaces v0.21.1.
 
-## Recurring activity
+## Fixed
 
-Users can mark supported records as:
+The recurring-bill form previously duplicated scheduling controls and pushed the Save action below the visible part of the modal.
 
-- One-time
-- Weekly
-- Every two weeks
-- Monthly
-- Quarterly
-- Annually
-- Custom
+## Changes
 
-Additional recurrence information includes:
+- Save record stays visible in a sticky action bar.
+- Removed duplicate Frequency and Next Due Date fields.
+- The Recurrence section is now the single source of truth.
+- Recurring bills require a repeating schedule.
+- Recurring bills require a next expected date.
+- Added a clear “expected, not completed” explanation.
+- The action bar explains what saving each record type will change.
+- After saving a bill, WealthOS opens it in the Record Library.
 
-- fixed or variable expected amount
-- next expected date
-- optional end date
-- custom interval
+## Trust rule
 
-Supported activity:
-
-- Expenses
-- Income
-- Recurring bills
-- Debt payments
-- Transfers
-- Roadmap contributions
-
-## Expected is not completed
-
-A recurring schedule creates an expectation.
-
-It does **not**:
-
-- count a bill as paid
-- count income as received
-- change an account balance
-- change spending totals
-- update a Roadmap
-
-Actual financial totals change only when the activity is recorded.
-
-## Record Library
-
-The Library now supports recurrence filters and shows recurring badges.
-
-Each record detail includes:
-
-- schedule
-- next expected date
-- amount behavior
-- source
-- revision
-- state
-- audit history
-
-Existing one-time records can be converted using **Make recurring**.
-
-## Upcoming recurring activity
-
-The Library shows recurring activity expected in the next 45 days.
-
-This helps users anticipate:
-
-- bills
-- subscriptions
-- paychecks
-- scheduled transfers
-- debt payments
-- Roadmap contributions
-
-## Data quality
-
-WealthOS can flag repeated similar records and ask whether they may be recurring.
-
-It does not automatically convert them.
-
-## Principle
-
-**Recurring creates an expectation. A recorded transaction confirms what actually happened.**
+A recurring bill is an expectation. It does not count as spending until the actual charge is recorded.
 
 Suggested commit:
 
-`Add recurring activity and expected commitments to Record Integrity`
+`Fix recurring bill save flow and remove duplicate schedule fields`

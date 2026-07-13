@@ -3608,3 +3608,45 @@ body{background:var(--paper);font-family:Manrope,sans-serif;-webkit-font-smoothi
     grid-column:2;
   }
 }
+
+/* v0.21.2 — Recurring bill save and clarity fix */
+
+.bill-expectation-note{
+  grid-column:1/-1;
+  padding:14px 16px;
+  border-left:3px solid var(--evergreen);
+  background:var(--evergreen-soft);
+}
+.bill-expectation-note[hidden]{display:none!important}
+.bill-expectation-note strong{display:block;margin-bottom:4px}
+.bill-expectation-note p{margin:0;color:var(--muted);font-size:.78rem;line-height:1.5}
+
+.record-sticky-actions{
+  position:sticky;
+  bottom:-32px;
+  z-index:8;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  align-items:center;
+  margin:24px -32px -32px;
+  padding:16px 32px;
+  border-top:1px solid var(--line);
+  background:rgba(251,248,242,.97);
+  backdrop-filter:blur(10px);
+  box-shadow:0 -12px 30px rgba(27,32,28,.08);
+}
+.record-save-context span{
+  display:block;color:var(--evergreen);font-size:.64rem;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase
+}
+.record-save-context small{display:block;margin-top:3px;color:var(--muted);line-height:1.35}
+#saveRecordButton{min-width:132px}
+
+@media(max-width:700px){
+  .record-sticky-actions{
+    bottom:-24px;grid-template-columns:1fr 1fr;
+    margin:20px -24px -24px;padding:14px 24px
+  }
+  .record-save-context{grid-column:1/-1;margin-bottom:4px}
+  #cancelRecord,#saveRecordButton{width:100%}
+}

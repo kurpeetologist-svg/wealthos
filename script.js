@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.21.1-data';
-const LEGACY_KEYS=['wealthos-v0.21.0-data','wealthos-v0.20.0-data','wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.21.2-data';
+const LEGACY_KEYS=['wealthos-v0.21.1-data','wealthos-v0.21.0-data','wealthos-v0.20.0-data','wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -1552,6 +1552,17 @@ function updateRecordFields(){
   });
   $('recordTypeExplainer').textContent=RECORD_EXPLAINERS[type]||'Record a financial fact.';
   updateRecurrenceFields('record');
+  const context={
+    expense:'This will update actual spending.',
+    income:'This will update recorded income.',
+    bill:'This will create an expected recurring bill. It will not count as paid spending.',
+    account:'This will store a user-reported account balance.',
+    debt:'This will store a user-reported debt balance.',
+    debt_payment:'This will reduce the selected recorded debt.',
+    transfer:'This will move value between two recorded accounts without counting as income or spending.',
+    roadmap_contribution:'This will update the selected Roadmap.'
+  };
+  $('recordSaveContextText').textContent=context[type]||'This will be stored as a user-reported record.';
   $('recordError').hidden=true;
 }
 
@@ -1560,7 +1571,7 @@ function resetRecordForm(type='expense'){
   $('recordType').value=type;
   $('recordDate').value=localDateKey();
   $('recordRecurrence').value=type==='bill'?'monthly':'once';
-  $('recordAmountBehavior').value='fixed';
+  $('recordAmountBehavior').value=type==='bill'?'variable':'fixed';
   $('recordNextExpectedDate').value=type==='bill'?defaultNextExpectedDate(localDateKey(),'monthly'):'';
   $('recordRecurrenceEndDate').value='';
   $('recordCustomInterval').value='1';
@@ -1669,17 +1680,26 @@ function saveCoreRecord(event){
 
   if(type==='bill'){
     const name=$('recordName').value.trim();
+    const recurrence=recurrenceFromForm('record');
     if(!name){recordError('Give this recurring bill a name.');return}
+    if(recurrence.frequency==='once'){
+      recordError('A recurring bill needs a repeating schedule.');
+      return;
+    }
+    if(!recurrence.nextExpectedDate){
+      recordError('Add the next expected date so WealthOS knows when to anticipate this bill.');
+      return;
+    }
     entity={
       id:coreId('bill'),
       name,
       expectedAmount:Math.max(0,n($('recordExpectedAmount').value)),
-      frequency:$('recordRecurrence').value==='once'?($('recordFrequency').value||'monthly'):$('recordRecurrence').value,
-      nextDueDate:$('recordNextExpectedDate').value||$('recordDueDate').value,
+      frequency:recurrence.frequency,
+      nextDueDate:recurrence.nextExpectedDate,
       accountId:$('recordAccountId').value||null,
       note,
       active:true,
-      recurrence:recurrenceFromForm('record'),
+      recurrence,
       source
     };
     Object.assign(entity,normalizeRecordState(entity));
@@ -1783,6 +1803,9 @@ function saveCoreRecord(event){
 
   if(type==='expense'){
     showExpenseToast(entity,data);
+  }else if(type==='bill'){
+    location.hash='recordLibrary';
+    setTimeout(()=>openRecordDetail('bill',entity.id),120);
   }else{
     location.hash=type==='roadmap_contribution'?'roadmaps':'coreFoundation';
   }
@@ -2979,6 +3002,10 @@ $('libraryClearFilters').addEventListener('click',()=>{
   renderRecordLibrary(loadData());
 });
 $('recordRecurrence').addEventListener('change',()=>{
+  if($('recordType').value==='bill'&&$('recordRecurrence').value==='once'){
+    $('recordRecurrence').value='monthly';
+    recordError('Recurring bills need a repeating schedule. Choose monthly, weekly, annual, or custom.');
+  }
   if($('recordRecurrence').value!=='once'&&!$('recordNextExpectedDate').value){
     $('recordNextExpectedDate').value=defaultNextExpectedDate($('recordDate').value||localDateKey(),$('recordRecurrence').value);
   }

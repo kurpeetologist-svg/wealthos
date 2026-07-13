@@ -405,3 +405,20 @@ Users need a way to tell WealthOS what is expected to happen again.
 ### Trust rule
 
 **Recurring creates an expectation. A recorded transaction confirms what actually happened.**
+
+## v0.21.2 — Recurring Bill Save Fix
+
+### Observation
+
+The recurring-bill form contained duplicate schedule fields and pushed the Save action below the visible area.
+
+### Decision
+
+- Keep Save visible.
+- Use one recurrence schedule.
+- Require the next expected date.
+- Open the saved bill immediately after creation.
+
+### Principle
+
+**A form should never make users wonder whether their work can be saved.**

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.21.1</title>
+  <title>WealthOS Private Preview v0.21.2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -1105,21 +1105,7 @@
             <input id="recordName" type="text" maxlength="100" placeholder="Employer, merchant, rent, checking account...">
           </label>
 
-          <label data-types="bill">
-            Frequency
-            <select id="recordFrequency">
-              <option value="weekly">Weekly</option>
-              <option value="biweekly">Every two weeks</option>
-              <option value="monthly" selected>Monthly</option>
-              <option value="quarterly">Quarterly</option>
-              <option value="annual">Annual</option>
-            </select>
-          </label>
-
-          <label data-types="bill">
-            Next due date
-            <input id="recordDueDate" type="date">
-          </label>
+          
 
           <label data-types="debt">
             APR, optional
@@ -1169,6 +1155,11 @@
               <option value="discretionary">Discretionary</option>
             </select>
           </label>
+
+          <div class="bill-expectation-note" id="billExpectationNote" data-types="bill">
+            <strong>This records an expected bill—not a completed payment.</strong>
+            <p>It will appear in upcoming activity. Spending changes only after you record the actual charge.</p>
+          </div>
 
           <fieldset class="recurrence-fields" id="recurrenceFields" data-types="expense income bill debt_payment transfer roadmap_contribution">
             <legend>Does this happen again?</legend>
@@ -1239,9 +1230,13 @@
 
         <div class="record-error" id="recordError" role="alert" hidden></div>
 
-        <div class="checkin-modal-actions">
+        <div class="checkin-modal-actions record-sticky-actions">
+          <div class="record-save-context" id="recordSaveContext">
+            <span>Ready to save</span>
+            <small id="recordSaveContextText">This will be stored as a user-reported record.</small>
+          </div>
           <button class="secondary-button" id="cancelRecord" type="button">Not now</button>
-          <button class="primary-button" type="submit">Save record</button>
+          <button class="primary-button" id="saveRecordButton" type="submit">Save record</button>
         </div>
       </form>
     </div>
