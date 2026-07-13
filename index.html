@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.16.0</title>
+  <title>WealthOS Private Preview v0.17.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -92,10 +92,27 @@
                 </div>
                 <a href="#spendingSnapshot">Open Snapshot →</a>
               </div>
-              <div class="workspace-today-values">
-                <div><span>Income this month</span><strong id="workspaceIncome">—</strong></div>
-                <div><span>Spent today</span><strong id="workspaceSpentToday">—</strong></div>
-                <div><span>Saved toward goals</span><strong id="workspaceSaved">—</strong></div>
+              <div class="workspace-financial-documents">
+                <article class="financial-document paycheck-document">
+                  <div class="document-topline"><span>Paycheck</span><small id="workspaceIncomeDate">Current month</small></div>
+                  <p id="workspaceIncomeSource">Total income</p>
+                  <strong id="workspaceIncome">—</strong>
+                  <div class="document-footer"><span>Income recorded</span><b>Received</b></div>
+                </article>
+
+                <article class="financial-document receipt-document">
+                  <div class="document-topline"><span>Receipt</span><small id="workspaceReceiptCount">0 records</small></div>
+                  <p>Today’s total</p>
+                  <strong id="workspaceSpentToday">—</strong>
+                  <div class="document-footer"><span>Quick Add activity</span><b>Recorded</b></div>
+                </article>
+
+                <article class="financial-document envelope-document">
+                  <div class="document-topline"><span>Envelope</span><small id="workspaceRoadmapProgress">No roadmap yet</small></div>
+                  <p id="workspaceSavedLabel">Saved toward goals</p>
+                  <strong id="workspaceSaved">—</strong>
+                  <div class="document-footer"><span id="workspaceRoadmapName">Future fund</span><b>Set aside</b></div>
+                </article>
               </div>
             </article>
 
@@ -147,6 +164,30 @@
               <a href="#lesson">Open Lesson →</a>
             </article>
           </div>
+
+          <section class="workspace-roadmaps" id="roadmaps">
+            <div class="workspace-section-heading">
+              <div>
+                <span>Where you’re going</span>
+                <h3>Roadmaps</h3>
+                <p>Life goals translated into clear financial progress.</p>
+              </div>
+              <button id="newRoadmapButton" type="button">New Roadmap +</button>
+            </div>
+            <div class="roadmap-grid" id="roadmapGrid"></div>
+          </section>
+
+          <section class="workspace-memory" id="financialMemory">
+            <div class="workspace-section-heading">
+              <div>
+                <span>What WealthOS remembers</span>
+                <h3>Financial Memory</h3>
+                <p>Quiet moments that show how your financial story is changing.</p>
+              </div>
+              <a href="#timeline">Open Timeline →</a>
+            </div>
+            <div class="memory-strip" id="memoryStrip"></div>
+          </section>
 
           <div class="workspace-detail-heading">
             <span>Financial materials</span>
@@ -781,6 +822,67 @@
     </div>
   </section>
 
+  <section class="roadmap-modal" id="roadmapModal" aria-hidden="true">
+    <div class="roadmap-modal-shell">
+      <div class="checkin-modal-top">
+        <div>
+          <p class="eyebrow">Roadmap</p>
+          <h2 id="roadmapModalTitle">Create a Roadmap.</h2>
+          <p class="roadmap-modal-intro">Start with the future you are working toward. WealthOS will translate it into measurable progress.</p>
+        </div>
+        <button class="close-button" id="closeRoadmapModal" type="button">Close</button>
+      </div>
+
+      <form id="roadmapForm">
+        <input id="roadmapId" type="hidden">
+
+        <label>What are you working toward?
+          <input id="roadmapName" type="text" maxlength="80" placeholder="Emergency Fund, Japan Trip, Credit Card Payoff..." required>
+        </label>
+
+        <div class="roadmap-form-grid">
+          <label>Roadmap type
+            <select id="roadmapType">
+              <option value="emergency">Emergency fund</option>
+              <option value="travel">Travel</option>
+              <option value="purchase">Major purchase</option>
+              <option value="debt">Debt payoff</option>
+              <option value="home">Home</option>
+              <option value="education">Education</option>
+              <option value="investing">Investing</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+
+          <label>Target amount
+            <input id="roadmapTarget" type="number" min="1" step="0.01" required>
+          </label>
+
+          <label>Already completed or saved
+            <input id="roadmapSaved" type="number" min="0" step="0.01">
+          </label>
+
+          <label>Planned monthly contribution
+            <input id="roadmapMonthlyContribution" type="number" min="0" step="0.01">
+          </label>
+
+          <label>Start date
+            <input id="roadmapStartDate" type="date">
+          </label>
+
+          <label>Target date <span>Optional</span>
+            <input id="roadmapTargetDate" type="date">
+          </label>
+        </div>
+
+        <div class="checkin-modal-actions">
+          <button class="secondary-button" id="cancelRoadmap" type="button">Not now</button>
+          <button class="primary-button" type="submit">Save Roadmap</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
   <section class="contribution-modal" id="contributionModal" aria-hidden="true">
     <div class="contribution-shell">
       <div class="checkin-modal-top">
@@ -791,6 +893,9 @@
         <button class="close-button" id="closeContribution" type="button">Close</button>
       </div>
       <form id="contributionForm">
+        <label id="contributionRoadmapLabel">Roadmap
+          <select id="contributionRoadmap"></select>
+        </label>
         <label>Amount contributed<input id="contributionAmount" type="number" min="0" step="0.01"></label>
         <p class="form-help" id="contributionHelp">This will update your active Savings Challenge.</p>
         <div class="checkin-modal-actions">
@@ -879,7 +984,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.16.0</span>
+    <span>Version 0.17.0</span>
   </footer>
 
   <script src="script.js"></script>

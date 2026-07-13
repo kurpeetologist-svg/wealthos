@@ -247,3 +247,40 @@ It is an environment that gives the user orientation, continuity, and one clear 
 ### Principle
 
 **The Workspace should orient the user, offer one useful next step, and send them back into real life with more clarity.**
+
+## v0.17.0 — Memory & Roadmaps
+
+### Why this exists
+
+Workspace answered what the user should do today.
+
+The next product questions were:
+
+> What has changed over time?
+
+and
+
+> Where am I going?
+
+### What changed
+
+- Today’s income is presented as a Paycheck.
+- Today’s spending is presented as a Receipt.
+- Goal progress is presented as an Envelope.
+- Financial Memory quietly records meaningful moments.
+- Users can create and manage multiple life-centered Roadmaps.
+- Roadmaps show next milestones and approximate timing.
+- Contributions can be directed to a selected Roadmap.
+- Existing Savings Challenge data migrates without being lost.
+
+### What we learned
+
+Transactions describe activity.
+
+Memory describes progress.
+
+Roadmaps give that progress a destination.
+
+### Principle
+
+**Financial Memory shows where the user has been. Roadmaps show where they are going.**

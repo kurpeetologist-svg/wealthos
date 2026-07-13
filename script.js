@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.16.0-data';
-const LEGACY_KEYS=['wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.17.0-data';
+const LEGACY_KEYS=['wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -16,6 +16,8 @@ const blankData=()=>({
   taxes:{dueDate:'',estimate:0,reserved:0},
   emergency:{balance:0,essentials:0,targetMonths:6,monthlyContribution:0},
   challenge:{enabled:false,name:'',target:0,saved:0,startDate:'',durationWeeks:12,frequency:'weekly'},
+  roadmaps:[],
+  memories:[],
   spending:{daily:0,weekly:0,monthly:0},
   expenses:[],
   checkins:[],
@@ -43,6 +45,34 @@ function migrate(raw){
   d.taxes={dueDate:String(raw.taxes?.dueDate||''),estimate:n(raw.taxes?.estimate),reserved:n(raw.taxes?.reserved)};
   d.emergency={balance:n(raw.emergency?.balance),essentials:n(raw.emergency?.essentials),targetMonths:Math.max(1,n(raw.emergency?.targetMonths,6)),monthlyContribution:n(raw.emergency?.monthlyContribution)};
   d.challenge={enabled:Boolean(raw.challenge?.enabled),name:String(raw.challenge?.name||''),target:n(raw.challenge?.target),saved:n(raw.challenge?.saved),startDate:String(raw.challenge?.startDate||''),durationWeeks:Math.max(1,n(raw.challenge?.durationWeeks,12)),frequency:['weekly','biweekly','monthly'].includes(raw.challenge?.frequency)?raw.challenge.frequency:'weekly'};
+  d.roadmaps=Array.isArray(raw.roadmaps)?raw.roadmaps.filter(item=>item&&item.name).map(item=>({
+    id:String(item.id||`roadmap-${Date.now()}-${Math.random()}`),
+    name:String(item.name||'Roadmap'),
+    type:String(item.type||'other'),
+    target:Math.max(0,n(item.target)),
+    saved:Math.max(0,n(item.saved)),
+    startDate:String(item.startDate||''),
+    targetDate:String(item.targetDate||''),
+    monthlyContribution:Math.max(0,n(item.monthlyContribution)),
+    status:String(item.status||'active')
+  })):[];
+  if(!d.roadmaps.length&&d.challenge.enabled&&d.challenge.name&&d.challenge.target>0){
+    d.roadmaps.push({
+      id:'migrated-challenge',
+      name:d.challenge.name,
+      type:/emergency/i.test(d.challenge.name)?'emergency':/travel|trip|vacation/i.test(d.challenge.name)?'travel':'other',
+      target:d.challenge.target,
+      saved:d.challenge.saved,
+      startDate:d.challenge.startDate,
+      targetDate:'',
+      monthlyContribution:0,
+      status:d.challenge.saved>=d.challenge.target?'complete':'active'
+    });
+  }
+  d.memories=Array.isArray(raw.memories)?raw.memories.filter(item=>item&&item.id).map(item=>({
+    id:String(item.id),type:String(item.type||'moment'),date:String(item.date||''),title:String(item.title||''),detail:String(item.detail||''),roadmapId:item.roadmapId?String(item.roadmapId):null
+  })):[];
+
   d.spending={daily:Math.max(0,n(raw.spending?.daily)),weekly:Math.max(0,n(raw.spending?.weekly)),monthly:Math.max(0,n(raw.spending?.monthly))};
   d.expenses=Array.isArray(raw.expenses)?raw.expenses.filter(item=>item&&item.date).map(item=>({
     id:item.id||Date.now()+Math.random(),amount:Math.max(0,n(item.amount)),category:String(item.category||'Other'),
@@ -175,6 +205,285 @@ function renderSavingsEnvelope(data,fmt){
   }
 }
 
+
+function activeRoadmaps(data){
+  return (data.roadmaps||[]).filter(item=>item.status!=='archived'&&n(item.target)>0);
+}
+
+function primaryRoadmap(data){
+  const active=activeRoadmaps(data);
+  return active.find(item=>item.status==='active'&&n(item.saved)<n(item.target))||active[0]||null;
+}
+
+function syncLegacyChallenge(data){
+  const roadmap=primaryRoadmap(data);
+  if(!roadmap){
+    data.challenge={enabled:false,name:'',target:0,saved:0,startDate:'',durationWeeks:12,frequency:'weekly'};
+    return data;
+  }
+  data.challenge={
+    enabled:true,
+    name:roadmap.name,
+    target:n(roadmap.target),
+    saved:n(roadmap.saved),
+    startDate:roadmap.startDate||'',
+    durationWeeks:12,
+    frequency:'monthly'
+  };
+  return data;
+}
+
+function roadmapTypeLabel(type){
+  return ({
+    emergency:'Emergency Fund',
+    travel:'Travel',
+    purchase:'Major Purchase',
+    debt:'Debt Payoff',
+    home:'Home',
+    education:'Education',
+    investing:'Investing',
+    other:'Life Goal'
+  })[type]||'Life Goal';
+}
+
+function roadmapNextMilestone(roadmap,fmt){
+  const target=n(roadmap.target);
+  const saved=n(roadmap.saved);
+  if(target<=0)return 'Add a target to begin.';
+  if(saved>=target)return 'Roadmap complete.';
+  const pct=saved/target*100;
+  const thresholds=[25,50,75,100];
+  const nextPct=thresholds.find(value=>value>pct)||100;
+  const nextAmount=target*nextPct/100;
+  const remaining=Math.max(0,nextAmount-saved);
+  return `${fmt.format(remaining)} to reach ${nextPct}%.`;
+}
+
+function estimatedRoadmapTiming(roadmap){
+  const remaining=Math.max(0,n(roadmap.target)-n(roadmap.saved));
+  const monthly=n(roadmap.monthlyContribution);
+  if(remaining<=0)return 'Complete';
+  if(monthly>0){
+    const months=Math.ceil(remaining/monthly);
+    return months===1?'About one month':`About ${months} months`;
+  }
+  if(roadmap.targetDate){
+    const days=daysUntil(roadmap.targetDate);
+    if(days!==null&&days>=0)return days<31?`${days} days remaining`:`About ${Math.ceil(days/30.44)} months`;
+  }
+  return 'Add a contribution pace';
+}
+
+function memoryExists(data,id){
+  return (data.memories||[]).some(item=>item.id===id);
+}
+
+function addMemory(data,memory){
+  if(memoryExists(data,memory.id))return false;
+  data.memories.push(memory);
+  return true;
+}
+
+function updateFinancialMemories(data){
+  data.memories=Array.isArray(data.memories)?data.memories:[];
+  let changed=false;
+  const fmt=money(data.profile.currency);
+  const expenses=[...(data.expenses||[])].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const checkins=[...(data.checkins||[])].sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+
+  if(expenses.length){
+    const first=expenses[0];
+    changed=addMemory(data,{
+      id:'first-expense',
+      type:'first',
+      date:first.date,
+      title:'Your first purchase became part of the story.',
+      detail:`You recorded ${first.merchant||first.category} for ${fmt.format(n(first.amount))}.`,
+      roadmapId:null
+    })||changed;
+  }
+
+  const firstWeekly=checkins.find(item=>item.type==='weekly');
+  if(firstWeekly){
+    changed=addMemory(data,{
+      id:'first-weekly-checkin',
+      type:'checkin',
+      date:firstWeekly.date,
+      title:'You created your first weekly reference point.',
+      detail:'WealthOS gained a wider view than a single day.',
+      roadmapId:null
+    })||changed;
+  }
+
+  const firstMonthly=checkins.find(item=>item.type==='monthly');
+  if(firstMonthly){
+    changed=addMemory(data,{
+      id:'first-monthly-checkin',
+      type:'checkin',
+      date:firstMonthly.date,
+      title:'You completed your first monthly chapter.',
+      detail:'Income, spending, and saving were remembered together.',
+      roadmapId:null
+    })||changed;
+  }
+
+  const weeklyDates=[...new Set(checkins.filter(item=>item.type==='weekly').map(item=>item.date))].sort();
+  if(weeklyDates.length>=3){
+    const recent=weeklyDates.slice(-3).map(value=>new Date(`${value}T12:00:00`));
+    const consecutive=recent.every((date,index)=>index===0||Math.round((date-recent[index-1])/86400000)<=10);
+    if(consecutive){
+      changed=addMemory(data,{
+        id:'three-weekly-checkins',
+        type:'consistency',
+        date:weeklyDates.at(-1),
+        title:'Three weekly check-ins are beginning to form continuity.',
+        detail:'This is enough history to begin separating isolated weeks from recurring patterns.',
+        roadmapId:null
+      })||changed;
+    }
+  }
+
+  (data.roadmaps||[]).forEach(roadmap=>{
+    const target=n(roadmap.target);
+    const saved=n(roadmap.saved);
+    if(target<=0)return;
+    const pct=saved/target*100;
+    [25,50,75,100].forEach(threshold=>{
+      if(pct>=threshold){
+        changed=addMemory(data,{
+          id:`roadmap-${roadmap.id}-${threshold}`,
+          type:'roadmap',
+          date:localDateKey(),
+          title:threshold===100?`${roadmap.name} reached its destination.`:`${roadmap.name} crossed ${threshold}%.`,
+          detail:threshold===100
+            ? `You completed the ${fmt.format(target)} target.`
+            : `${fmt.format(saved)} is now set aside toward a ${fmt.format(target)} target.`,
+          roadmapId:roadmap.id
+        })||changed;
+      }
+    });
+  });
+
+  data.memories.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  if(changed)saveData(syncLegacyChallenge(data));
+  return data;
+}
+
+function openRoadmapModal(roadmapId=''){
+  const data=loadData();
+  const roadmap=(data.roadmaps||[]).find(item=>item.id===roadmapId)||null;
+  $('roadmapModalTitle').textContent=roadmap?'Update this Roadmap.':'Create a Roadmap.';
+  $('roadmapId').value=roadmap?.id||'';
+  $('roadmapName').value=roadmap?.name||'';
+  $('roadmapType').value=roadmap?.type||'emergency';
+  $('roadmapTarget').value=roadmap?.target||'';
+  $('roadmapSaved').value=roadmap?.saved||'';
+  $('roadmapMonthlyContribution').value=roadmap?.monthlyContribution||'';
+  $('roadmapStartDate').value=roadmap?.startDate||localDateKey();
+  $('roadmapTargetDate').value=roadmap?.targetDate||'';
+  $('roadmapModal').classList.add('open');
+  $('roadmapModal').setAttribute('aria-hidden','false');
+  setTimeout(()=>$('roadmapName').focus(),80);
+}
+
+function closeRoadmapModal(){
+  $('roadmapModal').classList.remove('open');
+  $('roadmapModal').setAttribute('aria-hidden','true');
+}
+
+function saveRoadmap(event){
+  event.preventDefault();
+  const data=loadData();
+  const id=$('roadmapId').value||`roadmap-${Date.now()}`;
+  const roadmap={
+    id,
+    name:$('roadmapName').value.trim()||'Roadmap',
+    type:$('roadmapType').value||'other',
+    target:Math.max(1,n($('roadmapTarget').value)),
+    saved:Math.max(0,n($('roadmapSaved').value)),
+    monthlyContribution:Math.max(0,n($('roadmapMonthlyContribution').value)),
+    startDate:$('roadmapStartDate').value||localDateKey(),
+    targetDate:$('roadmapTargetDate').value,
+    status:'active'
+  };
+  roadmap.saved=Math.min(roadmap.saved,roadmap.target);
+  const index=(data.roadmaps||[]).findIndex(item=>item.id===id);
+  if(index>=0)data.roadmaps[index]=roadmap;
+  else data.roadmaps.push(roadmap);
+  syncLegacyChallenge(data);
+  updateFinancialMemories(data);
+  saveData(data);
+  closeRoadmapModal();
+  render(data);
+  location.hash='roadmaps';
+}
+
+function renderRoadmaps(data,fmt){
+  const grid=$('roadmapGrid');
+  grid.innerHTML='';
+  const roadmaps=activeRoadmaps(data);
+
+  if(!roadmaps.length){
+    const empty=document.createElement('article');
+    empty.className='empty-roadmap';
+    empty.innerHTML='<h4>Where are you going?</h4><p>Create a Roadmap for an emergency fund, a trip, debt payoff, a home, or another future that matters to you.</p><button type="button">Create your first Roadmap</button>';
+    empty.querySelector('button').addEventListener('click',()=>openRoadmapModal());
+    grid.append(empty);
+    return;
+  }
+
+  roadmaps.forEach(roadmap=>{
+    const target=n(roadmap.target);
+    const saved=Math.min(target,n(roadmap.saved));
+    const pct=target>0?Math.min(100,saved/target*100):0;
+    const card=document.createElement('article');
+    card.className='roadmap-card';
+    card.innerHTML=`
+      <div class="roadmap-card-top">
+        <span class="roadmap-card-type">${roadmapTypeLabel(roadmap.type)}</span>
+        <button class="roadmap-menu" type="button" aria-label="Edit ${roadmap.name}">Edit</button>
+      </div>
+      <h4>${roadmap.name}</h4>
+      <div class="roadmap-numbers">
+        <div><span>Today’s balance</span><strong>${fmt.format(saved)}</strong></div>
+        <div><span>Target</span><strong>${fmt.format(target)}</strong></div>
+      </div>
+      <div class="roadmap-track"><span style="width:${pct}%"></span></div>
+      <div class="roadmap-progress-copy"><span>${pct.toFixed(0)}% complete</span><span>${estimatedRoadmapTiming(roadmap)}</span></div>
+      <div class="roadmap-next"><span>Next milestone</span><strong>${roadmapNextMilestone(roadmap,fmt)}</strong></div>
+      <div class="roadmap-actions">
+        <button class="roadmap-contribute" type="button">Add contribution</button>
+        <button class="roadmap-review" type="button">Review progress</button>
+      </div>
+    `;
+    card.querySelector('.roadmap-menu').addEventListener('click',()=>openRoadmapModal(roadmap.id));
+    card.querySelector('.roadmap-contribute').addEventListener('click',()=>openContribution(roadmap.id));
+    card.querySelector('.roadmap-review').addEventListener('click',()=>location.hash='timeline');
+    grid.append(card);
+  });
+}
+
+function renderFinancialMemory(data){
+  const strip=$('memoryStrip');
+  strip.innerHTML='';
+  const memories=(data.memories||[]).slice(0,3);
+
+  if(!memories.length){
+    const card=document.createElement('article');
+    card.className='memory-card';
+    card.innerHTML='<time>Waiting for a first moment</time><h4>Your financial story is ready to begin.</h4><p>Check-ins, Roadmap milestones, and meaningful changes will quietly appear here.</p><span>Financial Memory</span>';
+    strip.append(card);
+    return;
+  }
+
+  memories.forEach(memory=>{
+    const card=document.createElement('article');
+    card.className='memory-card';
+    card.innerHTML=`<time>${formatDate(memory.date)}</time><h4>${memory.title}</h4><p>${memory.detail}</p><span>${memory.type==='roadmap'?'Roadmap moment':'Financial moment'}</span>`;
+    strip.append(card);
+  });
+}
+
 function checkinInCurrentWeek(data){
   const start=startOfWeek(new Date());
   return (data.checkins||[]).some(item=>{
@@ -220,10 +529,11 @@ function chooseWorkspaceFocus(data){
     };
   }
 
-  if(data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved)){
+  const focusRoadmap=primaryRoadmap(data);
+  if(focusRoadmap&&n(focusRoadmap.target)>n(focusRoadmap.saved)){
     return{
-      title:`Continue ${data.challenge.name||'your savings goal'}.`,
-      text:'One contribution can keep the goal moving without turning today into a full financial review.',
+      title:`Continue ${focusRoadmap.name}.`,
+      text:'One contribution can keep this Roadmap moving without turning today into a full financial review.',
       label:'Add contribution',
       time:'About 20 seconds',
       action:'contribution'
@@ -259,11 +569,12 @@ function chooseWorkspaceContinue(data){
     };
   }
 
-  if(data.challenge.enabled&&n(data.challenge.target)>0){
+  const roadmap=primaryRoadmap(data);
+  if(roadmap){
     return{
-      title:`Continue ${data.challenge.name||'your savings goal'}.`,
-      text:'Your goal folder is ready whenever you want to add another contribution.',
-      label:'Open goal',
+      title:`Continue ${roadmap.name}.`,
+      text:'Your Roadmap is ready whenever you want to add another contribution.',
+      label:'Open Roadmap',
       action:'contribution'
     };
   }
@@ -321,12 +632,22 @@ function renderWorkspace(data,fmt){
   $('workspaceFocusAction').dataset.action=focus.action;
   $('workspaceFocusTime').textContent=focus.time;
 
+  const todayRecords=expensesForPeriod(data,'daily');
+  const roadmap=primaryRoadmap(data);
   $('workspaceIncome').textContent=fmt.format(n(data.income.current));
-  $('workspaceSpentToday').textContent=fmt.format(expenseTotal(expensesForPeriod(data,'daily')));
-  const saved=data.challenge.enabled?n(data.challenge.saved):n(data.emergency.balance);
+  $('workspaceIncomeSource').textContent=data.income.source||'Total income';
+  $('workspaceIncomeDate').textContent=formatMonth(data.income.currentMonth)||'Current month';
+  $('workspaceSpentToday').textContent=fmt.format(expenseTotal(todayRecords));
+  $('workspaceReceiptCount').textContent=`${todayRecords.length} record${todayRecords.length===1?'':'s'}`;
+  const saved=roadmap?n(roadmap.saved):n(data.emergency.balance);
   $('workspaceSaved').textContent=fmt.format(saved);
+  $('workspaceSavedLabel').textContent=roadmap?'Saved toward Roadmap':'Emergency savings';
+  $('workspaceRoadmapName').textContent=roadmap?.name||'Future fund';
+  $('workspaceRoadmapProgress').textContent=roadmap&&n(roadmap.target)>0?`${Math.min(100,Math.round(n(roadmap.saved)/n(roadmap.target)*100))}% complete`:'No Roadmap yet';
 
   renderWorkspaceActivity(data,fmt);
+  renderRoadmaps(data,fmt);
+  renderFinancialMemory(data);
 
   const observation=buildObservation(data,fmt,'daily');
   $('workspaceObservationTitle').textContent=observation.title;
@@ -345,6 +666,8 @@ function renderWorkspace(data,fmt){
 }
 
 function render(data){
+  data=updateFinancialMemories(data);
+  syncLegacyChallenge(data);
   greeting();
   renderLesson();
   const returning=hasMeaningfulData(data);
@@ -871,8 +1194,10 @@ function saveCheckin(event){
     data.income.current=income;
     data.income.currentMonth=nowMonth;
     data.spending.monthly=spent;
-    if(saved>0&&data.challenge.enabled&&n(data.challenge.target)>0){
-      data.challenge.saved=Math.min(n(data.challenge.target),n(data.challenge.saved)+saved);
+    const roadmap=primaryRoadmap(data);
+    if(saved>0&&roadmap){
+      roadmap.saved=Math.min(n(roadmap.target),n(roadmap.saved)+saved);
+      roadmap.status=roadmap.saved>=n(roadmap.target)?'complete':'active';
     }else if(saved>0){
       data.emergency.balance=n(data.emergency.balance)+saved;
     }
@@ -907,12 +1232,25 @@ function openAboutSection(sectionTitle){
   const target=headings.find(h=>h.textContent.trim()===sectionTitle);
   if(target)setTimeout(()=>target.closest('.form-section').scrollIntoView({behavior:'smooth',block:'start'}),80);
 }
-function openContribution(){
+function openContribution(roadmapId=''){
   const data=loadData();
-  const hasChallenge=data.challenge.enabled&&n(data.challenge.target)>0;
-  $('contributionTitle').textContent=hasChallenge?'Record a contribution':'Update your emergency fund';
-  $('contributionHelp').textContent=hasChallenge
-    ? `This will update your ${data.challenge.name||'Savings'} challenge.`
+  const roadmaps=activeRoadmaps(data);
+  const select=$('contributionRoadmap');
+  select.innerHTML='';
+
+  roadmaps.forEach(roadmap=>{
+    const option=document.createElement('option');
+    option.value=roadmap.id;
+    option.textContent=roadmap.name;
+    option.selected=roadmap.id===(roadmapId||primaryRoadmap(data)?.id);
+    select.append(option);
+  });
+
+  const hasRoadmap=roadmaps.length>0;
+  $('contributionRoadmapLabel').hidden=!hasRoadmap;
+  $('contributionTitle').textContent=hasRoadmap?'Record a Roadmap contribution':'Update your emergency fund';
+  $('contributionHelp').textContent=hasRoadmap
+    ? 'This contribution will update the selected Roadmap and may create a new Financial Memory.'
     : 'This will add to your current emergency-fund balance.';
   $('contributionAmount').value='';
   $('contributionModal').classList.add('open');
@@ -927,16 +1265,37 @@ function saveContribution(event){
   const amount=Math.max(0,n($('contributionAmount').value));
   if(amount<=0)return;
   const data=loadData();
-  if(data.challenge.enabled&&n(data.challenge.target)>0){
-    data.challenge.saved=Math.min(n(data.challenge.target),n(data.challenge.saved)+amount);
+  const roadmapId=$('contributionRoadmap').value;
+  const roadmap=(data.roadmaps||[]).find(item=>item.id===roadmapId);
+
+  if(roadmap){
+    roadmap.saved=Math.min(n(roadmap.target),n(roadmap.saved)+amount);
+    roadmap.status=roadmap.saved>=n(roadmap.target)?'complete':'active';
+    data.memory={
+      ...(data.memory||{}),
+      lastInteraction:'roadmap',
+      lastCheckinDate:localDateKey(),
+      lastSummary:`You added ${money(data.profile.currency).format(amount)} to ${roadmap.name}.`
+    };
   }else{
     data.emergency.balance=n(data.emergency.balance)+amount;
   }
-  data.checkins.push({id:Date.now(),type:'contribution',date:new Date().toISOString().slice(0,10),amount});
+
+  data.checkins.push({
+    id:Date.now(),
+    type:'contribution',
+    date:localDateKey(),
+    amount,
+    roadmapId:roadmap?.id||null,
+    roadmapName:roadmap?.name||'Emergency fund'
+  });
+
+  syncLegacyChallenge(data);
+  updateFinancialMemories(data);
   saveData(data);
   closeContribution();
   render(data);
-  location.hash='focus';
+  location.hash='roadmaps';
 }
 function routeNextAction(){
   const data=loadData();
@@ -944,7 +1303,7 @@ function routeNextAction(){
   const ess=n(data.emergency.essentials),complete=ess>0&&n(data.emergency.balance)>=ess*n(data.emergency.targetMonths,6);
   if(te>0&&short>0){openAboutSection('Quarterly taxes');return}
   if(ess>0&&!complete){openAboutSection('Emergency fund');return}
-  if(data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved)){openContribution();return}
+  const roadmap=primaryRoadmap(data);if(roadmap&&n(roadmap.target)>n(roadmap.saved)){openContribution(roadmap.id);return}
   openAboutSection('You');
 }
 
@@ -963,10 +1322,11 @@ function chooseLoopNextStep(type,data){
       action:'snapshot'
     };
   }
-  if(data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved)){
+  const roadmap=primaryRoadmap(data);
+  if(roadmap&&n(roadmap.target)>n(roadmap.saved)){
     return {
-      title:'Continue your savings goal.',
-      text:'Your monthly check-in is complete. One contribution can keep the goal moving.',
+      title:`Continue ${roadmap.name}.`,
+      text:'Your monthly check-in is complete. One contribution can keep this Roadmap moving.',
       action:'contribution'
     };
   }
@@ -1078,7 +1438,16 @@ function renderHistoryManager(d){
 function readAbout(){
   const d=loadData(),newMonth=$('incomeMonth').value||nowMonth;
   if(d.income.current!==null&&d.income.currentMonth!==newMonth)d.incomeHistory.push({month:d.income.currentMonth,amount:n(d.income.current)});
-  d.onboardingComplete=true;d.profile={name:$('nameInput').value.trim(),currency:$('currencyInput').value};d.income={source:$('incomeSourceName').value.trim()||'Income',currentMonth:newMonth,current:n($('incomeCurrent').value)};d.taxes={dueDate:$('taxDueDate').value,estimate:n($('taxEstimate').value),reserved:n($('taxReserved').value)};d.emergency={balance:n($('emergencyBalance').value),essentials:n($('essentialExpenses').value),targetMonths:n($('targetMonths').value,6),monthlyContribution:n($('emergencyContribution').value)};d.challenge={enabled:$('challengeEnabled').checked,name:$('challengeName').value.trim(),target:n($('challengeTarget').value),saved:n($('challengeSaved').value),startDate:$('challengeStart').value,durationWeeks:n($('challengeDuration').value,12),frequency:$('challengeFrequency').value};return d;
+  d.onboardingComplete=true;d.profile={name:$('nameInput').value.trim(),currency:$('currencyInput').value};d.income={source:$('incomeSourceName').value.trim()||'Income',currentMonth:newMonth,current:n($('incomeCurrent').value)};d.taxes={dueDate:$('taxDueDate').value,estimate:n($('taxEstimate').value),reserved:n($('taxReserved').value)};d.emergency={balance:n($('emergencyBalance').value),essentials:n($('essentialExpenses').value),targetMonths:n($('targetMonths').value,6),monthlyContribution:n($('emergencyContribution').value)};d.challenge={enabled:$('challengeEnabled').checked,name:$('challengeName').value.trim(),target:n($('challengeTarget').value),saved:n($('challengeSaved').value),startDate:$('challengeStart').value,durationWeeks:n($('challengeDuration').value,12),frequency:$('challengeFrequency').value};
+  if(d.challenge.enabled&&d.challenge.name&&d.challenge.target>0){
+    const roadmap=primaryRoadmap(d);
+    if(roadmap){
+      roadmap.name=d.challenge.name;roadmap.target=d.challenge.target;roadmap.saved=Math.min(d.challenge.saved,d.challenge.target);roadmap.startDate=d.challenge.startDate||roadmap.startDate;roadmap.status=roadmap.saved>=roadmap.target?'complete':'active';
+    }else{
+      d.roadmaps.push({id:`roadmap-${Date.now()}`,name:d.challenge.name,type:'other',target:d.challenge.target,saved:Math.min(d.challenge.saved,d.challenge.target),startDate:d.challenge.startDate||localDateKey(),targetDate:'',monthlyContribution:0,status:'active'});
+    }
+  }
+  syncLegacyChallenge(d);return d;
 }
 function toggleChallenge(){const on=$('challengeEnabled').checked;$('challengeFields').style.opacity=on?'1':'.45';$('challengeFields').querySelectorAll('input,select').forEach(x=>x.disabled=!on)}
 function openOnboarding(){$('onboarding').classList.add('open');$('onboarding').setAttribute('aria-hidden','false');showStep(1)}
@@ -1090,13 +1459,18 @@ document.querySelectorAll('[data-begin-story]').forEach(b=>b.onclick=openOnboard
 document.querySelectorAll('input[name="challengeChoice"]').forEach(r=>r.onchange=()=>$('onboardingChallengeFields').hidden=document.querySelector('input[name="challengeChoice"]:checked').value!=='yes');
 fillCurrency($('onboardingCurrency'),'USD');$('onboardingIncomeMonth').value=nowMonth;
 $('onboardingForm').onsubmit=e=>{
-  e.preventDefault();const d=blankData();d.onboardingComplete=true;d.profile={name:$('onboardingName').value.trim(),currency:$('onboardingCurrency').value};d.income={source:$('onboardingIncomeSource').value.trim()||'Total income',currentMonth:$('onboardingIncomeMonth').value||nowMonth,current:n($('onboardingIncomeAmount').value)};const yes=document.querySelector('input[name="challengeChoice"]:checked').value==='yes';d.challenge.enabled=yes;if(yes){d.challenge.name=$('onboardingChallengeName').value.trim()||'Savings';d.challenge.target=n($('onboardingChallengeTarget').value);d.challenge.startDate=new Date().toISOString().slice(0,10)}saveData(d);closeOnboarding();render(d);location.hash='focus';
+  e.preventDefault();const d=blankData();d.onboardingComplete=true;d.profile={name:$('onboardingName').value.trim(),currency:$('onboardingCurrency').value};d.income={source:$('onboardingIncomeSource').value.trim()||'Total income',currentMonth:$('onboardingIncomeMonth').value||nowMonth,current:n($('onboardingIncomeAmount').value)};const yes=document.querySelector('input[name="challengeChoice"]:checked').value==='yes';d.challenge.enabled=yes;if(yes){d.challenge.name=$('onboardingChallengeName').value.trim()||'Savings';d.challenge.target=n($('onboardingChallengeTarget').value);d.challenge.startDate=localDateKey();d.roadmaps=[{id:`roadmap-${Date.now()}`,name:d.challenge.name,type:/emergency/i.test(d.challenge.name)?'emergency':/travel|trip|vacation/i.test(d.challenge.name)?'travel':'other',target:d.challenge.target,saved:0,startDate:d.challenge.startDate,targetDate:'',monthlyContribution:0,status:'active'}]}saveData(syncLegacyChallenge(d));closeOnboarding();render(d);location.hash='focus';
 };
 $('aboutTrigger').onclick=()=>{$('aboutPanel').classList.add('open');$('panelBackdrop').hidden=false};$('closePanel').onclick=()=>{$('aboutPanel').classList.remove('open');$('panelBackdrop').hidden=true};$('panelBackdrop').onclick=$('closePanel').onclick;
 $('challengeEnabled').onchange=toggleChallenge;$('aboutForm').onsubmit=e=>{e.preventDefault();const d=readAbout();saveData(d);render(d);$('closePanel').click()};
 $('clearPreviewButton').onclick=()=>{if(confirm('Start fresh on this browser? This removes the saved Private Preview data.')){localStorage.removeItem(STORAGE_KEY);for(const k of LEGACY_KEYS)localStorage.removeItem(k);$('closePanel').click();render(blankData());location.hash='lobby'}};
 document.querySelectorAll('.signal-button').forEach(b=>b.onclick=()=>{const card=b.closest('.signal-card'),open=card.classList.toggle('open');b.setAttribute('aria-expanded',String(open))});
 document.querySelectorAll('.period-button').forEach(button=>button.addEventListener('click',()=>{const data=loadData();renderSnapshot(data,money(data.profile.currency),button.dataset.period)}));
+$('newRoadmapButton').addEventListener('click',()=>openRoadmapModal());
+$('closeRoadmapModal').addEventListener('click',closeRoadmapModal);
+$('cancelRoadmap').addEventListener('click',closeRoadmapModal);
+$('roadmapModal').addEventListener('click',event=>{if(event.target===$('roadmapModal'))closeRoadmapModal()});
+$('roadmapForm').addEventListener('submit',saveRoadmap);
 $('workspaceFocusAction').addEventListener('click',()=>performWorkspaceAction($('workspaceFocusAction').dataset.action));
 $('workspaceContinueAction').addEventListener('click',()=>performWorkspaceAction($('workspaceContinueAction').dataset.action));
 $('workspaceQuickAdd').addEventListener('click',openQuickAdd);

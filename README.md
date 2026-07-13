@@ -1,46 +1,61 @@
-# WealthOS v0.16.0 — Workspace
+# WealthOS v0.17.0 — Memory & Roadmaps
 
-This release changes the returning-user homepage from a sequence of sections into an active financial Workspace.
+This release combines three major product systems:
 
-## Workspace hierarchy
+1. Tangible financial documents
+2. Financial Memory
+3. Life-centered Roadmaps
 
-1. Today’s Focus
-2. Today’s Snapshot
-3. Today’s Activity
-4. What WealthOS Noticed
-5. Continue
-6. Lesson Waiting
-7. Detailed Signals and records
+## Tangible documents
 
-## “What should I do next?”
+Today’s Snapshot now presents:
 
-The Workspace chooses one primary action based on current information:
+- Income as a Paycheck
+- Daily spending as a Receipt
+- Goal progress as an Envelope
 
-- Record today’s spending
-- Complete a Weekly Check-in
-- Close the month
-- Continue a savings goal
-- Review Spending Snapshot
+The data is unchanged, but each number now lives inside a recognizable financial object.
 
-Only one action is emphasized at a time.
+## Financial Memory
 
-## Observation Engine
+WealthOS quietly remembers meaningful moments such as:
 
-The same Observation Engine now powers:
+- first purchase recorded
+- first Weekly Check-in
+- first Monthly Check-in
+- three weeks of continuity
+- Roadmap milestones at 25%, 50%, 75%, and 100%
 
-- Workspace
-- Spending Snapshot
-- Snapshot closing explanation
+These are Moments, not badges or points.
 
-Developer-facing text about where numbers came from has been replaced with useful implications or honest statements about limited history.
+## Roadmaps
+
+Users can create multiple Roadmaps for:
+
+- Emergency funds
+- Travel
+- Major purchases
+- Debt payoff
+- Home goals
+- Education
+- Investing
+- Other life goals
+
+Each Roadmap includes:
+
+- target
+- current progress
+- start and target dates
+- planned monthly contribution
+- next milestone
+- approximate timing
+- contribution workflow
+
+Existing Savings Challenge data migrates automatically into the first Roadmap.
 
 ## Principle
 
-**The Workspace should orient the user, offer one useful next step, and send them back into real life with more clarity.**
-
-## Retention
-
-Saved data migrates automatically from v0.15.1 and earlier versions.
+**Financial Memory shows where the user has been. Roadmaps show where they are going.**
 
 ## Publish
 
@@ -52,9 +67,10 @@ Replace:
 - README.md
 - FOUNDER_CHANGELOG.md
 - WEALTHOS_DESIGN_SYSTEM.md
-- PROTECTED_IDEAS.md
+- ROADMAPS_AND_MEMORY.md
 - CONTEXT_LIBRARY.md
+- PROTECTED_IDEAS.md
 
 Suggested commit:
 
-`Build the WealthOS Workspace and unify observations`
+`Add financial documents, Memory, and Roadmaps`

@@ -104,3 +104,48 @@ A returning-user Workspace should answer:
 5. Where can I continue from the last visit?
 
 The Workspace should not maximize time in app. It should create enough clarity for the user to return to real life confidently.
+
+## Financial Memory Language
+
+Financial Memory records meaningful moments, not app engagement.
+
+Use:
+
+- firsts
+- meaningful changes
+- continuity
+- completed chapters
+- Roadmap milestones
+
+Avoid:
+
+- badges
+- points
+- streak pressure
+- artificial congratulations
+- milestones created only to increase usage
+
+## Roadmap Language
+
+A Roadmap begins with a life outcome, not a financial mechanic.
+
+Prefer:
+
+- Emergency Fund
+- Japan Trip
+- Move Into My Own Place
+- Credit Card Payoff
+- First Home
+
+Avoid reducing the object to only:
+
+- savings target
+- budget category
+- account balance
+
+A Roadmap should show:
+
+1. where the user started
+2. where they stand today
+3. the next milestone
+4. a plausible path forward
