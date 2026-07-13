@@ -3922,3 +3922,198 @@ body{background:var(--paper);font-family:Manrope,sans-serif;-webkit-font-smoothi
 .library-suggestions[hidden]{
   display:none!important;
 }
+
+/* v0.22.0 — WealthOS Intelligence v1 */
+
+.workspace-observation .workspace-panel-heading button{
+  border:0;
+  background:transparent;
+  color:var(--evergreen);
+  cursor:pointer;
+  font-size:.72rem;
+  font-weight:800;
+}
+
+.observation-meta{
+  display:flex;
+  gap:9px;
+  align-items:center;
+  margin:14px 0 4px;
+}
+
+.observation-meta span{
+  display:inline-flex;
+  padding:4px 7px;
+  border:1px solid rgba(61,126,70,.25);
+  background:var(--evergreen-soft);
+  color:var(--evergreen);
+  font-size:.58rem;
+  font-weight:800;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+.observation-meta span[data-level="estimate"]{
+  border-color:#d3b879;
+  background:#fff8e8;
+  color:#725d27;
+}
+
+.observation-meta span[data-level="emerging"]{
+  border-color:#b7c2cc;
+  background:#f1f4f6;
+  color:#465663;
+}
+
+.observation-meta span[data-level="serious"]{
+  border-color:#d8b9ae;
+  background:#fff4f1;
+  color:#7a3f33;
+}
+
+.observation-meta small{
+  color:var(--muted);
+}
+
+.workspace-observation-detail{
+  display:grid;
+  grid-template-columns:1.2fr .8fr 1fr;
+  gap:1px;
+  margin-top:18px;
+  border:1px solid var(--line);
+  background:var(--line);
+}
+
+.workspace-observation-detail[hidden]{
+  display:none!important;
+}
+
+.workspace-observation-detail>div{
+  min-height:120px;
+  padding:16px;
+  background:#fff;
+}
+
+.workspace-observation-detail span{
+  display:block;
+  margin-bottom:8px;
+  color:var(--evergreen);
+  font-size:.6rem;
+  font-weight:800;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+
+.workspace-observation-detail p{
+  margin:0;
+  color:var(--muted);
+  font-size:.78rem;
+  line-height:1.5;
+}
+
+.workspace-observation-detail ul{
+  margin:0;
+  padding-left:18px;
+  color:var(--muted);
+  font-size:.78rem;
+  line-height:1.55;
+}
+
+.workspace-observation-action{
+  margin-top:14px;
+}
+
+.workspace-observation-action[hidden]{
+  display:none!important;
+}
+
+.workspace-observation-action button{
+  padding:10px 13px;
+  border:1px solid var(--ink);
+  background:var(--ink);
+  color:#fff;
+  cursor:pointer;
+  font-weight:800;
+}
+
+.supporting-observations{
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+}
+
+.supporting-observations-heading{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:8px;
+}
+
+.supporting-observations-heading span{
+  color:var(--evergreen);
+  font-size:.64rem;
+  font-weight:800;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+
+.supporting-observations-heading small{
+  color:var(--muted);
+}
+
+.supporting-observation{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:12px;
+  padding:13px 0;
+  border-top:1px solid var(--line);
+}
+
+.supporting-observation:first-child{
+  border-top:0;
+}
+
+.supporting-observation-mark{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--line);
+  background:#fff;
+  color:var(--evergreen);
+  font-size:.62rem;
+  font-weight:800;
+}
+
+.supporting-observation strong{
+  display:block;
+  margin-bottom:3px;
+}
+
+.supporting-observation p{
+  margin:0;
+  color:var(--muted);
+  font-size:.76rem;
+  line-height:1.45;
+}
+
+.snapshot-insight-heading>div small{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:.62rem;
+}
+
+.workspace-observation.severity-serious{
+  border-left:3px solid #9a5345;
+}
+
+.workspace-observation.severity-serious .workspace-wit{
+  display:none;
+}
+
+@media(max-width:800px){
+  .workspace-observation-detail{
+    grid-template-columns:1fr;
+  }
+}

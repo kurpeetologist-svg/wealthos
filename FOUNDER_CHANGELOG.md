@@ -456,3 +456,24 @@ Place results immediately after the search status and move supporting informatio
 ### Principle
 
 **When a user searches, the answer becomes the next thing they see.**
+
+## v0.22.0 — Intelligence v1
+
+### Why this exists
+
+The Core can now capture and preserve facts. WealthOS must interpret those facts without exaggerating what the data proves.
+
+### What changed
+
+- Added an observation-priority engine.
+- Added confidence classifications.
+- Added evidence, source, period, and meaning to every observation.
+- Added a Why? disclosure in Workspace.
+- Added supporting observations.
+- Added serious-state language safeguards.
+- Added recurring, category, comparison, Roadmap, income, data-quality, and limited-history observations.
+- Updated Snapshot observations to use the same intelligence engine.
+
+### Trust rule
+
+**Every observation must be explainable, proportionate, and earned by the data.**

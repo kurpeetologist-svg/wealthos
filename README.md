@@ -1,30 +1,73 @@
-# WealthOS v0.21.4 — Record Results Fix
+# WealthOS v0.22.0 — Intelligence v1
 
-This release replaces v0.21.3.
+Phase 1, Sprint 3 introduces the first explainable WealthOS observation engine.
 
-## Problem fixed
+## Observation confidence
 
-Search correctly found matching records, but results appeared below:
+Each observation is classified as:
 
-- Recent searches
-- Data quality
-- Upcoming recurring activity
+- Fact
+- Comparison
+- Emerging pattern
+- Established pattern
+- Estimate
 
-This made a successful search look broken.
+The classification controls how strongly WealthOS speaks.
 
-## Changes
+## Observation priority
 
-- Search results now appear immediately under the search summary.
-- Added a visible Search Results heading.
-- Recent searches hide during an active search.
-- Data quality and upcoming activity now appear after results.
-- Matching results can be scrolled into view after typing.
-- No-match guidance appears exactly where results would normally appear.
+The engine prioritizes:
 
-## Principle
+1. Overdue expected obligations
+2. Recorded negative cash flow
+3. Upcoming recurring activity
+4. Data-quality concerns
+5. Roadmap progress
+6. Period comparisons
+7. Recurring commitment estimates
+8. Largest spending category
+9. Repeated similar income
+10. Limited-history context
 
-**When a user searches, the answer becomes the next thing they see.**
+Only one observation leads the Workspace.
+
+Up to three additional observations appear beneath it.
+
+## Explainability
+
+The Workspace observation now includes a Why? control showing:
+
+- evidence
+- source
+- period
+- confidence
+- what the observation means
+
+## Serious-state language
+
+Humor is removed for observations involving:
+
+- overdue expected bills
+- recorded spending above recorded income
+- serious financial concerns
+
+## Supported observations
+
+- overdue expected bill
+- spending above recorded monthly income
+- upcoming recurring activity
+- data-quality concerns
+- Roadmap completion and progress
+- current versus previous period
+- largest category
+- monthly recurring commitment estimate
+- repeated similar income
+- limited-history disclaimer
+
+## Trust rule
+
+**Every observation must be explainable, proportionate, and earned by the data.**
 
 Suggested commit:
 
-`Move Record Library search results above supporting panels`
+`Build explainable WealthOS Intelligence v1`

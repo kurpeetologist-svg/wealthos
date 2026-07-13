@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.21.4</title>
+  <title>WealthOS Private Preview v0.22.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -140,18 +140,49 @@
               <div id="workspaceActivityList" class="workspace-activity-list"></div>
             </article>
 
-            <article class="workspace-panel workspace-observation">
+            <article class="workspace-panel workspace-observation" id="workspaceObservation">
               <div class="workspace-panel-heading">
                 <div>
                   <span>Observation</span>
                   <h3>What WealthOS noticed</h3>
                 </div>
-                <a href="#spendingSnapshot">See context →</a>
+                <button id="workspaceObservationWhy" type="button" aria-expanded="false">Why? +</button>
+              </div>
+              <div class="observation-meta">
+                <span id="workspaceObservationConfidence">Fact</span>
+                <small id="workspaceObservationPeriod">Today</small>
               </div>
               <p class="workspace-signature">WealthOS noticed…</p>
               <p class="workspace-observation-title" id="workspaceObservationTitle"></p>
               <p id="workspaceObservationSummary"></p>
               <p class="workspace-wit" id="workspaceObservationWit"></p>
+
+              <div class="workspace-observation-detail" id="workspaceObservationDetail" hidden>
+                <div>
+                  <span>Evidence</span>
+                  <ul id="workspaceObservationEvidence"></ul>
+                </div>
+                <div>
+                  <span>Source</span>
+                  <p id="workspaceObservationSource"></p>
+                </div>
+                <div>
+                  <span>What this means</span>
+                  <p id="workspaceObservationMeaning"></p>
+                </div>
+              </div>
+
+              <div class="workspace-observation-action" id="workspaceObservationAction" hidden>
+                <button id="workspaceObservationActionButton" type="button"></button>
+              </div>
+
+              <div class="supporting-observations">
+                <div class="supporting-observations-heading">
+                  <span>Also worth knowing</span>
+                  <small id="supportingObservationCount">0 additional observations</small>
+                </div>
+                <div id="supportingObservationList"></div>
+              </div>
             </article>
 
             <article class="workspace-panel workspace-continue">
@@ -739,7 +770,10 @@
 
               <section class="snapshot-insight" id="snapshotInsight">
                 <div class="snapshot-insight-heading">
-                  <span>What WealthOS noticed</span>
+                  <div>
+                    <span>What WealthOS noticed</span>
+                    <small id="snapshotInsightConfidence">Fact · This period</small>
+                  </div>
                   <button id="snapshotInsightWhy" type="button" aria-expanded="false">Why? +</button>
                 </div>
                 <h3 id="snapshotInsightTitle">A clearer pattern will appear as more records are added.</h3>

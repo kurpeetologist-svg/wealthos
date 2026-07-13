@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.21.4-data';
-const LEGACY_KEYS=['wealthos-v0.21.3-data','wealthos-v0.21.2-data','wealthos-v0.21.1-data','wealthos-v0.21.0-data','wealthos-v0.20.0-data','wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.22.0-data';
+const LEGACY_KEYS=['wealthos-v0.21.4-data','wealthos-v0.21.3-data','wealthos-v0.21.2-data','wealthos-v0.21.1-data','wealthos-v0.21.0-data','wealthos-v0.20.0-data','wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -2221,6 +2221,108 @@ function renderWorkspaceActivity(data,fmt){
   });
 }
 
+
+function performObservationAction(action){
+  if(!action)return;
+  if(action.kind==='snapshot'){
+    location.hash='spendingSnapshot';
+    setTimeout(()=>{
+      const button=document.querySelector(`.period-button[data-period="${action.period||'monthly'}"]`);
+      button?.click();
+    },80);
+    return;
+  }
+  if(action.kind==='library'){
+    location.hash='recordLibrary';
+    return;
+  }
+  if(action.kind==='library-recurring'){
+    location.hash='recordLibrary';
+    setTimeout(()=>setRecurringQuickFilter(true),80);
+    return;
+  }
+  if(action.kind==='library-income'){
+    location.hash='recordLibrary';
+    setTimeout(()=>{
+      $('libraryType').value='income';
+      renderRecordLibrary(loadData());
+    },80);
+    return;
+  }
+  if(action.kind==='record'){
+    location.hash='recordLibrary';
+    setTimeout(()=>openRecordDetail(action.type,action.id),100);
+    return;
+  }
+  if(action.kind==='record-expense'){
+    openRecordModal('expense');
+    return;
+  }
+  if(action.kind==='roadmap'){
+    location.hash='roadmaps';
+    return;
+  }
+}
+
+function observationWitSafe(observation,period){
+  if(seriousObservation(observation))return '';
+  return observationWit(observation,period);
+}
+
+function renderSupportingObservations(observations){
+  const holder=$('supportingObservationList');
+  holder.innerHTML='';
+  const supporting=observations.slice(1,4);
+  $('supportingObservationCount').textContent=`${supporting.length} additional observation${supporting.length===1?'':'s'}`;
+  if(!supporting.length){
+    holder.innerHTML='<p class="workspace-empty">No additional observation is strong enough to surface yet.</p>';
+    return;
+  }
+  supporting.forEach(observation=>{
+    const row=document.createElement('article');
+    row.className='supporting-observation';
+    row.innerHTML=`
+      <span class="supporting-observation-mark">${observationConfidenceLabel(observation).slice(0,2).toUpperCase()}</span>
+      <div>
+        <strong>${observation.title}</strong>
+        <p>${observation.summary}</p>
+      </div>
+    `;
+    holder.append(row);
+  });
+}
+
+function renderWorkspaceObservation(data,fmt){
+  const observations=generateObservations(data,fmt,'daily');
+  const observation=observations[0];
+
+  $('workspaceObservationTitle').textContent=observation.title;
+  $('workspaceObservationSummary').textContent=observation.summary;
+  $('workspaceObservationWit').textContent=observationWitSafe(observation,'daily');
+
+  const confidence=observationConfidenceLabel(observation);
+  $('workspaceObservationConfidence').textContent=confidence;
+  $('workspaceObservationConfidence').dataset.level=seriousObservation(observation)?'serious':observation.type;
+  $('workspaceObservationPeriod').textContent=observation.period;
+  $('workspaceObservationSource').textContent=observation.source;
+  $('workspaceObservationMeaning').textContent=observation.meaning;
+  $('workspaceObservationEvidence').innerHTML=observation.evidence.map(item=>`<li>${item}</li>`).join('');
+
+  $('workspaceObservation').classList.toggle('severity-serious',seriousObservation(observation));
+
+  const actionArea=$('workspaceObservationAction');
+  const actionButton=$('workspaceObservationActionButton');
+  actionArea.hidden=!observation.action;
+  if(observation.action){
+    actionButton.textContent=`${observation.action.label} →`;
+    actionButton.onclick=()=>performObservationAction(observation.action);
+  }else{
+    actionButton.onclick=null;
+  }
+
+  renderSupportingObservations(observations);
+}
+
 function renderWorkspace(data,fmt){
   const focus=chooseWorkspaceFocus(data);
   $('workspaceFocusTitle').textContent=focus.title;
@@ -2250,10 +2352,7 @@ function renderWorkspace(data,fmt){
   renderRoadmaps(data,fmt);
   renderFinancialMemory(data);
 
-  const observation=buildObservation(data,fmt,'daily');
-  $('workspaceObservationTitle').textContent=observation.title;
-  $('workspaceObservationSummary').textContent=observation.summary;
-  $('workspaceObservationWit').textContent=observationWit(observation,'daily');
+  renderWorkspaceObservation(data,fmt);
 
   const continuation=chooseWorkspaceContinue(data);
   $('workspaceContinueTitle').textContent=continuation.title;
@@ -2797,90 +2896,385 @@ function strongestCategory(totals){
   return [...totals.entries()].sort((a,b)=>b[1]-a[1])[0]||null;
 }
 
-function buildObservation(data,fmt,period){
-  const currentKey=currentMonthKey();
-  const previousKey=previousMonthKey();
-  const currentTotals=categoryTotalsForMonth(data,currentKey);
-  const previousTotals=categoryTotalsForMonth(data,previousKey);
-  const strongest=strongestCategory(currentTotals);
 
-  let title='A clearer pattern will appear as more records are added.';
-  let summary='One purchase is useful context, but not enough evidence to call a trend.';
-  let reason='WealthOS waits for enough comparable history before describing spending as higher, lower, or unusual.';
+const OBSERVATION_PRIORITY={
+  overdue:100,
+  cashflow:95,
+  upcoming:90,
+  duplicate:85,
+  stale:80,
+  roadmap:70,
+  comparison:65,
+  recurring:60,
+  category:50,
+  income:45,
+  limited:10
+};
 
-  if(strongest){
-    const [category,currentAmount]=strongest;
-    const previousAmount=previousTotals.get(category)||0;
-    const currentCount=(data.expenses||[]).filter(item=>String(item.date).slice(0,7)===currentKey&&item.category===category).length;
-
-    if(previousAmount>0){
-      const change=(currentAmount-previousAmount)/previousAmount*100;
-      const absolute=Math.abs(currentAmount-previousAmount);
-
-      if(Math.abs(change)<5){
-        title=`${category} spending is holding fairly steady this month.`;
-        summary=`You recorded ${fmt.format(currentAmount)} this month compared with ${fmt.format(previousAmount)} last month.`;
-        reason=`The difference is ${fmt.format(absolute)}, which is less than 5% of last month’s ${category.toLowerCase()} total.`;
-      }else if(change<0){
-        title=`Your ${category.toLowerCase()} spending decreased ${Math.abs(change).toFixed(0)}%.`;
-        summary=`You recorded ${fmt.format(currentAmount)} this month compared with ${fmt.format(previousAmount)} last month.`;
-        reason=`That is ${fmt.format(absolute)} less than the previous month. WealthOS is comparing Quick Add records in the same category across two months.`;
-      }else{
-        title=`Your ${category.toLowerCase()} spending increased ${change.toFixed(0)}%.`;
-        summary=`You recorded ${fmt.format(currentAmount)} this month compared with ${fmt.format(previousAmount)} last month.`;
-        reason=`That is ${fmt.format(absolute)} more than the previous month. This is an observation, not a judgment.`;
-      }
-    }else if(currentCount>=3){
-      title=`${category} is your largest recorded spending category this month.`;
-      summary=`You recorded ${fmt.format(currentAmount)} across ${currentCount} purchases.`;
-      reason=`There is not yet a comparable ${category.toLowerCase()} total from last month, so WealthOS is describing the current month rather than claiming a trend.`;
-    }else{
-      title=`${category} is currently your largest recorded category.`;
-      summary=`You have ${currentCount} recorded purchase${currentCount===1?'':'s'} totaling ${fmt.format(currentAmount)}.`;
-      reason='More history is needed before WealthOS can compare this category across time.';
-    }
-  }
-
-  if(period==='daily'){
-    const todayRecords=expensesForPeriod(data,'daily');
-    if(todayRecords.length){
-      const todayTotals=new Map();
-      todayRecords.forEach(item=>todayTotals.set(item.category,(todayTotals.get(item.category)||0)+n(item.amount)));
-      const top=strongestCategory(todayTotals);
-      if(top){
-        const total=expenseTotal(todayRecords);
-        const share=total>0?top[1]/total*100:0;
-        title=`${top[0]} accounts for most of today’s recorded spending.`;
-        summary=`${fmt.format(top[1])}—about ${share.toFixed(0)}% of today’s total—is in ${top[0].toLowerCase()}.`;
-        reason='Daily observations describe today’s composition only. WealthOS does not treat one day as a lasting habit.';
-      }
-    }
-  }
-
-  if(period==='weekly'){
-    const weekRecords=expensesForPeriod(data,'weekly');
-    if(weekRecords.length>=2){
-      const weekTotals=new Map();
-      weekRecords.forEach(item=>weekTotals.set(item.category,(weekTotals.get(item.category)||0)+n(item.amount)));
-      const top=strongestCategory(weekTotals);
-      if(top){
-        const weekTotal=expenseTotal(weekRecords);
-        const share=weekTotal>0?top[1]/weekTotal*100:0;
-        title=`${top[0]} is this week’s largest recorded category.`;
-        summary=`It represents ${share.toFixed(0)}% of the spending you recorded this week.`;
-        reason=`WealthOS calculated this from ${weekRecords.length} Quick Add records in the current week.`;
-      }
-    }
-  }
-
-  return {title,summary,reason};
+function observationPeriodLabel(period){
+  return {daily:'Today',weekly:'This week',monthly:'This month'}[period]||'Current period';
 }
+
+function periodExpenses(data,period){
+  return expensesForPeriod(data,period);
+}
+
+function previousPeriodExpenses(data,period){
+  const today=new Date();
+  const records=activeOnly(data.expenses);
+  if(period==='daily'){
+    const previous=new Date(today);
+    previous.setDate(previous.getDate()-1);
+    const key=localDateKey(previous);
+    return records.filter(item=>item.date===key);
+  }
+  if(period==='weekly'){
+    const currentStart=startOfWeek(today);
+    const previousStart=new Date(currentStart);
+    previousStart.setDate(previousStart.getDate()-7);
+    const previousEnd=new Date(currentStart);
+    previousEnd.setMilliseconds(-1);
+    return records.filter(item=>{
+      const date=new Date(`${item.date}T12:00:00`);
+      return date>=previousStart&&date<=previousEnd;
+    });
+  }
+  const key=previousMonthKey(today);
+  return records.filter(item=>String(item.date).slice(0,7)===key);
+}
+
+function categoryTotals(items){
+  const totals=new Map();
+  items.forEach(item=>totals.set(item.category||'Other',(totals.get(item.category||'Other')||0)+n(item.amount)));
+  return totals;
+}
+
+function observationBase({
+  id,type='fact',priority=0,severity='normal',title,summary,meaning,
+  period='Current period',source='User-reported records',evidence=[],action=null
+}){
+  return{
+    id:String(id||coreId('observation')),
+    type,
+    priority,
+    severity,
+    title:String(title||''),
+    summary:String(summary||''),
+    meaning:String(meaning||''),
+    period:String(period||'Current period'),
+    source:String(source||'User-reported records'),
+    evidence:Array.isArray(evidence)?evidence.map(String):[],
+    action,
+    generatedAt:new Date().toISOString()
+  };
+}
+
+function observationConfidenceLabel(observation){
+  const labels={
+    fact:'Fact',
+    comparison:'Comparison',
+    emerging:'Emerging pattern',
+    established:'Established pattern',
+    estimate:'Estimate'
+  };
+  return labels[observation.type]||'Fact';
+}
+
+function seriousObservation(observation){
+  return observation?.severity==='serious';
+}
+
+function generateObservations(data,fmt,period='daily'){
+  const observations=[];
+  const current=periodExpenses(data,period);
+  const previous=previousPeriodExpenses(data,period);
+  const currentTotal=expenseTotal(current);
+  const previousTotal=expenseTotal(previous);
+  const periodLabel=observationPeriodLabel(period);
+  const state=knowledgeState(data);
+
+  // 1. Overdue recurring obligations.
+  const today=localDateKey();
+  activeOnly(data.recurringBills).forEach(bill=>{
+    const recurrence=normalizeRecurrence(bill);
+    const due=recurrence.nextExpectedDate||bill.nextDueDate;
+    if(due&&due<today){
+      observations.push(observationBase({
+        id:`overdue-${bill.id}`,
+        type:'fact',
+        priority:OBSERVATION_PRIORITY.overdue,
+        severity:'serious',
+        title:`${bill.name} appears past its expected date.`,
+        summary:`The recorded expectation was ${formatDate(due)} for ${fmt.format(n(bill.expectedAmount))}.`,
+        meaning:'WealthOS only knows the expected date. It does not know whether the bill was paid unless a completed payment is recorded.',
+        period:'Current obligations',
+        source:'Recurring bill schedule entered by you',
+        evidence:[
+          `Expected date: ${formatDate(due)}`,
+          `Expected amount: ${fmt.format(n(bill.expectedAmount))}`,
+          'No matching completed payment was confirmed by this schedule'
+        ],
+        action:{label:'Review bill',kind:'record',type:'bill',id:bill.id}
+      }));
+    }
+  });
+
+  // 2. Negative recorded cash flow.
+  const monthlyIncome=n(data.income?.current);
+  const monthlySpending=expenseTotal(expensesForPeriod(data,'monthly'));
+  if(monthlyIncome>0&&monthlySpending>monthlyIncome){
+    const gap=monthlySpending-monthlyIncome;
+    observations.push(observationBase({
+      id:'negative-cashflow',
+      type:'fact',
+      priority:OBSERVATION_PRIORITY.cashflow,
+      severity:'serious',
+      title:'Recorded spending is currently above recorded monthly income.',
+      summary:`Spending exceeds income by ${fmt.format(gap)} based on records entered so far.`,
+      meaning:'This is a current recorded difference, not a complete assessment of financial health. Missing income or expenses may change the picture.',
+      period:'This month',
+      source:'Recorded income and active expense records',
+      evidence:[
+        `Recorded income: ${fmt.format(monthlyIncome)}`,
+        `Recorded spending: ${fmt.format(monthlySpending)}`,
+        `Difference: ${fmt.format(gap)}`
+      ],
+      action:{label:'Review monthly Snapshot',kind:'snapshot',period:'monthly'}
+    }));
+  }
+
+  // 3. Upcoming recurring activity in the next 14 days.
+  const upcoming=expectedRecurringRecords(data,14);
+  if(upcoming.length){
+    const total=upcoming.reduce((sum,{item})=>sum+recordAmount('bill'===item.type?'bill':'expense',item),0);
+    const first=upcoming[0];
+    const firstDate=normalizeRecurrence(first.item).nextExpectedDate;
+    observations.push(observationBase({
+      id:'upcoming-recurring',
+      type:'fact',
+      priority:OBSERVATION_PRIORITY.upcoming,
+      title:`${upcoming.length} recurring item${upcoming.length===1?' is':'s are'} expected soon.`,
+      summary:`The next expected item is ${recordTitle(first.type,first.item,data)} on ${formatDate(firstDate)}.`,
+      meaning:'These are expectations only. Actual totals will change only when completed activity is recorded.',
+      period:'Next 14 days',
+      source:'Recurring schedules entered by you',
+      evidence:upcoming.slice(0,4).map(({type,item})=>{
+        const recurrence=normalizeRecurrence(item);
+        return `${recordTitle(type,item,data)} · ${formatDate(recurrence.nextExpectedDate)} · ${fmt.format(recordAmount(type,item))}`;
+      }),
+      action:{label:'Review upcoming activity',kind:'library-recurring'}
+    }));
+  }
+
+  // 4. Data quality issues.
+  const issues=dataQualityIssues(data);
+  if(issues.length){
+    const first=issues[0];
+    observations.push(observationBase({
+      id:`quality-${first.key}`,
+      type:'fact',
+      priority:OBSERVATION_PRIORITY.duplicate,
+      title:first.title,
+      summary:first.text,
+      meaning:'This is an invitation to review—not a claim that the record is wrong.',
+      period:'Record quality',
+      source:'Record Library consistency checks',
+      evidence:[first.text,`${issues.length} item${issues.length===1?'':'s'} currently worth reviewing`],
+      action:{label:'Open Record Library',kind:'library'}
+    }));
+  }
+
+  // 5. Roadmap pace and milestones.
+  const roadmap=primaryRoadmap(data);
+  if(roadmap&&n(roadmap.target)>0){
+    const progress=Math.min(100,n(roadmap.saved)/n(roadmap.target)*100);
+    if(progress>=100){
+      observations.push(observationBase({
+        id:`roadmap-complete-${roadmap.id}`,
+        type:'fact',
+        priority:OBSERVATION_PRIORITY.roadmap,
+        title:`${roadmap.name} is fully funded.`,
+        summary:`You recorded ${fmt.format(roadmap.saved)} against a ${fmt.format(roadmap.target)} target.`,
+        meaning:'The Roadmap reached the amount you defined. WealthOS is not making a recommendation about where the money should go next.',
+        period:'Roadmap progress',
+        source:'Roadmap target and recorded contributions',
+        evidence:[
+          `Target: ${fmt.format(roadmap.target)}`,
+          `Recorded progress: ${fmt.format(roadmap.saved)}`,
+          'Progress: 100%'
+        ],
+        action:{label:'Open Roadmap',kind:'roadmap',id:roadmap.id}
+      }));
+    }else if(progress>=25){
+      observations.push(observationBase({
+        id:`roadmap-progress-${roadmap.id}`,
+        type:state.daySpan>=30?'established':'fact',
+        priority:OBSERVATION_PRIORITY.roadmap,
+        title:`${roadmap.name} is ${Math.round(progress)}% complete.`,
+        summary:`You have ${fmt.format(Math.max(0,n(roadmap.target)-n(roadmap.saved)))} left to reach the current target.`,
+        meaning:'This describes recorded progress only. A pace estimate requires reliable contribution timing.',
+        period:'Roadmap progress',
+        source:'Roadmap target and recorded contributions',
+        evidence:[
+          `Saved: ${fmt.format(roadmap.saved)}`,
+          `Target: ${fmt.format(roadmap.target)}`,
+          `Remaining: ${fmt.format(Math.max(0,n(roadmap.target)-n(roadmap.saved)))}`
+        ],
+        action:{label:'Open Roadmap',kind:'roadmap',id:roadmap.id}
+      }));
+    }
+  }
+
+  // 6. Period comparison.
+  if(current.length&&previous.length&&previousTotal>0){
+    const change=(currentTotal-previousTotal)/previousTotal*100;
+    const absolute=Math.abs(currentTotal-previousTotal);
+    const enough=period==='monthly'||current.length>=3&&previous.length>=3;
+    observations.push(observationBase({
+      id:`period-comparison-${period}`,
+      type:enough?'comparison':'emerging',
+      priority:OBSERVATION_PRIORITY.comparison,
+      title:Math.abs(change)<5
+        ? `Recorded spending is fairly steady compared with the previous ${period}.`
+        : `Recorded spending ${change>0?'increased':'decreased'} ${Math.abs(change).toFixed(0)}% from the previous ${period}.`,
+      summary:`${fmt.format(currentTotal)} is recorded for ${periodLabel.toLowerCase()}, compared with ${fmt.format(previousTotal)} in the previous comparable period.`,
+      meaning:enough
+        ? 'This is a direct comparison of two recorded periods.'
+        : 'The comparison is mathematically valid, but the number of records is still limited.',
+      period:`${periodLabel} vs previous ${period}`,
+      source:'Active expense records',
+      evidence:[
+        `${periodLabel}: ${fmt.format(currentTotal)} across ${current.length} record${current.length===1?'':'s'}`,
+        `Previous ${period}: ${fmt.format(previousTotal)} across ${previous.length} record${previous.length===1?'':'s'}`,
+        `Difference: ${fmt.format(absolute)}`
+      ],
+      action:{label:'Review Snapshot',kind:'snapshot',period}
+    }));
+  }
+
+  // 7. Largest category.
+  if(current.length){
+    const totals=categoryTotals(current);
+    const strongest=strongestCategory(totals);
+    if(strongest){
+      const [category,amount]=strongest;
+      const count=current.filter(item=>item.category===category).length;
+      const share=currentTotal>0?amount/currentTotal*100:0;
+      observations.push(observationBase({
+        id:`largest-category-${period}-${category}`,
+        type:count>=3?'emerging':'fact',
+        priority:OBSERVATION_PRIORITY.category,
+        title:`${category} is ${periodLabel.toLowerCase()}’s largest recorded category.`,
+        summary:`${fmt.format(amount)}—about ${share.toFixed(0)}% of recorded spending—is in ${category.toLowerCase()}.`,
+        meaning:count>=3
+          ? 'The category repeats within this period, but more comparable periods are needed before calling it a lasting pattern.'
+          : `This describes the composition of ${periodLabel.toLowerCase()} only.`,
+        period:periodLabel,
+        source:'Active expense records grouped by category',
+        evidence:[
+          `${count} ${category.toLowerCase()} record${count===1?'':'s'}`,
+          `Category total: ${fmt.format(amount)}`,
+          `Period total: ${fmt.format(currentTotal)}`,
+          `Share: ${share.toFixed(0)}%`
+        ],
+        action:{label:'See supporting activity',kind:'snapshot',period}
+      }));
+    }
+  }
+
+  // 8. Recurring commitments total.
+  const recurring=libraryRecords(data).filter(({item})=>recordStatus(item)==='active'&&isRecurring(item));
+  if(recurring.length){
+    const monthlyEquivalent=recurring.reduce((sum,{type,item})=>{
+      const amount=recordAmount(type,item);
+      const frequency=normalizeRecurrence(item).frequency;
+      if(frequency==='weekly')return sum+amount*4.345;
+      if(frequency==='biweekly')return sum+amount*2.1725;
+      if(frequency==='quarterly')return sum+amount/3;
+      if(frequency==='annual')return sum+amount/12;
+      if(frequency==='monthly')return sum+amount;
+      return sum;
+    },0);
+    observations.push(observationBase({
+      id:'recurring-total',
+      type:'estimate',
+      priority:OBSERVATION_PRIORITY.recurring,
+      title:'Your recurring schedules form a monthly commitment estimate.',
+      summary:`The current monthly equivalent is approximately ${fmt.format(monthlyEquivalent)}.`,
+      meaning:'This is a normalized estimate from recorded schedules. Variable amounts and custom schedules may change the actual total.',
+      period:'Monthly equivalent',
+      source:'Active recurring schedules',
+      evidence:recurring.slice(0,5).map(({type,item})=>`${recordTitle(type,item,data)} · ${recurrenceLabel(item)} · ${fmt.format(recordAmount(type,item))}`),
+      action:{label:'Review recurring records',kind:'library-recurring'}
+    }));
+  }
+
+  // 9. Repeated similar income.
+  const incomes=activeOnly(data.incomes).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  if(incomes.length>=3){
+    const latest=incomes[0];
+    const similar=incomes.filter(item=>{
+      const amount=n(latest.amount);
+      return item.sourceName===latest.sourceName&&Math.abs(n(item.amount)-amount)<=Math.max(1,amount*.05);
+    });
+    if(similar.length>=3){
+      observations.push(observationBase({
+        id:`income-repeat-${latest.sourceName}`,
+        type:similar.length>=4?'established':'emerging',
+        priority:OBSERVATION_PRIORITY.income,
+        title:`${latest.sourceName} has appeared at a similar amount ${similar.length} times.`,
+        summary:`The most recent recorded amount is ${fmt.format(latest.amount)}.`,
+        meaning:'Repeated similar income can become a useful reference point, but WealthOS does not assume future income is guaranteed.',
+        period:'Recorded income history',
+        source:'Active income records',
+        evidence:similar.slice(0,4).map(item=>`${formatDate(item.date)} · ${fmt.format(item.amount)}`),
+        action:{label:'Review income records',kind:'library-income'}
+      }));
+    }
+  }
+
+  // 10. Limited history.
+  if(!observations.length||state.daySpan<7||current.length<2){
+    observations.push(observationBase({
+      id:`limited-history-${period}`,
+      type:'emerging',
+      priority:OBSERVATION_PRIORITY.limited,
+      title:'A clearer pattern will appear as more records are added.',
+      summary:current.length
+        ? `${current.length} record${current.length===1?' is':'s are'} useful context, but not enough evidence to call a lasting trend.`
+        : `Nothing is recorded for ${periodLabel.toLowerCase()} yet.`,
+      meaning:'WealthOS waits for comparable history before using stronger pattern language.',
+      period:periodLabel,
+      source:'Current knowledge state and active records',
+      evidence:[
+        `${current.length} record${current.length===1?'':'s'} in this period`,
+        `${state.daySpan} day${state.daySpan===1?'':'s'} of recorded history`,
+        `Knowledge state: ${state.label}`
+      ],
+      action:current.length?null:{label:'Record something',kind:'record-expense'}
+    }));
+  }
+
+  return observations
+    .filter((observation,index,array)=>array.findIndex(item=>item.id===observation.id)===index)
+    .sort((a,b)=>b.priority-a.priority);
+}
+
+function buildObservation(data,fmt,period){
+  return generateObservations(data,fmt,period)[0];
+}
+
 
 function renderSnapshotInsight(data,fmt,period){
   const observation=buildObservation(data,fmt,period);
   $('snapshotInsightTitle').textContent=observation.title;
   $('snapshotInsightSummary').textContent=observation.summary;
-  $('snapshotInsightReason').textContent=observation.reason;
+  $('snapshotInsightReason').textContent=[
+    observation.meaning,
+    observation.evidence.length?`Evidence: ${observation.evidence.join(' · ')}`:'',
+    `Source: ${observation.source}`
+  ].filter(Boolean).join(' ');
+  $('snapshotInsightConfidence').textContent=`${observationConfidenceLabel(observation)} · ${observation.period}`;
 }
 
 function renderSnapshot(data,fmt,period){
@@ -2909,7 +3303,7 @@ function renderSnapshot(data,fmt,period){
   const closingObservation=buildObservation(data,fmt,period);
   $('snapshotNote').textContent=amount===0
     ? 'Once activity is recorded, WealthOS will begin separating isolated events from patterns.'
-    : closingObservation.reason;
+    : closingObservation.meaning;
   document.querySelectorAll('.period-button').forEach(button=>button.classList.toggle('active',button.dataset.period===period));
 }
 
@@ -3298,6 +3692,13 @@ $('cancelRecord').addEventListener('click',closeRecordModal);
 $('recordModal').addEventListener('click',event=>{if(event.target===$('recordModal'))closeRecordModal()});
 $('recordType').addEventListener('change',updateRecordFields);
 $('recordForm').addEventListener('submit',saveCoreRecord);
+$('workspaceObservationWhy').addEventListener('click',()=>{
+  const detail=$('workspaceObservationDetail');
+  const opening=detail.hidden;
+  detail.hidden=!opening;
+  $('workspaceObservationWhy').setAttribute('aria-expanded',String(opening));
+  $('workspaceObservationWhy').textContent=opening?'Why? −':'Why? +';
+});
 $('workspaceFocusAction').addEventListener('click',()=>performWorkspaceAction($('workspaceFocusAction').dataset.action));
 $('workspaceContinueAction').addEventListener('click',()=>performWorkspaceAction($('workspaceContinueAction').dataset.action));
 $('workspaceQuickAdd').addEventListener('click',()=>openRecordModal('expense'));
