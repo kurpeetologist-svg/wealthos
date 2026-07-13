@@ -477,3 +477,13 @@ The Core can now capture and preserve facts. WealthOS must interpret those facts
 ### Trust rule
 
 **Every observation must be explainable, proportionate, and earned by the data.**
+
+
+## v0.23.0 — Context Engine v1
+
+- Added contextual learning behind Why? interactions.
+- Preserved Fact → Meaning → Mastery.
+- Added learning history and serious-state restraint.
+- Added no new product surface.
+
+**WealthOS should reward curiosity, not demand attention.**

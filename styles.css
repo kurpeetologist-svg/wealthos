@@ -4117,3 +4117,20 @@ body{background:var(--paper);font-family:Manrope,sans-serif;-webkit-font-smoothi
     grid-template-columns:1fr;
   }
 }
+
+/* v0.23.0 — Context Engine v1 */
+.context-learning,.snapshot-context-learning{margin-top:18px;padding:18px;border-left:3px solid var(--evergreen);background:var(--evergreen-soft)}
+.context-learning[hidden],.snapshot-context-learning[hidden]{display:none!important}
+.context-learning-heading{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:12px}
+.context-learning-heading span,.snapshot-context-learning>span{display:block;color:var(--evergreen);font-size:.62rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.context-learning-heading small,.snapshot-context-learning small{display:block;margin-top:4px;color:var(--muted);font-size:.66rem}
+.context-learning-heading button{border:0;background:transparent;color:var(--evergreen);cursor:pointer;font-size:.72rem;font-weight:800}
+.context-learning h4,.snapshot-context-learning h4{margin:0 0 8px;font-family:var(--font-display,Georgia,serif);font-size:1.35rem;line-height:1.1}
+.context-learning>p,.snapshot-context-learning p{margin:0;color:var(--muted);font-size:.84rem;line-height:1.55}
+.context-learning-calculation{margin-top:14px;padding:14px 16px;border:1px solid rgba(61,126,70,.22);background:#fff;font-size:.84rem;font-weight:800}
+.context-learning-calculation[hidden]{display:none!important}
+.context-learning-footer{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.context-learning-footer button{padding:9px 11px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;font-size:.72rem;font-weight:800}
+.context-learning-footer button:first-child{border-color:var(--ink);background:var(--ink);color:#fff}
+.context-learning-signature{margin-top:16px!important;padding-top:12px;border-top:1px solid rgba(61,126,70,.18);color:var(--evergreen)!important;font-style:italic}
+.workspace-observation.severity-serious .context-learning-signature{display:none}

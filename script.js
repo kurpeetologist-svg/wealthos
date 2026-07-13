@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.22.0-data';
-const LEGACY_KEYS=['wealthos-v0.21.4-data','wealthos-v0.21.3-data','wealthos-v0.21.2-data','wealthos-v0.21.1-data','wealthos-v0.21.0-data','wealthos-v0.20.0-data','wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.23.0-data';
+const LEGACY_KEYS=['wealthos-v0.22.0-data','wealthos-v0.21.4-data','wealthos-v0.21.3-data','wealthos-v0.21.2-data','wealthos-v0.21.1-data','wealthos-v0.21.0-data','wealthos-v0.20.0-data','wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -27,7 +27,8 @@ const blankData=()=>({
   debtPayments:[],
   transfers:[],
   auditLog:[],
-  schemaVersion:'1.0.0',
+  learningHistory:[],
+  schemaVersion:'1.1.0',
   checkins:[],
   memory:{lastInteraction:null,lastCheckinType:null,lastCheckinDate:null,lastSummary:null}
 });
@@ -388,7 +389,8 @@ function migrate(raw){
     sourceMethod:String(item.sourceMethod||'manual'),
     detail:String(item.detail||'')
   })):[];
-  d.schemaVersion=String(raw.schemaVersion||'1.0.0');
+  d.learningHistory=Array.isArray(raw.learningHistory)?raw.learningHistory.filter(Boolean).map(item=>({id:String(item.id||coreId('learning')),contextId:String(item.contextId||''),observationId:String(item.observationId||''),shownAt:String(item.shownAt||new Date().toISOString()),dismissedAt:item.dismissedAt?String(item.dismissedAt):null,lessonOpenedAt:item.lessonOpenedAt?String(item.lessonOpenedAt):null,actionCompletedAt:item.actionCompletedAt?String(item.actionCompletedAt):null,relatedRecordId:item.relatedRecordId?String(item.relatedRecordId):null})):[];
+  d.schemaVersion=String(raw.schemaVersion||'1.1.0');
   syncCanonicalIncomeToLegacy(d);
   d.checkins=Array.isArray(raw.checkins)?raw.checkins:[];
   d.memory={
@@ -2037,7 +2039,7 @@ function saveCoreRecord(event){
     advanceRecurringExpectation(data,type,entity,date);
   }
 
-  data.schemaVersion='1.0.0';
+  data.schemaVersion='1.1.0';
   data.onboardingComplete=true;
   syncLegacyChallenge(data);
   updateFinancialMemories(data);
@@ -2321,6 +2323,7 @@ function renderWorkspaceObservation(data,fmt){
   }
 
   renderSupportingObservations(observations);
+  renderWorkspaceContext(observation,data,fmt);
 }
 
 function renderWorkspace(data,fmt){
@@ -2897,6 +2900,32 @@ function strongestCategory(totals){
 }
 
 
+
+const CONTEXT_RESHOW_DAYS=30;
+const CONTEXT_LIBRARY_V2={
+ recurring_total:{id:'recurring_total',title:'Recurring commitments reserve future income.',confidence:'Calculated context',body:'Monthly schedules often feel small because they arrive one at a time.',signature:'Small commitments become easier to manage once they become visible.',lesson:'fixed-vs-recurring',action:{label:'Review recurring commitments',kind:'library-recurring'}},
+ upcoming_recurring:{id:'upcoming_recurring',title:'Expected activity belongs in planning—not completed totals.',confidence:'Direct explanation',body:'A schedule tells WealthOS what may happen next. A recorded transaction confirms what actually happened.',signature:'Clear expectations make the next few weeks easier to plan.',lesson:'expected-vs-actual',action:{label:'Review upcoming activity',kind:'library-recurring'}},
+ largest_category:{id:'largest_category',title:'A category can lead a period without becoming a lasting pattern.',confidence:'General principle',body:'One period shows composition. Repeated comparable periods are needed before stronger pattern language is justified.',signature:'A reference point is useful even before it becomes a pattern.',lesson:'reference-point-vs-pattern'},
+ period_comparison:{id:'period_comparison',title:'Comparisons are useful when the periods are truly comparable.',confidence:'General principle',body:'A change between two periods may reflect timing, missing records, or unusual events—not only a lasting behavior change.',signature:'Context keeps comparisons from becoming judgments.',lesson:'reading-spending-comparisons'},
+ negative_cashflow:{id:'negative_cashflow',title:'Cash flow is the relationship between money recorded in and money recorded out.',confidence:'Direct explanation',body:'When recorded spending is above recorded income, first verify whether either side is incomplete before drawing a larger conclusion.',signature:'',lesson:'understanding-cash-flow',action:{label:'Review monthly Snapshot',kind:'snapshot',period:'monthly'}},
+ overdue_bill:{id:'overdue_bill',title:'Expected and paid are different financial states.',confidence:'Direct explanation',body:'A past expected date does not prove a missed payment. WealthOS needs a completed record or connected-account confirmation.',signature:'',lesson:'expected-vs-actual'},
+ roadmap_progress:{id:'roadmap_progress',title:'A Roadmap is a sinking fund with a specific purpose.',confidence:'General principle',body:'Setting aside money gradually helps a future expense become part of today’s plan instead of tomorrow’s surprise.',signature:'Future plans become more manageable when they are funded in pieces.',lesson:'sinking-funds'},
+ roadmap_complete:{id:'roadmap_complete',title:'Liquidity can buy time and flexibility.',confidence:'General principle',body:'Completing a Roadmap means the amount you defined is available for that purpose. It does not automatically mean the target itself was optimal.',signature:'Progress is usually quieter than people expect.',lesson:'liquidity-and-resilience'},
+ repeated_income:{id:'repeated_income',title:'Consistency can become a planning reference without becoming a guarantee.',confidence:'General principle',body:'Repeated similar income helps estimate a baseline, but future income remains uncertain until recorded or verified.',signature:'A useful reference is not the same as a promise.',lesson:'income-consistency',action:{label:'Review income records',kind:'library-income'}},
+ limited_history:{id:'limited_history',title:'Good conclusions need comparable history.',confidence:'Direct explanation',body:'WealthOS uses cautious language until enough records exist to separate an isolated moment from a repeating pattern.',signature:'Financial confidence begins with an honest picture.',lesson:'reference-point-vs-pattern'},
+ data_quality:{id:'data_quality',title:'Better records create better context.',confidence:'Direct explanation',body:'A duplicate, stale balance, or missing due date can change totals and weaken future observations.',signature:'Every clear record makes tomorrow a little more predictable.',lesson:'financial-data-quality',action:{label:'Open Record Library',kind:'library'}}
+};
+function contextForObservation(o,data,fmt){if(!o)return null;const id=String(o.id||'');let k='limited_history';if(id==='negative-cashflow')k='negative_cashflow';else if(id.startsWith('overdue-'))k='overdue_bill';else if(id==='upcoming-recurring')k='upcoming_recurring';else if(id.startsWith('quality-'))k='data_quality';else if(id.startsWith('roadmap-complete-'))k='roadmap_complete';else if(id.startsWith('roadmap-progress-'))k='roadmap_progress';else if(id.startsWith('period-comparison-'))k='period_comparison';else if(id.startsWith('largest-category-'))k='largest_category';else if(id==='recurring-total')k='recurring_total';else if(id.startsWith('income-repeat-'))k='repeated_income';const b=CONTEXT_LIBRARY_V2[k];if(!b)return null;let calculation='';if(k==='recurring_total'){const annual=libraryRecords(data).filter(({item})=>recordStatus(item)==='active'&&isRecurring(item)).reduce((s,{type,item})=>{const a=recordAmount(type,item),f=normalizeRecurrence(item).frequency;return s+(f==='weekly'?a*52:f==='biweekly'?a*26:f==='monthly'?a*12:f==='quarterly'?a*4:f==='annual'?a:0)},0);calculation=`Estimated annual equivalent: ${fmt.format(annual)} based on current recurring schedules.`}return {...b,calculation,serious:seriousObservation(o),observationId:o.id}}
+function histEntry(data,cid,oid){return (data.learningHistory||[]).find(x=>x.contextId===cid&&x.observationId===oid)||null}
+function recordContextShown(data,c,o){data.learningHistory=Array.isArray(data.learningHistory)?data.learningHistory:[];let e=histEntry(data,c.id,o.id);if(e)return e;e={id:coreId('learning'),contextId:c.id,observationId:o.id,shownAt:new Date().toISOString(),dismissedAt:null,lessonOpenedAt:null,actionCompletedAt:null,relatedRecordId:o.action?.id||null};data.learningHistory.push(e);return e}
+function updateLearningHistory(data,cid,oid,field){const e=histEntry(data,cid,oid);if(e)e[field]=new Date().toISOString()}
+function lessonLabel(id){return {'fixed-vs-recurring':'Fixed and recurring expenses','expected-vs-actual':'Expected versus completed activity','reference-point-vs-pattern':'Reference points and patterns','reading-spending-comparisons':'Reading spending comparisons','understanding-cash-flow':'Understanding cash flow','sinking-funds':'Sinking funds','liquidity-and-resilience':'Liquidity and resilience','income-consistency':'Income consistency','financial-data-quality':'Why data quality matters'}[id]||'Related lesson'}
+let currentWorkspaceContext=null,currentSnapshotContext=null;
+function renderWorkspaceContext(o,data,fmt){const c=contextForObservation(o,data,fmt);currentWorkspaceContext=c?{context:c,observation:o}:null;$('workspaceContextLearning').hidden=true;if(!c)return;$('workspaceContextTitle').textContent=c.title;$('workspaceContextBody').textContent=c.body;$('workspaceContextConfidence').textContent=c.confidence;$('workspaceContextSignature').textContent=c.serious?'':c.signature;$('workspaceContextCalculation').hidden=!c.calculation;$('workspaceContextCalculation').textContent=c.calculation||'';const a=$('workspaceContextAction');a.hidden=!c.action;if(c.action){a.textContent=`${c.action.label} →`;a.onclick=()=>{const d=loadData();updateLearningHistory(d,c.id,o.id,'actionCompletedAt');saveData(d);performObservationAction(c.action)}}const l=$('workspaceContextLesson');l.hidden=!c.lesson;if(c.lesson){l.textContent=`Read: ${lessonLabel(c.lesson)} →`;l.onclick=()=>{const d=loadData();updateLearningHistory(d,c.id,o.id,'lessonOpenedAt');saveData(d);location.hash='lessons'}}}
+function revealWorkspaceContext(){if(!currentWorkspaceContext)return;const {context,observation}=currentWorkspaceContext,d=loadData();recordContextShown(d,context,observation);saveData(d);$('workspaceContextLearning').hidden=false}
+function dismissWorkspaceContext(){if(currentWorkspaceContext){const {context,observation}=currentWorkspaceContext,d=loadData();updateLearningHistory(d,context.id,observation.id,'dismissedAt');saveData(d)}$('workspaceContextLearning').hidden=true}
+function renderSnapshotContext(o,data,fmt){const c=contextForObservation(o,data,fmt);currentSnapshotContext=c?{context:c,observation:o}:null;$('snapshotContextLearning').hidden=true;if(!c)return;$('snapshotContextTitle').textContent=c.title;$('snapshotContextBody').textContent=c.body;$('snapshotContextConfidence').textContent=c.confidence}
+
 const OBSERVATION_PRIORITY={
   overdue:100,
   cashflow:95,
@@ -3275,6 +3304,7 @@ function renderSnapshotInsight(data,fmt,period){
     `Source: ${observation.source}`
   ].filter(Boolean).join(' ');
   $('snapshotInsightConfidence').textContent=`${observationConfidenceLabel(observation)} · ${observation.period}`;
+  renderSnapshotContext(observation,data,fmt);
 }
 
 function renderSnapshot(data,fmt,period){
@@ -3692,12 +3722,14 @@ $('cancelRecord').addEventListener('click',closeRecordModal);
 $('recordModal').addEventListener('click',event=>{if(event.target===$('recordModal'))closeRecordModal()});
 $('recordType').addEventListener('change',updateRecordFields);
 $('recordForm').addEventListener('submit',saveCoreRecord);
+$('dismissWorkspaceContext').addEventListener('click',dismissWorkspaceContext);
 $('workspaceObservationWhy').addEventListener('click',()=>{
   const detail=$('workspaceObservationDetail');
   const opening=detail.hidden;
   detail.hidden=!opening;
   $('workspaceObservationWhy').setAttribute('aria-expanded',String(opening));
   $('workspaceObservationWhy').textContent=opening?'Why? −':'Why? +';
+  if(opening)revealWorkspaceContext(); else $('workspaceContextLearning').hidden=true;
 });
 $('workspaceFocusAction').addEventListener('click',()=>performWorkspaceAction($('workspaceFocusAction').dataset.action));
 $('workspaceContinueAction').addEventListener('click',()=>performWorkspaceAction($('workspaceContinueAction').dataset.action));
@@ -3715,6 +3747,7 @@ $('expenseToastClose').addEventListener('click',()=>$('expenseToast').classList.
 $('snapshotInsightWhy').addEventListener('click',()=>{
   const insight=$('snapshotInsight');
   const open=insight.classList.toggle('open');
+  $('snapshotContextLearning').hidden=!open||!currentSnapshotContext;
   $('snapshotInsightWhy').setAttribute('aria-expanded',String(open));
   $('snapshotInsightWhy').textContent=open?'Why? ×':'Why? +';
 });

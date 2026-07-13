@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.22.0</title>
+  <title>WealthOS Private Preview v0.23.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -170,6 +170,21 @@
                   <span>What this means</span>
                   <p id="workspaceObservationMeaning"></p>
                 </div>
+              </div>
+
+              <div class="context-learning" id="workspaceContextLearning" hidden>
+                <div class="context-learning-heading">
+                  <div><span>One thing worth knowing</span><small id="workspaceContextConfidence">Direct explanation</small></div>
+                  <button id="dismissWorkspaceContext" type="button">Got it</button>
+                </div>
+                <h4 id="workspaceContextTitle"></h4>
+                <p id="workspaceContextBody"></p>
+                <div class="context-learning-calculation" id="workspaceContextCalculation" hidden></div>
+                <div class="context-learning-footer">
+                  <button id="workspaceContextAction" type="button" hidden></button>
+                  <button id="workspaceContextLesson" type="button" hidden>Read the full lesson →</button>
+                </div>
+                <p class="context-learning-signature" id="workspaceContextSignature"></p>
               </div>
 
               <div class="workspace-observation-action" id="workspaceObservationAction" hidden>
@@ -780,6 +795,12 @@
                 <p id="snapshotInsightSummary">One purchase is useful context, but not enough evidence to call a trend.</p>
                 <div class="snapshot-insight-detail" id="snapshotInsightDetail">
                   <p id="snapshotInsightReason"></p>
+                  <div class="snapshot-context-learning" id="snapshotContextLearning" hidden>
+                <span>One thing worth knowing</span>
+                <h4 id="snapshotContextTitle"></h4>
+                <p id="snapshotContextBody"></p>
+                <small id="snapshotContextConfidence"></small>
+              </div>
                 </div>
               </section>
 
