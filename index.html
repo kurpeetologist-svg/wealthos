@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.11.0</title>
+  <title>WealthOS Private Preview v0.12.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="desk-pending">
   <header class="brandbar">
     <a class="brand" href="#lobby">Wealth<span>OS</span></a>
     <div class="brand-actions">
@@ -21,7 +21,7 @@
 
   <main>
     <section class="lobby" id="lobby">
-      <div class="lobby-inner">
+      <div class="lobby-inner"><div class="desk-assembly-label" id="deskAssemblyLabel">Preparing your financial desk…</div>
         <h1 id="greeting">Good morning!</h1>
         <p class="reflection" id="reflection">Let's see where you stand today.</p>
 
@@ -65,7 +65,7 @@
           </button>
         </div>
 
-        <section class="financial-ledger material-sheet material-ledger" id="financialLedger" hidden aria-label="Current financial position"><span class="sheet-tab">Current month</span>
+        <section class="financial-ledger material-sheet material-ledger desk-object desk-paycheck" id="financialLedger" hidden aria-label="Current financial position"><span class="sheet-tab">Current month</span>
           <div class="ledger-heading">
             <div><p class="ledger-kicker">Current position</p><h3>This month at a glance</h3></div>
             <span class="ledger-currency" id="ledgerCurrency">USD</span>
@@ -81,6 +81,22 @@
             <button class="definition-toggle" id="flexibleDefinitionToggle" type="button" aria-expanded="false">What does “remaining” mean? <b>+</b></button>
             <div class="definition-detail"><p><strong>Remaining</strong> is income minus the spending recorded for the month. It is not the same as disposable cash unless all obligations have been entered.</p></div>
           </div>
+        </section>
+
+        <section class="savings-envelope desk-object desk-envelope" id="savingsEnvelope" hidden>
+          <div class="envelope-flap" aria-hidden="true"></div>
+          <div class="envelope-body">
+            <div>
+              <p class="envelope-kicker">Savings envelope</p>
+              <h3 id="envelopeTitle">Your future fund</h3>
+              <p id="envelopeContext">Add a goal or emergency-fund target to begin.</p>
+            </div>
+            <div class="envelope-amount">
+              <span id="envelopeLabel">Saved</span>
+              <strong id="envelopeValue">—</strong>
+            </div>
+          </div>
+          <button class="envelope-action" id="envelopeAction" type="button">Open envelope <span>→</span></button>
         </section>
 
         <div class="signal-grid" id="signalGrid" hidden>
@@ -245,7 +261,7 @@
             <p>One useful idea to carry into your next financial decision.</p>
           </div>
 
-          <article class="lesson-card material-sheet material-notebook" id="lessonCard"><span class="bookmark-tab" aria-hidden="true"></span>
+          <article class="lesson-card material-sheet material-notebook desk-object desk-lesson" id="lessonCard"><span class="bookmark-tab" aria-hidden="true"></span>
             <div class="lesson-side-rail" aria-hidden="true">
               <span>01</span>
               <span>READ</span>
@@ -275,7 +291,7 @@
           </article>
         </section>
 
-        <section class="checkin-section" id="checkin">
+        <section class="checkin-section desk-object desk-checkin" id="checkin">
           <div class="checkin-heading">
             <div>
               <div class="material-label"><span class="material-mark form-mark"></span><p class="eyebrow">Working form</p></div>
@@ -328,7 +344,7 @@
           </div>
         </section>
 
-        <section class="timeline-section" id="timeline">
+        <section class="timeline-section desk-object desk-timeline" id="timeline">
           <div class="timeline-heading">
             <div>
               <div class="material-label"><span class="material-mark folder-mark"></span><p class="eyebrow">Filed record</p></div>
@@ -350,7 +366,7 @@
           <div class="timeline-groups filed-records" id="timelineGroups" hidden></div>
         </section>
 
-        <section class="snapshot-section" id="spendingSnapshot">
+        <section class="snapshot-section desk-object desk-receipt" id="spendingSnapshot">
           <div class="snapshot-heading">
             <div>
               <div class="material-label"><span class="material-mark receipt-mark"></span><p class="eyebrow">Receipt summary</p></div>
@@ -606,7 +622,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.11.0</span>
+    <span>Version 0.12.0</span>
   </footer>
 
   <script src="script.js"></script>

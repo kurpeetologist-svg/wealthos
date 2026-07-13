@@ -1,0 +1,46 @@
+# WealthOS Design System v1.0
+
+## Core Philosophy
+**Build confidence with money, one decision at a time.**
+
+## Object Language
+Paychecks, receipts, envelopes, folders, statements, journals, planners, and lesson cards.
+
+## Motion Language
+Slide, unfold, stamp, stack, file, clip, settle, open, and land.
+
+## Interaction Language
+Every screen answers: **What can I do here?**
+
+## Writing Language
+Calm, encouraging, contextual, educational, and never judgmental.
+
+## Visual Language
+Minimal, editorial, tactile, and modern. Use meaningful financial artifacts rather than flashy fintech graphics.
+
+## First-Login Assembly
+1. Greeting appears
+2. Paycheck slides in
+3. Receipt lands
+4. Savings envelope appears
+5. Lesson card clips into place
+6. Timeline journal slides into view
+7. Check-in form settles
+8. Workspace becomes still
+
+Target duration: 600–800 ms.
+
+## Accumulation Principle
+Receipts stack, lessons form a library, contributions fill envelopes, and Timeline chapters fill the journal.
+
+## Product Rules
+1. Every number needs context.
+2. Every Signal needs a source.
+3. Every major object needs an action.
+4. Intelligence must be earned.
+5. Automation is a convenience, not a requirement.
+6. WealthOS never shames.
+7. Design with financial materials, not financial decoration.
+8. Cards are working surfaces, not containers for reports.
+9. Motion should explain, never entertain.
+10. Every visit should leave the user more confident or informed.

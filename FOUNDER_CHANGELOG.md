@@ -64,3 +64,27 @@ WealthOS needs both.
 ### Principle
 
 **Cards are working surfaces, not containers for reports.**
+
+## v0.12.0 — The Financial Desk
+
+### Why this exists
+We formalized the WealthOS Design System v1.0 around one metaphor:
+
+> **Your financial life deserves a place to live.**
+
+### What changed
+- The Financial Desk assembles through motion.
+- Paycheck slides in.
+- Receipt lands.
+- Savings envelope appears.
+- Lesson card clips into place.
+- Timeline journal slides into view.
+- Check-in form settles.
+- Reduced-motion preferences are respected.
+- The Design System v1.0 is stored with the project.
+
+### Core Philosophy
+**Build confidence with money, one decision at a time.**
+
+### Principle
+**Motion should explain, never entertain.**

@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.11.0-data';
-const LEGACY_KEYS=['wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.12.0-data';
+const LEGACY_KEYS=['wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -80,7 +80,7 @@ function stats(h){
 }
 function showState(isReturning){
   $('firstVisitLobby').hidden=isReturning;$('returningLobby').hidden=!isReturning;
-  $('firstVisitFocus').hidden=isReturning;$('financialLedger').hidden=!isReturning;$('signalGrid').hidden=!isReturning;$('continueExploring').hidden=!isReturning;
+  $('firstVisitFocus').hidden=isReturning;$('financialLedger').hidden=!isReturning;$('savingsEnvelope').hidden=!isReturning;$('signalGrid').hidden=!isReturning;$('continueExploring').hidden=!isReturning;
   $('firstVisitCheckin').hidden=isReturning;$('returningCheckin').hidden=!isReturning;$('connectionChoice').hidden=!isReturning;
   $('firstVisitTimeline').hidden=isReturning;$('timelineGroups').hidden=!isReturning;
   $('firstVisitSnapshot').hidden=isReturning;$('returningSnapshot').hidden=!isReturning;
@@ -190,14 +190,44 @@ function renderFinancialLedger(data,fmt){
     ? 'Add monthly income during a Check-in to place spending, saving, and remaining funds in context.'
     : `Recorded spending represents ${(spending/income*100).toFixed(0)}% of monthly income. Recorded saving represents ${(saving/income*100).toFixed(0)}%.`;
 }
+
+function assembleFinancialDesk(){
+  const body=document.body;
+  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  body.classList.remove('desk-ready','desk-assembling');
+  body.classList.add('desk-pending');
+  if(reduce){requestAnimationFrame(()=>{body.classList.remove('desk-pending');body.classList.add('desk-ready')});return}
+  setTimeout(()=>{body.classList.remove('desk-pending');body.classList.add('desk-assembling')},120);
+  setTimeout(()=>{body.classList.remove('desk-assembling');body.classList.add('desk-ready')},800);
+}
+function renderSavingsEnvelope(data,fmt){
+  const hasChallenge=data.challenge.enabled&&n(data.challenge.target)>0;
+  const hasEmergency=n(data.emergency?.balance)>0||n(data.emergency?.essentials)>0;
+  if(hasChallenge){
+    const saved=n(data.challenge.saved),target=n(data.challenge.target);
+    $('envelopeTitle').textContent=data.challenge.name||'Savings goal';
+    $('envelopeContext').textContent=target>0?`${Math.min(100,Math.round(saved/target*100))}% of your target is currently saved.`:'Add a target to begin.';
+    $('envelopeLabel').textContent='Saved';$('envelopeValue').textContent=fmt.format(saved);
+  }else if(hasEmergency){
+    $('envelopeTitle').textContent='Emergency fund';
+    $('envelopeContext').textContent='Money set aside to give you more options when life changes.';
+    $('envelopeLabel').textContent='Current balance';$('envelopeValue').textContent=fmt.format(n(data.emergency.balance));
+  }else{
+    $('envelopeTitle').textContent='Your future fund';
+    $('envelopeContext').textContent='Create a Savings Challenge or emergency-fund target when you are ready.';
+    $('envelopeLabel').textContent='Saved';$('envelopeValue').textContent=fmt.format(0);
+  }
+}
 function render(data){
   greeting();
   renderLesson();
   const returning=hasMeaningfulData(data);
   showState(returning);
+  assembleFinancialDesk();
   if(!returning)return;
   const fmt=money(data.profile.currency),h=sortedHistory(data),s=stats(h),cur=n(s.cur.amount),prev=s.prev?n(s.prev.amount):null,delta=prev===null?null:cur-prev,pct=prev>0?delta/prev*100:null,source=data.income.source||'Income';
   renderFinancialLedger(data,fmt);
+  renderSavingsEnvelope(data,fmt);
   $('incomeSlipMonth').textContent=formatMonth(data.income.currentMonth);
   $('incomeSlipSource').textContent=source;
   $('incomeSlipAmount').textContent=fmt.format(cur);
@@ -498,6 +528,15 @@ $('progressAction').addEventListener('click',()=>{
 $('nextAction').addEventListener('click',routeNextAction);
 $('nextPreviewButton').addEventListener('click',event=>{event.stopPropagation();routeNextAction()});
 $('nextPreviewButton').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();routeNextAction()}});
+$('envelopeAction').addEventListener('click',()=>{
+  const envelope=$('savingsEnvelope');
+  envelope.classList.toggle('open');
+  const data=loadData();
+  setTimeout(()=>{
+    if(data.challenge.enabled&&n(data.challenge.target)>0)openContribution();
+    else openAboutSection('Emergency fund');
+  },envelope.classList.contains('open')?180:0);
+});
 $('closeContribution').addEventListener('click',closeContribution);
 $('cancelContribution').addEventListener('click',closeContribution);
 $('contributionForm').addEventListener('submit',saveContribution);
