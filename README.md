@@ -1,43 +1,43 @@
-# WealthOS v0.14.0 — Quick Add
+# WealthOS v0.14.1 — What WealthOS Noticed
 
-## Quick Add
-Record amount, date, category, merchant or description, and an optional note.
+This patch restores interpretation to Spending Snapshot.
 
-Each locally stored record updates Today, This Week, This Month, Spending Snapshot, Timeline, and Return Memory.
+## Snapshot hierarchy
 
-## Spending Snapshot
-- identifies the data source
-- shows the last update
-- separates records from WealthOS calculations
-- offers timeframe-specific input actions
-- displays recent purchase records
-- removes duplicated metrics
+1. Facts
+2. What WealthOS noticed
+3. Supporting records
 
-Source hierarchy:
-1. Quick Add records
-2. Weekly or Monthly Check-in totals
-3. No data yet
+## Rule-based insights
 
-## Lesson
-Lesson now teaches concrete financial-literacy concepts across foundations, cash flow, saving, debt, credit, investing, taxes, insurance, economics, planning, and benefits.
+WealthOS can now surface observations such as:
 
-“Keep in mind” is now **Key idea**.
+- restaurant spending decreased compared with last month
+- a category increased compared with last month
+- a category is holding steady
+- the largest current category
+- the largest category today or this week
+
+The application only describes a trend when comparable history exists. Otherwise, it clearly says that more history is needed.
 
 ## Principle
-**Users enter facts. WealthOS provides context.**
 
-## Privacy
-Quick Add records remain in local browser storage during the Private Preview.
+**Data tells the user what happened. Interpretation helps them understand why it matters.**
+
+## Retention
+
+Saved data migrates from v0.14.0 and earlier releases.
 
 ## Publish
+
 Replace:
+
 - index.html
 - styles.css
 - script.js
 - README.md
 - FOUNDER_CHANGELOG.md
-- PROTECTED_IDEAS.md
-- WEALTHOS_DESIGN_SYSTEM.md
 
 Suggested commit:
-`Add Quick Add and clarify Spending Snapshot sources`
+
+`Restore interpretation with What WealthOS Noticed`

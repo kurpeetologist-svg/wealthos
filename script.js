@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.14.0-data';
-const LEGACY_KEYS=['wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.14.1-data';
+const LEGACY_KEYS=['wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -356,6 +356,107 @@ function renderTimeline(data,h,fmt,source){
   });
 
 }
+
+function previousMonthKey(date=new Date()){
+  const d=new Date(date.getFullYear(),date.getMonth()-1,1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function currentMonthKey(date=new Date()){
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+}
+
+function categoryTotalsForMonth(data,monthKey){
+  const totals=new Map();
+  (data.expenses||[])
+    .filter(item=>String(item.date).slice(0,7)===monthKey)
+    .forEach(item=>totals.set(item.category,(totals.get(item.category)||0)+n(item.amount)));
+  return totals;
+}
+
+function strongestCategory(totals){
+  return [...totals.entries()].sort((a,b)=>b[1]-a[1])[0]||null;
+}
+
+function renderSnapshotInsight(data,fmt,period){
+  const currentKey=currentMonthKey();
+  const previousKey=previousMonthKey();
+  const currentTotals=categoryTotalsForMonth(data,currentKey);
+  const previousTotals=categoryTotalsForMonth(data,previousKey);
+  const strongest=strongestCategory(currentTotals);
+
+  let title='A clearer pattern will appear as more records are added.';
+  let summary='One purchase is useful context, but not enough evidence to call a trend.';
+  let reason='WealthOS waits for enough comparable history before describing spending as higher, lower, or unusual.';
+
+  if(strongest){
+    const [category,currentAmount]=strongest;
+    const previousAmount=previousTotals.get(category)||0;
+    const currentCount=(data.expenses||[]).filter(item=>String(item.date).slice(0,7)===currentKey&&item.category===category).length;
+
+    if(previousAmount>0){
+      const change=(currentAmount-previousAmount)/previousAmount*100;
+      const absolute=Math.abs(currentAmount-previousAmount);
+
+      if(Math.abs(change)<5){
+        title=`${category} spending is holding fairly steady this month.`;
+        summary=`You recorded ${fmt.format(currentAmount)} this month compared with ${fmt.format(previousAmount)} last month.`;
+        reason=`The difference is ${fmt.format(absolute)}, which is less than 5% of last month’s ${category.toLowerCase()} total.`;
+      }else if(change<0){
+        title=`Your ${category.toLowerCase()} spending decreased ${Math.abs(change).toFixed(0)}%.`;
+        summary=`You recorded ${fmt.format(currentAmount)} this month compared with ${fmt.format(previousAmount)} last month.`;
+        reason=`That is ${fmt.format(absolute)} less than the previous month. WealthOS is comparing Quick Add records in the same category across two months.`;
+      }else{
+        title=`Your ${category.toLowerCase()} spending increased ${change.toFixed(0)}%.`;
+        summary=`You recorded ${fmt.format(currentAmount)} this month compared with ${fmt.format(previousAmount)} last month.`;
+        reason=`That is ${fmt.format(absolute)} more than the previous month. This is an observation, not a judgment.`;
+      }
+    }else if(currentCount>=3){
+      title=`${category} is your largest recorded spending category this month.`;
+      summary=`You recorded ${fmt.format(currentAmount)} across ${currentCount} purchases.`;
+      reason=`There is not yet a comparable ${category.toLowerCase()} total from last month, so WealthOS is describing the current month rather than claiming a trend.`;
+    }else{
+      title=`${category} is currently your largest recorded category.`;
+      summary=`You have ${currentCount} recorded purchase${currentCount===1?'':'s'} totaling ${fmt.format(currentAmount)}.`;
+      reason='More history is needed before WealthOS can compare this category across time.';
+    }
+  }
+
+  if(period==='daily'){
+    const todayRecords=expensesForPeriod(data,'daily');
+    if(todayRecords.length){
+      const todayTotals=new Map();
+      todayRecords.forEach(item=>todayTotals.set(item.category,(todayTotals.get(item.category)||0)+n(item.amount)));
+      const top=strongestCategory(todayTotals);
+      if(top){
+        title=`${top[0]} accounts for most of today’s recorded spending.`;
+        summary=`${fmt.format(top[1])} of today’s total is in ${top[0].toLowerCase()}.`;
+        reason='Daily observations describe today’s composition only. WealthOS does not treat one day as a lasting habit.';
+      }
+    }
+  }
+
+  if(period==='weekly'){
+    const weekRecords=expensesForPeriod(data,'weekly');
+    if(weekRecords.length>=2){
+      const weekTotals=new Map();
+      weekRecords.forEach(item=>weekTotals.set(item.category,(weekTotals.get(item.category)||0)+n(item.amount)));
+      const top=strongestCategory(weekTotals);
+      if(top){
+        const weekTotal=expenseTotal(weekRecords);
+        const share=weekTotal>0?top[1]/weekTotal*100:0;
+        title=`${top[0]} is this week’s largest recorded category.`;
+        summary=`It represents ${share.toFixed(0)}% of the spending you recorded this week.`;
+        reason=`WealthOS calculated this from ${weekRecords.length} Quick Add records in the current week.`;
+      }
+    }
+  }
+
+  $('snapshotInsightTitle').textContent=title;
+  $('snapshotInsightSummary').textContent=summary;
+  $('snapshotInsightReason').textContent=reason;
+}
+
 function renderSnapshot(data,fmt,period){
   const labels={daily:'Today',weekly:'This week',monthly:'This month'},source=spendingSource(data,period),amount=source.amount,records=source.records,monthlyIncome=n(data.income?.current);
   let monthlyEquivalent=amount;if(period==='daily')monthlyEquivalent=amount*30;if(period==='weekly')monthlyEquivalent=amount*4.345;
@@ -378,7 +479,7 @@ function renderSnapshot(data,fmt,period){
     $('metricThreeLabel').textContent='Remaining after spending';$('metricThreeValue').textContent=monthlyIncome>0?fmt.format(remaining):'—';
     $('snapshotUpdateButton').textContent='Update monthly check-in →';
   }
-  $('snapshotUpdateButton').dataset.period=period;renderRecentReceipts(data,period,fmt);
+  $('snapshotUpdateButton').dataset.period=period;renderSnapshotInsight(data,fmt,period);renderRecentReceipts(data,period,fmt);
   $('snapshotNote').textContent=amount===0?'Users enter the spending facts. WealthOS calculates the context.':'These figures are calculated from your records and check-ins. They are not separate inputs.';
   document.querySelectorAll('.period-button').forEach(button=>button.classList.toggle('active',button.dataset.period===period));
 }
@@ -653,6 +754,13 @@ $('cancelQuickAdd').addEventListener('click',closeQuickAdd);
 $('quickAddModal').addEventListener('click',event=>{if(event.target===$('quickAddModal'))closeQuickAdd()});
 $('quickAddForm').addEventListener('submit',saveQuickAdd);
 $('expenseToastView').addEventListener('click',()=>{$('expenseToast').classList.remove('show');location.hash='spendingSnapshot'});
+
+$('snapshotInsightWhy').addEventListener('click',()=>{
+  const insight=$('snapshotInsight');
+  const open=insight.classList.toggle('open');
+  $('snapshotInsightWhy').setAttribute('aria-expanded',String(open));
+  $('snapshotInsightWhy').textContent=open?'Why? ×':'Why? +';
+});
 $('snapshotUpdateButton').addEventListener('click',()=>{
   const period=$('snapshotUpdateButton').dataset.period||'weekly';
   if(period==='daily'){openQuickAdd();return}

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.14.0</title>
+  <title>WealthOS Private Preview v0.14.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -420,6 +420,18 @@
 
               <p class="calculated-label">Calculated by WealthOS</p>
 
+              <section class="snapshot-insight" id="snapshotInsight">
+                <div class="snapshot-insight-heading">
+                  <span>What WealthOS noticed</span>
+                  <button id="snapshotInsightWhy" type="button" aria-expanded="false">Why? +</button>
+                </div>
+                <h3 id="snapshotInsightTitle">A clearer pattern will appear as more records are added.</h3>
+                <p id="snapshotInsightSummary">One purchase is useful context, but not enough evidence to call a trend.</p>
+                <div class="snapshot-insight-detail" id="snapshotInsightDetail">
+                  <p id="snapshotInsightReason"></p>
+                </div>
+              </section>
+
               <div class="recent-receipts" id="recentReceipts">
                 <div class="recent-receipts-heading">
                   <div>
@@ -758,7 +770,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.14.0</span>
+    <span>Version 0.14.1</span>
   </footer>
 
   <script src="script.js"></script>

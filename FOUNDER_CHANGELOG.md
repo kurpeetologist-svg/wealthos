@@ -140,3 +140,25 @@ Quick Add brings WealthOS into the moment when financial life actually happens.
 
 ### Principle
 **Users enter facts. WealthOS provides context.**
+
+## v0.14.1 — What WealthOS Noticed
+
+### Why this exists
+
+Quick Add made Spending Snapshot much stronger at reporting facts and showing supporting records.
+
+However, the interpretation layer was lost.
+
+WealthOS should not only show users their data. It should help them notice meaningful changes without judging them.
+
+### What changed
+
+- Spending Snapshot now includes **What WealthOS noticed**.
+- Current categories can be compared with the same categories from the prior month.
+- Daily and weekly views receive timeframe-specific observations.
+- Every insight includes an optional explanation of how it was calculated.
+- WealthOS explicitly avoids claiming a trend when history is insufficient.
+
+### Principle
+
+**Data tells the user what happened. Interpretation helps them understand why it matters.**
