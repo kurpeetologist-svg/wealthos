@@ -149,3 +149,32 @@ A Roadmap should show:
 2. where they stand today
 3. the next milestone
 4. a plausible path forward
+
+## Personality Principles
+
+1. **Speak like a thoughtful friend, not a financial institution.**
+   WealthOS is calm, warm, precise, witty, and occasionally funny—but never offensive.
+
+2. **Notice before advising.**
+   Observation comes before recommendation.
+
+3. **Teach through context, never lectures.**
+   Financial concepts should emerge naturally from what the user is already doing.
+
+4. **Reduce anxiety, not increase urgency.**
+   Avoid guilt, fear, red-alert language, and moral judgments.
+
+5. **Every screen answers one question.**
+   “What can I understand or do next?”
+
+6. **Turn financial data into financial confidence.**
+   Numbers are the starting point, not the destination.
+
+7. **Humor must earn its place.**
+   Use it to clarify, humanize, or lower tension. Never use it to make light of debt, hardship, taxes owed, missed payments, or financial distress.
+
+### Humor rule
+
+A small smile can reduce anxiety.
+
+A joke should never reduce trust.

@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.17.0-data';
-const LEGACY_KEYS=['wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.18.0-data';
+const LEGACY_KEYS=['wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -628,6 +628,7 @@ function renderWorkspace(data,fmt){
   const focus=chooseWorkspaceFocus(data);
   $('workspaceFocusTitle').textContent=focus.title;
   $('workspaceFocusText').textContent=focus.text;
+  $('workspaceFocusAside').textContent=WEALTHOS_VOICE.focus[focus.action]||WEALTHOS_VOICE.focus.snapshot;
   $('workspaceFocusAction').innerHTML=`${focus.label} <b>→</b>`;
   $('workspaceFocusAction').dataset.action=focus.action;
   $('workspaceFocusTime').textContent=focus.time;
@@ -644,6 +645,9 @@ function renderWorkspace(data,fmt){
   $('workspaceSavedLabel').textContent=roadmap?'Saved toward Roadmap':'Emergency savings';
   $('workspaceRoadmapName').textContent=roadmap?.name||'Future fund';
   $('workspaceRoadmapProgress').textContent=roadmap&&n(roadmap.target)>0?`${Math.min(100,Math.round(n(roadmap.saved)/n(roadmap.target)*100))}% complete`:'No Roadmap yet';
+  $('paycheckAside').textContent=deterministicPick(WEALTHOS_VOICE.documents.paycheck,data.income.currentMonth||localDateKey());
+  $('receiptAside').textContent=deterministicPick(WEALTHOS_VOICE.documents.receipt,`${todayRecords.length}-${localDateKey()}`);
+  $('envelopeAside').textContent=deterministicPick(WEALTHOS_VOICE.documents.envelope,roadmap?.id||'none');
 
   renderWorkspaceActivity(data,fmt);
   renderRoadmaps(data,fmt);
@@ -652,6 +656,7 @@ function renderWorkspace(data,fmt){
   const observation=buildObservation(data,fmt,'daily');
   $('workspaceObservationTitle').textContent=observation.title;
   $('workspaceObservationSummary').textContent=observation.summary;
+  $('workspaceObservationWit').textContent=observationWit(observation,'daily');
 
   const continuation=chooseWorkspaceContinue(data);
   $('workspaceContinueTitle').textContent=continuation.title;
@@ -772,6 +777,149 @@ function timelineEvent(title,description,amount,isFresh=false){
   a.append(b,story);b.onclick=()=>{const open=a.classList.toggle('open');b.setAttribute('aria-expanded',String(open))};return a;
 }
 
+
+
+const WEALTHOS_VOICE={
+  focus:{
+    quickAdd:'No spreadsheet ceremony required.',
+    weekly:'One week is a clue. A few weeks become a pattern.',
+    monthly:'Close the month. Keep the drama out of it.',
+    contribution:'Future you has excellent taste.',
+    snapshot:'The numbers are ready. No calculator face required.'
+  },
+
+  documents:{
+    paycheck:[
+      'Money came in. We noticed.',
+      'The plot has income.',
+      'A very welcome character.'
+    ],
+    receipt:[
+      'Today left a paper trail.',
+      'Tiny records. Better context.',
+      'Receipts: less glamorous, very useful.'
+    ],
+    envelope:[
+      'Future you says thanks.',
+      'Assigned to something that matters.',
+      'Not gone. Just given a job.'
+    ]
+  },
+
+  category:{
+    Coffee:[
+      'Coffee is not a moral failing. It is, however, very trackable.',
+      'Caffeine happened. Context followed.',
+      'A small cup can still leave a pattern.'
+    ],
+    'Food & Dining':[
+      'Dinner has entered the chat.',
+      'One meal is a moment. Repetition becomes a pattern.',
+      'No food shaming here. Just useful context.'
+    ],
+    Groceries:[
+      'One receipt. Several future meals.',
+      'Groceries often look bigger because they work overtime.',
+      'This purchase may feed more than one day.'
+    ],
+    Transportation:[
+      'Getting somewhere also costs something.',
+      'Movement has a price tag. Now it has context.',
+      'The destination was not the only thing that moved.'
+    ],
+    Housing:[
+      'The roof is doing a lot of financial heavy lifting.',
+      'Housing: essential, substantial, and rarely shy.',
+      'A fixed expense with main-character energy.'
+    ],
+    Utilities:[
+      'The lights stayed on. The bill showed up.',
+      'Useful, recurring, and not especially mysterious.',
+      'Modern life sent another invoice.'
+    ],
+    Shopping:[
+      'The bag is cute. The context is useful.',
+      'A purchase can be fun and still deserve perspective.',
+      'Retail therapy has now met recordkeeping.'
+    ],
+    Health:[
+      'Health spending is rarely the fun kind. It still deserves clarity.',
+      'Taking care of yourself counts as financial activity too.',
+      'Necessary does not always mean predictable.'
+    ],
+    Entertainment:[
+      'Fun has a line item. That is allowed.',
+      'Enjoyment is part of a financial life too.',
+      'Not every dollar needs a serious face.'
+    ],
+    Travel:[
+      'Future memories often start as present-day expenses.',
+      'The trip is temporary. The planning is doing the work.',
+      'A boarding pass is just a Roadmap with better views.'
+    ],
+    Subscriptions:[
+      'Small monthly charges love becoming annual totals.',
+      'A tiny recurring charge can have impressive stamina.',
+      'Subscriptions are quiet. Their totals are less quiet.'
+    ],
+    Taxes:[
+      'Taxes: rarely delightful, frequently relevant.',
+      'The money did not vanish. It had an assignment.',
+      'Not glamorous. Very much part of the story.'
+    ],
+    Debt:[
+      'Debt gets less mysterious when principal and interest stop hiding together.',
+      'Borrowed money comes with a supporting character named interest.',
+      'Every payment has two jobs: cost and progress.'
+    ],
+    Insurance:[
+      'Paying for protection is not exciting. That is often the point.',
+      'A boring premium can protect against a very un-boring bill.',
+      'Risk management rarely gets invited to parties.'
+    ],
+    Investment:[
+      'Growth likes time. It also dislikes guarantees.',
+      'Investing is patience wearing a little risk.',
+      'The future is uncertain. Diversification knows.'
+    ],
+    Other:[
+      'Every category starts somewhere.',
+      'Uncategorized does not mean unimportant.',
+      'Mystery expense, meet context.'
+    ]
+  },
+
+  observation:{
+    limited:'Not a trend yet. Just a very well-documented moment.',
+    steady:'Steady is not boring. Steady is information.',
+    increase:'Higher does not automatically mean worse. Context first.',
+    decrease:'Lower is a change, not automatically a victory.',
+    daily:'Today is one page, not the whole book.',
+    weekly:'A week is useful. A pattern needs company.'
+  }
+};
+
+function deterministicPick(items,key=''){
+  if(!Array.isArray(items)||!items.length)return '';
+  const score=String(key).split('').reduce((sum,char)=>sum+char.charCodeAt(0),0);
+  return items[score%items.length];
+}
+
+function voiceForCategory(category,key=''){
+  return deterministicPick(
+    WEALTHOS_VOICE.category[category]||WEALTHOS_VOICE.category.Other,
+    `${category}-${key}`
+  );
+}
+
+function observationWit(observation,period){
+  const title=String(observation?.title||'').toLowerCase();
+  if(title.includes('clearer pattern'))return WEALTHOS_VOICE.observation.limited;
+  if(title.includes('steady'))return WEALTHOS_VOICE.observation.steady;
+  if(title.includes('increased'))return WEALTHOS_VOICE.observation.increase;
+  if(title.includes('decreased'))return WEALTHOS_VOICE.observation.decrease;
+  return period==='daily'?WEALTHOS_VOICE.observation.daily:period==='weekly'?WEALTHOS_VOICE.observation.weekly:WEALTHOS_VOICE.observation.limited;
+}
 
 const CONTEXT_LIBRARY={
   expense:{
@@ -901,13 +1049,25 @@ function normalizeContextText(value){
 
 function expenseContextEntry(expense){
   const category=expense.category||'Other';
-  if(CONTEXT_LIBRARY.expense[category])return CONTEXT_LIBRARY.expense[category];
+  let resolvedCategory=category;
+  let entry=CONTEXT_LIBRARY.expense[category]||null;
 
-  const haystack=normalizeContextText(`${expense.merchant||''} ${expense.note||''} ${category}`);
-  for(const entry of Object.values(CONTEXT_LIBRARY.expense)){
-    if((entry.aliases||[]).some(alias=>haystack.includes(normalizeContextText(alias))))return entry;
+  if(!entry){
+    const haystack=normalizeContextText(`${expense.merchant||''} ${expense.note||''} ${category}`);
+    for(const [name,candidate] of Object.entries(CONTEXT_LIBRARY.expense)){
+      if((candidate.aliases||[]).some(alias=>haystack.includes(normalizeContextText(alias)))){
+        entry=candidate;
+        resolvedCategory=name;
+        break;
+      }
+    }
   }
-  return CONTEXT_LIBRARY.expense.Other;
+
+  entry=entry||CONTEXT_LIBRARY.expense.Other;
+  return{
+    ...entry,
+    wit:voiceForCategory(resolvedCategory,`${expense.merchant||''}-${expense.date||''}`)
+  };
 }
 
 function contextForExpense(expense){
@@ -915,16 +1075,16 @@ function contextForExpense(expense){
 }
 
 function contextForCheckin(type,data){
-  if(type==='weekly')return CONTEXT_LIBRARY.checkin.weekly;
+  if(type==='weekly')return{...CONTEXT_LIBRARY.checkin.weekly,wit:'One week is useful. A pattern needs company.'};
 
   const latest=(data.checkins||[]).at(-1)||{};
   const income=n(latest.income);
   const spent=n(latest.spent);
   const saved=n(latest.saved);
 
-  if(saved>0)return CONTEXT_LIBRARY.checkin.monthlySaving;
-  if(income>0&&spent>income)return CONTEXT_LIBRARY.checkin.monthlyNegative;
-  return CONTEXT_LIBRARY.checkin.monthly;
+  if(saved>0)return{...CONTEXT_LIBRARY.checkin.monthlySaving,wit:'Future you has excellent taste.'};
+  if(income>0&&spent>income)return{...CONTEXT_LIBRARY.checkin.monthlyNegative,wit:'No panic. Just a number worth understanding.'};
+  return{...CONTEXT_LIBRARY.checkin.monthly,wit:'Cash flow: less glamorous than cash, more useful than flow charts.'};
 }
 
 function localDateKey(date=new Date()){const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');return `${y}-${m}-${d}`}
@@ -964,6 +1124,7 @@ function showExpenseToast(expense,data){
   const context=contextForExpense(expense);
   $('expenseContextTitle').textContent=context.concept;
   $('expenseContextText').textContent=context.explanation;
+  $('expenseContextWit').textContent=context.wit||'';
   $('expenseToast').classList.add('show');
   clearTimeout(expenseToastTimer);
   expenseToastTimer=setTimeout(()=>$('expenseToast').classList.remove('show'),9000);
@@ -1394,6 +1555,7 @@ function openLoop(type,data){
   $('loopContextText').textContent=payload.context;
   $('loopActionContextTitle').textContent=payload.actionContext.concept;
   $('loopActionContext').textContent=payload.actionContext.explanation;
+  $('loopActionContextWit').textContent=payload.actionContext.wit||'';
   $('loopLessonCategory').textContent=payload.lesson.category;
   $('loopLessonTitle').textContent=payload.lesson.title;
   $('loopLessonSummary').textContent=payload.lesson.summary;

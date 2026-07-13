@@ -2623,3 +2623,104 @@ body.desk-ready .desk-object{opacity:1;transform:none}
     grid-template-columns:1fr;
   }
 }
+
+/* v0.18.0 — WealthOS Personality & Craft */
+
+.workspace-focus-aside{
+  position:relative;
+  z-index:1;
+  max-width:620px;
+  margin:-12px 0 24px!important;
+  color:rgba(255,255,255,.52)!important;
+  font-size:.78rem!important;
+  font-style:italic;
+}
+
+.workspace-signature{
+  margin:0 0 10px!important;
+  color:var(--evergreen)!important;
+  font-size:.66rem!important;
+  font-weight:800;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+
+.workspace-wit{
+  margin:18px 0 0!important;
+  padding-top:14px;
+  border-top:1px solid rgba(61,126,70,.18);
+  color:var(--evergreen)!important;
+  font-size:.79rem!important;
+  font-style:italic;
+}
+
+.context-small-smile{
+  margin-top:12px!important;
+  color:var(--evergreen)!important;
+  font-size:.78rem!important;
+  font-style:italic;
+}
+
+.financial-document{
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+
+.financial-document:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 38px rgba(27,32,28,.08);
+}
+
+.paycheck-document .document-topline::before,
+.receipt-document .document-topline::before,
+.envelope-document .document-topline::before{
+  content:"";
+  width:7px;
+  height:7px;
+  margin-right:3px;
+  border-radius:50%;
+  background:var(--evergreen);
+}
+
+.document-topline{
+  justify-content:flex-start;
+}
+
+.document-topline small{
+  margin-left:auto;
+}
+
+.roadmap-card{
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+
+.roadmap-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 18px 40px rgba(27,32,28,.09);
+}
+
+.workspace-panel,
+.memory-card{
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+
+.workspace-panel:hover,
+.memory-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 14px 34px rgba(27,32,28,.07);
+}
+
+@media(prefers-reduced-motion:reduce){
+  .financial-document,
+  .roadmap-card,
+  .workspace-panel,
+  .memory-card{
+    transition:none;
+  }
+
+  .financial-document:hover,
+  .roadmap-card:hover,
+  .workspace-panel:hover,
+  .memory-card:hover{
+    transform:none;
+  }
+}

@@ -284,3 +284,30 @@ Roadmaps give that progress a destination.
 ### Principle
 
 **Financial Memory shows where the user has been. Roadmaps show where they are going.**
+
+## v0.18.0 — Personality & Craft
+
+### Why this exists
+
+Minimal does not have to mean sterile.
+
+WealthOS needed a voice that could carry empathy, intelligence, restraint, and a small amount of humor without turning financial life into a joke.
+
+### What changed
+
+- Workspace Focus now includes a quiet personality line.
+- Paycheck, Receipt, and Envelope documents use rotating editorial asides.
+- What WealthOS Noticed now includes a signature voice and a subtle human observation.
+- Behind the Number includes category-aware wit.
+- The Context Library and Personality Library remain separate so factual education is never dependent on humor.
+- Hover motion adds tactility without turning the product into a toy.
+
+### What we learned
+
+Humor is useful when it lowers anxiety or makes a concept memorable.
+
+It is harmful when it minimizes a real financial concern or makes the user feel observed rather than understood.
+
+### Principle
+
+**A small smile can reduce anxiety. A joke should never reduce trust.**

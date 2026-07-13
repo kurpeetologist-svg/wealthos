@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.17.0</title>
+  <title>WealthOS Private Preview v0.18.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -80,6 +80,7 @@
             </div>
             <h3 id="workspaceFocusTitle">Record today’s spending.</h3>
             <p id="workspaceFocusText">One small record gives today a clearer financial picture.</p>
+            <p class="workspace-focus-aside" id="workspaceFocusAside"></p>
             <button id="workspaceFocusAction" type="button">Quick Add <b>→</b></button>
           </article>
 
@@ -97,21 +98,21 @@
                   <div class="document-topline"><span>Paycheck</span><small id="workspaceIncomeDate">Current month</small></div>
                   <p id="workspaceIncomeSource">Total income</p>
                   <strong id="workspaceIncome">—</strong>
-                  <div class="document-footer"><span>Income recorded</span><b>Received</b></div>
+                  <div class="document-footer"><span id="paycheckAside">Money came in. We noticed.</span><b>Received</b></div>
                 </article>
 
                 <article class="financial-document receipt-document">
                   <div class="document-topline"><span>Receipt</span><small id="workspaceReceiptCount">0 records</small></div>
                   <p>Today’s total</p>
                   <strong id="workspaceSpentToday">—</strong>
-                  <div class="document-footer"><span>Quick Add activity</span><b>Recorded</b></div>
+                  <div class="document-footer"><span id="receiptAside">Today left a paper trail.</span><b>Recorded</b></div>
                 </article>
 
                 <article class="financial-document envelope-document">
                   <div class="document-topline"><span>Envelope</span><small id="workspaceRoadmapProgress">No roadmap yet</small></div>
                   <p id="workspaceSavedLabel">Saved toward goals</p>
                   <strong id="workspaceSaved">—</strong>
-                  <div class="document-footer"><span id="workspaceRoadmapName">Future fund</span><b>Set aside</b></div>
+                  <div class="document-footer"><span id="workspaceRoadmapName">Future fund</span><b id="envelopeAside">Set aside</b></div>
                 </article>
               </div>
             </article>
@@ -135,8 +136,10 @@
                 </div>
                 <a href="#spendingSnapshot">See context →</a>
               </div>
+              <p class="workspace-signature">WealthOS noticed…</p>
               <p class="workspace-observation-title" id="workspaceObservationTitle"></p>
               <p id="workspaceObservationSummary"></p>
+              <p class="workspace-wit" id="workspaceObservationWit"></p>
             </article>
 
             <article class="workspace-panel workspace-continue">
@@ -758,6 +761,7 @@
       <span>One thing worth knowing…</span>
       <h3 id="expenseContextTitle"></h3>
       <p id="expenseContextText"></p>
+      <p class="context-small-smile" id="expenseContextWit"></p>
     </div>
 
     <div class="expense-toast-actions">
@@ -792,6 +796,7 @@
           <span>One thing worth knowing…</span>
           <h3 id="loopActionContextTitle"></h3>
           <p id="loopActionContext"></p>
+          <p class="context-small-smile" id="loopActionContextWit"></p>
         </div>
 
         <button class="primary-button loop-next" type="button">Continue</button>
@@ -984,7 +989,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.17.0</span>
+    <span>Version 0.18.0</span>
   </footer>
 
   <script src="script.js"></script>
