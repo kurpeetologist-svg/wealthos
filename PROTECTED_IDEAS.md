@@ -20,13 +20,13 @@ Principle:
 
 Let a user test a potential purchase before completing it.
 
-## Quick Log
+## Quick Add — Implemented in v0.14.0
 
 Mobile-first expense entry for purchases made in the moment.
 
-## Daily Spending
+## Daily Spending — Foundation implemented in v0.14.0
 
-Today's spending, today's receipts, and how today rolls into the week and month.
+Today's spending and receipts now roll into weekly and monthly totals. Deeper daily context remains protected for the Context Engine phase.
 
 ## Financial Confidence
 

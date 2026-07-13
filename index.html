@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.13.0</title>
+  <title>WealthOS Private Preview v0.14.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -15,6 +15,9 @@
     <a class="brand" href="#lobby">Wealth<span>OS</span></a>
     <div class="brand-actions">
       <span class="preview-label">Private Preview</span>
+      <button class="quick-add-trigger" id="quickAddTrigger" type="button">
+        <span>Quick Add</span><b>+</b>
+      </button>
       <button class="about-trigger" id="aboutTrigger" type="button" hidden>About You</button>
     </div>
   </header>
@@ -262,7 +265,7 @@
               <div class="material-label"><span class="material-mark bookmark-mark"></span><p class="eyebrow">Bookmarked</p></div>
               <h2>Lesson</h2>
             </div>
-            <p>One useful idea to carry into your next financial decision.</p>
+            <p>One financial concept, explained clearly and without jargon.</p>
           </div>
 
           <article class="lesson-card material-sheet material-notebook desk-object desk-lesson" id="lessonCard"><span class="bookmark-tab" aria-hidden="true"></span>
@@ -287,7 +290,7 @@
                   <p id="lessonWhy"></p>
                 </div>
                 <div>
-                  <span>Keep in mind</span>
+                  <span>Key idea</span>
                   <p id="lessonKeepInMind"></p>
                 </div>
               </div>
@@ -397,22 +400,37 @@
             </div>
 
             <div class="snapshot-card material-sheet material-receipt"><div class="receipt-cut" aria-hidden="true"></div>
-              <p class="snapshot-period" id="snapshotPeriod">This week</p>
+              <div class="snapshot-source-row">
+                <div>
+                  <p class="snapshot-period" id="snapshotPeriod">This week</p>
+                  <p class="snapshot-source" id="snapshotSource">Based on your latest check-in</p>
+                </div>
+                <button class="snapshot-update-button" id="snapshotUpdateButton" type="button">Update spending →</button>
+              </div>
+
               <p class="snapshot-label">You spent</p>
               <div class="snapshot-value" id="snapshotValue">—</div>
               <p class="snapshot-context" id="snapshotContext"></p>
 
-              <div class="receipt-lines" id="receiptLines" aria-label="Spending composition">
-                <div><span>Recorded total</span><strong id="receiptRecorded">—</strong></div>
-                <div><span>Share of income</span><strong id="receiptIncomeShare">—</strong></div>
-                <div><span>Current pace</span><strong id="receiptPace">—</strong></div>
+              <div class="snapshot-metrics" id="snapshotMetrics" aria-label="Calculated spending context">
+                <div><span id="metricOneLabel">Recorded total</span><strong id="metricOneValue">—</strong></div>
+                <div><span id="metricTwoLabel">Share of income</span><strong id="metricTwoValue">—</strong></div>
+                <div><span id="metricThreeLabel">Monthly pace</span><strong id="metricThreeValue">—</strong></div>
               </div>
 
-              <div class="snapshot-horizons">
-                <div><span>Selected period</span><strong id="snapshotSelectedAmount">—</strong></div>
-                <div><span>Monthly pace</span><strong id="snapshotMonthlyPace">—</strong></div>
-                <div><span>Annualized pace</span><strong id="snapshotAnnualPace">—</strong></div>
+              <p class="calculated-label">Calculated by WealthOS</p>
+
+              <div class="recent-receipts" id="recentReceipts">
+                <div class="recent-receipts-heading">
+                  <div>
+                    <span>Recent records</span>
+                    <h3 id="recentReceiptsTitle">Today’s receipts</h3>
+                  </div>
+                  <button id="addAnotherExpense" type="button">Quick Add +</button>
+                </div>
+                <div id="recentReceiptsList"></div>
               </div>
+
               <div class="snapshot-note"><p id="snapshotNote"></p></div>
             </div>
           </div>
@@ -527,6 +545,71 @@
       </form>
     </div>
   </section>
+
+  <section class="quick-add-modal" id="quickAddModal" aria-hidden="true">
+    <div class="quick-add-shell">
+      <div class="checkin-modal-top">
+        <div>
+          <p class="eyebrow">Quick Add</p>
+          <h2>Record a purchase.</h2>
+          <p class="quick-add-intro">Capture what happened. WealthOS will use it to build today’s, this week’s, and this month’s picture.</p>
+        </div>
+        <button class="close-button" id="closeQuickAdd" type="button">Close</button>
+      </div>
+
+      <form id="quickAddForm">
+        <div class="quick-amount-row">
+          <label>Amount<input id="quickAddAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required></label>
+          <label>Date<input id="quickAddDate" type="date" required></label>
+        </div>
+
+        <label>Category
+          <select id="quickAddCategory" required>
+            <option value="Coffee">Coffee</option>
+            <option value="Food & Dining">Food & Dining</option>
+            <option value="Groceries">Groceries</option>
+            <option value="Transportation">Transportation</option>
+            <option value="Housing">Housing</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Health">Health</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Travel">Travel</option>
+            <option value="Subscriptions">Subscriptions</option>
+            <option value="Taxes">Taxes</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+
+        <label>Merchant or description
+          <input id="quickAddMerchant" type="text" maxlength="80" placeholder="Coffee shop, gas station, rent...">
+        </label>
+
+        <label>Note <span>Optional</span>
+          <textarea id="quickAddNote" rows="3" maxlength="180" placeholder="Anything worth remembering?"></textarea>
+        </label>
+
+        <div class="quick-add-preview">
+          <span>This purchase will update</span>
+          <strong>Today · This week · This month</strong>
+        </div>
+
+        <div class="checkin-modal-actions">
+          <button class="secondary-button" id="cancelQuickAdd" type="button">Not now</button>
+          <button class="primary-button" type="submit">Add purchase</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <div class="expense-toast" id="expenseToast" role="status" aria-live="polite">
+    <span class="expense-toast-mark">✓</span>
+    <div>
+      <strong id="expenseToastTitle">Purchase recorded.</strong>
+      <p id="expenseToastText">Your Spending Snapshot has been updated.</p>
+    </div>
+    <button id="expenseToastView" type="button">View</button>
+  </div>
 
   <section class="loop-modal" id="loopModal" aria-hidden="true">
     <div class="loop-shell">
@@ -675,7 +758,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.13.0</span>
+    <span>Version 0.14.0</span>
   </footer>
 
   <script src="script.js"></script>

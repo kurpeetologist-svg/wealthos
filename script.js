@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.13.0-data';
-const LEGACY_KEYS=['wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.14.0-data';
+const LEGACY_KEYS=['wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -17,6 +17,7 @@ const blankData=()=>({
   emergency:{balance:0,essentials:0,targetMonths:6,monthlyContribution:0},
   challenge:{enabled:false,name:'',target:0,saved:0,startDate:'',durationWeeks:12,frequency:'weekly'},
   spending:{daily:0,weekly:0,monthly:0},
+  expenses:[],
   checkins:[],
   memory:{lastInteraction:null,lastCheckinType:null,lastCheckinDate:null,lastSummary:null}
 });
@@ -43,6 +44,10 @@ function migrate(raw){
   d.emergency={balance:n(raw.emergency?.balance),essentials:n(raw.emergency?.essentials),targetMonths:Math.max(1,n(raw.emergency?.targetMonths,6)),monthlyContribution:n(raw.emergency?.monthlyContribution)};
   d.challenge={enabled:Boolean(raw.challenge?.enabled),name:String(raw.challenge?.name||''),target:n(raw.challenge?.target),saved:n(raw.challenge?.saved),startDate:String(raw.challenge?.startDate||''),durationWeeks:Math.max(1,n(raw.challenge?.durationWeeks,12)),frequency:['weekly','biweekly','monthly'].includes(raw.challenge?.frequency)?raw.challenge.frequency:'weekly'};
   d.spending={daily:Math.max(0,n(raw.spending?.daily)),weekly:Math.max(0,n(raw.spending?.weekly)),monthly:Math.max(0,n(raw.spending?.monthly))};
+  d.expenses=Array.isArray(raw.expenses)?raw.expenses.filter(item=>item&&item.date).map(item=>({
+    id:item.id||Date.now()+Math.random(),amount:Math.max(0,n(item.amount)),category:String(item.category||'Other'),
+    merchant:String(item.merchant||''),note:String(item.note||''),date:String(item.date)
+  })):[];
   d.checkins=Array.isArray(raw.checkins)?raw.checkins:[];
   d.memory={
     lastInteraction:raw.memory?.lastInteraction||null,
@@ -96,77 +101,21 @@ function showState(isReturning){
 }
 
 const lessons=[
-  {
-    category:'Saving',
-    title:'An emergency fund is not about expecting the worst.',
-    summary:'It is about giving yourself more choices when life changes.',
-    why:'Cash set aside for emergencies can reduce the need to rely on debt or make rushed decisions when an unexpected expense appears.',
-    keep:'The right target is personal. Start with an amount that feels achievable, then build from there.'
-  },
-  {
-    category:'Investing',
-    title:'Time can matter more than finding the perfect investment.',
-    summary:'Starting consistently gives compounding more time to work.',
-    why:'Investment growth can build on earlier growth over long periods. Waiting for a perfect moment can mean losing valuable time.',
-    keep:'Investing involves risk. A diversified approach and a long-term view may help, but choices should fit your goals and circumstances.'
-  },
-  {
-    category:'Spending',
-    title:'A spending total becomes useful when it has context.',
-    summary:'The same amount can mean very different things depending on income, obligations, and priorities.',
-    why:'Comparing spending with income and personal goals provides more meaning than labeling a purchase good or bad.',
-    keep:'A Snapshot is meant to create awareness—not guilt. One week does not define your habits.'
-  },
-  {
-    category:'Saving',
-    title:'Small automatic transfers can turn intention into a habit.',
-    summary:'Consistency often matters more than beginning with a large amount.',
-    why:'Moving money regularly reduces the number of times you need to make the same saving decision.',
-    keep:'Choose an amount that leaves enough room for essential expenses and adjust it when your circumstances change.'
-  },
-  {
-    category:'Debt',
-    title:'The minimum payment keeps an account current, but it may not reduce debt quickly.',
-    summary:'Paying more than the minimum can reduce the time and interest needed to repay a balance.',
-    why:'Interest may continue accumulating while a balance remains. Additional principal payments can shorten the repayment period.',
-    keep:'Always protect essential expenses first, and review the specific terms and interest rate of each debt.'
-  },
-  {
-    category:'Income',
-    title:'A raise does not have to become a full lifestyle upgrade.',
-    summary:'Saving part of every increase can support both present comfort and future goals.',
-    why:'Lifestyle expenses can quietly expand to absorb higher income, leaving long-term progress unchanged.',
-    keep:'Enjoying part of an increase is reasonable. The lesson is to choose the allocation intentionally.'
-  },
-  {
-    category:'Planning',
-    title:'A financial goal becomes clearer when it has an amount and a timeframe.',
-    summary:'Specific goals make it easier to understand the next manageable contribution.',
-    why:'A defined target can be divided into smaller weekly or monthly actions instead of remaining an abstract intention.',
-    keep:'Timelines can change. Adjusting a goal is part of planning—not a sign of failure.'
-  },
-  {
-    category:'Spending',
-    title:'Recurring expenses deserve occasional attention because they are easy to stop noticing.',
-    summary:'A small monthly charge can become meaningful when repeated over a year.',
-    why:'Subscriptions and recurring services continue without requiring a new decision each month.',
-    keep:'The goal is not to cancel everything. Keep what provides enough value and reconsider what no longer does.'
-  },
-  {
-    category:'Credit',
-    title:'Credit utilization is a snapshot, not a measure of your worth.',
-    summary:'Lower reported balances may support credit health, but they do not define financial success.',
-    why:'Credit scoring models often consider how much revolving credit is being used relative to available limits.',
-    keep:'Credit factors vary by scoring model. Paying on time and avoiding unaffordable debt remain important foundations.'
-  },
-  {
-    category:'Financial Confidence',
-    title:'Knowing where you stand is already a financial action.',
-    summary:'Clarity makes the next decision easier, even when nothing changes immediately.',
-    why:'Avoiding financial information can increase uncertainty. A brief check-in turns the unknown into something understandable.',
-    keep:'You do not need to solve everything today. One honest check-in is enough for this moment.'
-  }
-];
+  {category:'Foundations',title:'What is cash flow?',summary:'Cash flow is the movement of money into and out of your financial life over a period of time.',why:'Positive cash flow means more money came in than went out. Negative cash flow means spending and obligations exceeded income.',keep:'Cash flow is about timing as well as totals. A person can earn enough overall and still face a shortage if bills arrive before income.'},
+  {category:'Saving',title:'What is an emergency fund?',summary:'An emergency fund is money reserved for unexpected essential expenses or a temporary loss of income.',why:'It can reduce the need to use high-interest debt when a necessary expense appears unexpectedly.',keep:'Many people begin with a small milestone, then work toward several months of essential expenses.'},
+  {category:'Spending',title:'What is the difference between fixed and variable expenses?',summary:'Fixed expenses tend to remain consistent, while variable expenses change with use or choice.',why:'Knowing the difference helps identify which costs are difficult to change quickly and which can respond more easily to new priorities.',keep:'Rent is often fixed. Dining, fuel, and entertainment are usually variable, although every household is different.'},
+  {category:'Income',title:'Gross income and net income are not the same.',summary:'Gross income is earned before deductions. Net income is what remains after taxes, benefits, and other deductions.',why:'Plans based on gross income can overstate how much money is actually available to spend or save.',keep:'For everyday cash-flow decisions, net income is usually the more useful starting point.'},
+  {category:'Debt & Credit',title:'Why can minimum credit-card payments keep debt around for years?',summary:'A minimum payment may cover interest and only a small part of the original balance.',why:'When interest continues to accrue, repayment can take much longer and cost substantially more than the amount originally borrowed.',keep:'The statement’s repayment disclosure can show how payment size changes the estimated payoff time.'},
+  {category:'Debt & Credit',title:'What is credit utilization?',summary:'Credit utilization compares revolving balances with available revolving credit.',why:'Many credit-scoring models consider how much available credit is being used when a balance is reported.',keep:'It is one factor among many. Payment history and avoiding unaffordable debt remain important.'},
+  {category:'Investing',title:'What is compound growth?',summary:'Compound growth occurs when returns can begin generating additional returns over time.',why:'The effect becomes more meaningful over longer periods because growth builds on earlier growth.',keep:'Compounding can magnify losses as well as gains, and investment returns are never guaranteed.'},
+  {category:'Investing',title:'What is diversification?',summary:'Diversification means spreading investments across different assets rather than relying on one outcome.',why:'Different investments may respond differently to the same event, which can reduce dependence on a single company, sector, or market.',keep:'Diversification can manage some risk, but it cannot eliminate all investment risk.'},
+  {category:'Investing',title:'What is an index fund?',summary:'An index fund is designed to track a defined market index rather than select individual investments one by one.',why:'It can provide broad exposure through a single fund and often uses a rules-based, lower-cost approach.',keep:'Index funds differ in fees, holdings, risk, and the markets they track.'},
+  {category:'Taxes',title:'What is tax withholding?',summary:'Tax withholding is money taken from income and sent toward expected tax obligations before the worker receives net pay.',why:'Withholding spreads tax payments across the year instead of requiring the entire amount at filing time.',keep:'The amount withheld may be more or less than the final tax owed, depending on income and personal circumstances.'},
+  {category:'Insurance',title:'What is an insurance deductible?',summary:'A deductible is the amount a policyholder generally pays before covered insurance benefits begin paying.',why:'Plans with higher deductibles may have lower premiums, but they require more out-of-pocket money when covered care or damage occurs.',keep:'Deductibles, copays, coinsurance, limits, and exclusions can all affect the actual cost of coverage.'},
+  {category:'Economics',title:'How does inflation affect purchasing power?',summary:'Inflation means the general price level rises, so the same amount of money may buy less over time.',why:'A savings or income amount can increase in dollars while still losing purchasing power if prices rise faster.',keep:'Inflation affects categories differently and does not mean every price rises at the same rate.'},
+  {category:'Planning',title:'What is a sinking fund?',summary:'A sinking fund is money saved gradually for a known future expense.',why:'Breaking a large predictable cost into smaller contributions can reduce the need for debt or a sudden hit to monthly cash flow.',keep:'Examples include annual insurance, travel, home repairs, gifts, and vehicle registration.'},
+  {category:'Benefits',title:'Why do payroll benefits matter?',summary:'Benefits can include health coverage, retirement contributions, insurance, paid leave, and government-mandated programs.',why:'They affect both current net pay and the broader value or protection connected to employment.',keep:'Benefit systems vary by employer and country, so users should review the specific rules that apply to them.'}
+]
 
 function renderLesson(){
   const now=new Date();
@@ -313,7 +262,7 @@ function render(data){
   $('nextSource').textContent='Source: Growth, Attention, and Progress Signals · WealthOS selects one priority.';
   $('nextAction').textContent=te>0&&short>0?'Update tax reserve':ess>0&&!complete?'Update emergency fund':data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved)?'Record contribution':'Review About You';
   renderTimeline(data,h,fmt,source);
-  renderSnapshot(data,fmt,'weekly');
+  renderSnapshot(data,fmt,expensesForPeriod(data,'daily').length?'daily':'weekly');
   populateAbout(data);
 }
 function timelineEvent(title,description,amount,isFresh=false){
@@ -327,6 +276,44 @@ function timelineEvent(title,description,amount,isFresh=false){
   b.append(marker,copy,val,action);
   const story=document.createElement('div');story.className='timeline-story';story.innerHTML=`<div class="timeline-story-inner"><div class="timeline-story-block"><span>What happened</span><p>${description}</p></div><div class="timeline-story-block"><span>Why it matters</span><p>This chapter becomes part of the context WealthOS uses to help you understand future changes.</p></div></div>`;
   a.append(b,story);b.onclick=()=>{const open=a.classList.toggle('open');b.setAttribute('aria-expanded',String(open))};return a;
+}
+
+function localDateKey(date=new Date()){const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');return `${y}-${m}-${d}`}
+function startOfWeek(date=new Date()){const result=new Date(date);result.setHours(0,0,0,0);const day=result.getDay(),offset=day===0?6:day-1;result.setDate(result.getDate()-offset);return result}
+function expensesForPeriod(data,period){
+  const expenses=[...(data.expenses||[])],today=new Date();today.setHours(0,0,0,0);
+  const todayKey=localDateKey(today),weekStart=startOfWeek(today),monthKey=todayKey.slice(0,7);
+  return expenses.filter(item=>{const date=new Date(`${item.date}T12:00:00`);if(period==='daily')return item.date===todayKey;if(period==='weekly')return date>=weekStart&&date<=new Date(`${todayKey}T23:59:59`);return item.date.slice(0,7)===monthKey})
+    .sort((a,b)=>String(b.date).localeCompare(String(a.date))||n(b.id)-n(a.id));
+}
+function expenseTotal(items){return items.reduce((sum,item)=>sum+n(item.amount),0)}
+function spendingSource(data,period){
+  const records=expensesForPeriod(data,period);
+  if(records.length){const newest=records[0];return{type:'expenses',amount:expenseTotal(records),records,text:`Based on ${records.length} Quick Add record${records.length===1?'':'s'} · Updated ${formatDate(newest.date)}`}}
+  const amount=n(data.spending?.[period]);
+  const latest=[...(data.checkins||[])].filter(item=>item.type===period).sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
+  return{type:'manual',amount,records:[],text:latest?`Based on your latest ${period} check-in · Updated ${formatDate(latest.date)}`:`No ${period} spending recorded yet`}
+}
+function categoryInitial(category){return String(category||'Other').split(/\s+/).filter(Boolean).slice(0,2).map(word=>word[0]).join('').toUpperCase()}
+function renderRecentReceipts(data,period,fmt){
+  const list=$('recentReceiptsList');list.innerHTML='';const records=expensesForPeriod(data,period).slice(0,6);
+  $('recentReceiptsTitle').textContent=period==='daily'?'Today’s receipts':period==='weekly'?'This week’s records':'This month’s records';
+  if(!records.length){const empty=document.createElement('p');empty.className='receipt-record-empty';empty.textContent=period==='daily'?'No purchases recorded today yet.':`No individual purchases recorded for this ${period==='weekly'?'week':'month'} yet.`;list.append(empty);return}
+  records.forEach(item=>{const row=document.createElement('article');row.className='receipt-record';const merchant=item.merchant||item.category;row.innerHTML=`<span class="receipt-category-mark">${categoryInitial(item.category)}</span><div class="receipt-record-copy"><strong>${merchant}</strong><span>${item.category} · ${formatDate(item.date)}</span></div><strong class="receipt-record-amount">${fmt.format(n(item.amount))}</strong>`;list.append(row)})
+}
+function openQuickAdd(){
+  const data=loadData();if(!hasMeaningfulData(data)){openOnboarding();return}
+  $('quickAddAmount').value='';$('quickAddDate').value=localDateKey();$('quickAddCategory').value='Coffee';$('quickAddMerchant').value='';$('quickAddNote').value='';
+  $('quickAddModal').classList.add('open');$('quickAddModal').setAttribute('aria-hidden','false');setTimeout(()=>$('quickAddAmount').focus(),80)
+}
+function closeQuickAdd(){$('quickAddModal').classList.remove('open');$('quickAddModal').setAttribute('aria-hidden','true')}
+let expenseToastTimer=null;
+function showExpenseToast(expense,data){const fmt=money(data.profile.currency);$('expenseToastTitle').textContent=`${expense.category} recorded.`;$('expenseToastText').textContent=`${fmt.format(expense.amount)} was added to today, this week, and this month.`;$('expenseToast').classList.add('show');clearTimeout(expenseToastTimer);expenseToastTimer=setTimeout(()=>$('expenseToast').classList.remove('show'),4800)}
+function saveQuickAdd(event){
+  event.preventDefault();const amount=Math.max(0,n($('quickAddAmount').value));if(amount<=0)return;
+  const data=loadData(),expense={id:Date.now(),amount,category:$('quickAddCategory').value||'Other',merchant:$('quickAddMerchant').value.trim(),note:$('quickAddNote').value.trim(),date:$('quickAddDate').value||localDateKey()};
+  data.expenses.push(expense);data.memory={...(data.memory||{}),lastInteraction:'expense',lastCheckinType:null,lastCheckinDate:expense.date,lastSummary:`You recorded ${money(data.profile.currency).format(amount)} for ${expense.category}.`};
+  saveData(data);closeQuickAdd();render(data);showExpenseToast(expense,data)
 }
 function renderTimeline(data,h,fmt,source){
   const groups=$('timelineGroups');groups.innerHTML='';
@@ -359,34 +346,40 @@ function renderTimeline(data,h,fmt,source){
       : `You closed the month with ${fmt.format(n(checkin.income))} of income and ${fmt.format(n(checkin.spent))} of spending.`;
     events.append(timelineEvent(title,description,amount,Boolean(checkin.isFresh)));
   });
+  const recentExpenses=[...(data.expenses||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date))||n(b.id)-n(a.id)).slice(0,8),expenseGroups=new Map();
+  recentExpenses.forEach(expense=>{if(!expenseGroups.has(expense.date))expenseGroups.set(expense.date,[]);expenseGroups.get(expense.date).push(expense)});
+  expenseGroups.forEach((items,date)=>{
+    const monthKey=date.slice(0,7);let monthSection=[...groups.querySelectorAll('.timeline-month')].find(section=>section.dataset.month===monthKey);
+    if(!monthSection){monthSection=document.createElement('section');monthSection.className='timeline-month';monthSection.dataset.month=monthKey;const heading=document.createElement('div');heading.className='timeline-month-heading';heading.innerHTML=`<h3>${formatMonth(monthKey)}</h3><p>Purchases</p>`;const events=document.createElement('div');events.className='timeline-events';monthSection.append(heading,events);groups.prepend(monthSection)}
+    const total=expenseTotal(items),categories=[...new Set(items.map(item=>item.category))],title=items.length===1?`${items[0].category} purchase recorded`:`${items.length} purchases recorded`,description=items.length===1?`${items[0].merchant||items[0].category} was added through Quick Add.`:`${categories.slice(0,3).join(', ')}${categories.length>3?' and more':''} became part of this day’s record.`;
+    monthSection.querySelector('.timeline-events').append(timelineEvent(title,description,fmt.format(total)));
+  });
+
 }
 function renderSnapshot(data,fmt,period){
-  const labels={daily:'Today',weekly:'This week',monthly:'This month'};
-  const values={daily:n(data.spending?.daily),weekly:n(data.spending?.weekly),monthly:n(data.spending?.monthly)};
-  const amount=values[period]||0;
-  const monthlyIncome=n(data.income?.current);
-  let monthlyEquivalent=amount;
-  if(period==='daily')monthlyEquivalent=amount*30;
-  if(period==='weekly')monthlyEquivalent=amount*4.345;
-  $('snapshotPeriod').textContent=labels[period];
-  $('snapshotValue').textContent=fmt.format(amount);
-  if(monthlyIncome>0){
-    const percent=(period==='monthly'?amount:monthlyEquivalent)/monthlyIncome*100;
-    $('snapshotContext').textContent=period==='monthly'
-      ? `${percent.toFixed(0)}% of this month's income has been spent.`
-      : `At this pace, spending equals about ${percent.toFixed(0)}% of monthly income.`;
+  const labels={daily:'Today',weekly:'This week',monthly:'This month'},source=spendingSource(data,period),amount=source.amount,records=source.records,monthlyIncome=n(data.income?.current);
+  let monthlyEquivalent=amount;if(period==='daily')monthlyEquivalent=amount*30;if(period==='weekly')monthlyEquivalent=amount*4.345;
+  const comparisonAmount=period==='monthly'?amount:monthlyEquivalent,percent=monthlyIncome>0?comparisonAmount/monthlyIncome*100:null,remaining=monthlyIncome-amount;
+  $('snapshotPeriod').textContent=labels[period];$('snapshotSource').textContent=source.text;$('snapshotValue').textContent=fmt.format(amount);
+  $('snapshotContext').textContent=amount===0?(period==='daily'?'Record a purchase to begin today’s picture.':`Add or update ${period} spending to begin this Snapshot.`):percent!==null?(period==='monthly'?`${percent.toFixed(0)}% of this month’s income has been recorded as spending.`:`At this pace, spending equals about ${percent.toFixed(0)}% of monthly income.`):'Add monthly income to place this spending in context.';
+  if(period==='daily'){
+    $('metricOneLabel').textContent='Purchases recorded';$('metricOneValue').textContent=String(records.length);
+    $('metricTwoLabel').textContent='Share of monthly income';$('metricTwoValue').textContent=percent===null?'—':`${percent.toFixed(1)}%`;
+    $('metricThreeLabel').textContent='Estimated monthly pace';$('metricThreeValue').textContent=fmt.format(monthlyEquivalent);
+    $('snapshotUpdateButton').textContent='Add today’s spending →';
+  }else if(period==='weekly'){
+    $('metricOneLabel').textContent='Recorded total';$('metricOneValue').textContent=fmt.format(amount);
+    $('metricTwoLabel').textContent='Share of monthly income';$('metricTwoValue').textContent=percent===null?'—':`${percent.toFixed(0)}%`;
+    $('metricThreeLabel').textContent='Estimated monthly pace';$('metricThreeValue').textContent=fmt.format(monthlyEquivalent);
+    $('snapshotUpdateButton').textContent=source.type==='expenses'?'Add another purchase →':'Update weekly spending →';
   }else{
-    $('snapshotContext').textContent='Add monthly income to place this spending in context.';
+    $('metricOneLabel').textContent='Recorded spending';$('metricOneValue').textContent=fmt.format(amount);
+    $('metricTwoLabel').textContent='Share of monthly income';$('metricTwoValue').textContent=percent===null?'—':`${percent.toFixed(0)}%`;
+    $('metricThreeLabel').textContent='Remaining after spending';$('metricThreeValue').textContent=monthlyIncome>0?fmt.format(remaining):'—';
+    $('snapshotUpdateButton').textContent='Update monthly check-in →';
   }
-  $('snapshotSelectedAmount').textContent=fmt.format(amount);
-  $('snapshotMonthlyPace').textContent=fmt.format(monthlyEquivalent);
-  $('snapshotAnnualPace').textContent=fmt.format(monthlyEquivalent*12);
-  $('receiptRecorded').textContent=fmt.format(amount);
-  $('receiptIncomeShare').textContent=monthlyIncome>0?`${(((period==='monthly'?amount:monthlyEquivalent)/monthlyIncome)*100).toFixed(0)}%`:'—';
-  $('receiptPace').textContent=fmt.format(monthlyEquivalent);
-  $('snapshotNote').textContent=amount===0
-    ? 'Your Snapshot is ready for its first spending check-in. Add an approximate total whenever you are ready.'
-    : 'This is a snapshot, not a judgment. Time horizons show how a repeated spending pattern could affect the larger picture.';
+  $('snapshotUpdateButton').dataset.period=period;renderRecentReceipts(data,period,fmt);
+  $('snapshotNote').textContent=amount===0?'Users enter the spending facts. WealthOS calculates the context.':'These figures are calculated from your records and check-ins. They are not separate inputs.';
   document.querySelectorAll('.period-button').forEach(button=>button.classList.toggle('active',button.dataset.period===period));
 }
 
@@ -510,25 +503,9 @@ function routeNextAction(){
 
 
 function chooseLoopLesson(type,data){
-  if(type==='weekly'){
-    return {
-      category:'Spending',
-      title:'A weekly total is more useful when it becomes part of a pattern.',
-      summary:'One week creates a reference point. Repeated check-ins reveal what is typical for you.'
-    };
-  }
-  if(n(data.checkins?.at(-1)?.saved)>0){
-    return {
-      category:'Saving',
-      title:'Saving becomes more powerful when it is repeated.',
-      summary:'A single contribution matters. A consistent contribution becomes a financial habit.'
-    };
-  }
-  return {
-    category:'Planning',
-    title:'Closing the month gives the next month a clearer starting point.',
-    summary:'A monthly check-in turns income and spending into information you can use.'
-  };
+  if(type==='weekly')return{category:'Cash Flow',title:'What is the difference between fixed and variable expenses?',summary:'Fixed expenses tend to remain consistent. Variable expenses change with use, frequency, or choice.'};
+  if(n(data.checkins?.at(-1)?.saved)>0)return{category:'Saving',title:'What is a sinking fund?',summary:'A sinking fund is money saved gradually for a known future expense.'};
+  return{category:'Foundations',title:'What is cash flow?',summary:'Cash flow is the movement of money into and out of your financial life over a period of time.'};
 }
 
 function chooseLoopNextStep(type,data){
@@ -669,6 +646,19 @@ $('challengeEnabled').onchange=toggleChallenge;$('aboutForm').onsubmit=e=>{e.pre
 $('clearPreviewButton').onclick=()=>{if(confirm('Start fresh on this browser? This removes the saved Private Preview data.')){localStorage.removeItem(STORAGE_KEY);for(const k of LEGACY_KEYS)localStorage.removeItem(k);$('closePanel').click();render(blankData());location.hash='lobby'}};
 document.querySelectorAll('.signal-button').forEach(b=>b.onclick=()=>{const card=b.closest('.signal-card'),open=card.classList.toggle('open');b.setAttribute('aria-expanded',String(open))});
 document.querySelectorAll('.period-button').forEach(button=>button.addEventListener('click',()=>{const data=loadData();renderSnapshot(data,money(data.profile.currency),button.dataset.period)}));
+$('quickAddTrigger').addEventListener('click',openQuickAdd);
+$('addAnotherExpense').addEventListener('click',openQuickAdd);
+$('closeQuickAdd').addEventListener('click',closeQuickAdd);
+$('cancelQuickAdd').addEventListener('click',closeQuickAdd);
+$('quickAddModal').addEventListener('click',event=>{if(event.target===$('quickAddModal'))closeQuickAdd()});
+$('quickAddForm').addEventListener('submit',saveQuickAdd);
+$('expenseToastView').addEventListener('click',()=>{$('expenseToast').classList.remove('show');location.hash='spendingSnapshot'});
+$('snapshotUpdateButton').addEventListener('click',()=>{
+  const period=$('snapshotUpdateButton').dataset.period||'weekly';
+  if(period==='daily'){openQuickAdd();return}
+  if(period==='weekly'){const data=loadData();if(expensesForPeriod(data,'weekly').length){openQuickAdd();return}openCheckin('weekly');return}
+  openCheckin('monthly');
+});
 document.querySelectorAll('[data-open-checkin]').forEach(button=>button.addEventListener('click',()=>openCheckin(button.dataset.openCheckin)));
 $('closeCheckin').addEventListener('click',closeCheckin);
 $('cancelCheckin').addEventListener('click',closeCheckin);

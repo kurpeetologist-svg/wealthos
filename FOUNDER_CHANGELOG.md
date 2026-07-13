@@ -121,3 +121,22 @@ The user needs closure, meaning, and continuity.
 ### Principle
 
 **After every meaningful action, the user should know what happened, why it matters, and what they can do next.**
+
+## v0.14.0 — Quick Add
+
+### Why this exists
+WealthOS was built around confidence growing one decision at a time, but the application still depended mainly on weekly and monthly reflection.
+
+Quick Add brings WealthOS into the moment when financial life actually happens.
+
+### What changed
+- Users can record a purchase immediately.
+- Each purchase updates daily, weekly, and monthly spending.
+- Spending Snapshot identifies its information source.
+- Snapshot calculations are separated from user inputs.
+- Recent purchase records appear as receipts.
+- Lessons teach concrete financial concepts.
+- Timeline can remember Quick Add activity.
+
+### Principle
+**Users enter facts. WealthOS provides context.**

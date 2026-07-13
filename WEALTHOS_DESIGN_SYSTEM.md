@@ -44,3 +44,14 @@ Receipts stack, lessons form a library, contributions fill envelopes, and Timeli
 8. Cards are working surfaces, not containers for reports.
 9. Motion should explain, never entertain.
 10. Every visit should leave the user more confident or informed.
+
+## Data Language
+Users enter facts. WealthOS calculates and explains context.
+
+The interface clearly distinguishes:
+- user-entered records
+- connected-account information
+- WealthOS calculations
+- estimates and projections
+
+Every calculated number should identify its source whenever practical.

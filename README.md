@@ -1,37 +1,35 @@
-# WealthOS v0.13.0 — The First Complete Loop
+# WealthOS v0.14.0 — Quick Add
 
-This release connects Check-in, understanding, learning, action, Timeline, and memory into one continuous experience.
+## Quick Add
+Record amount, date, category, merchant or description, and an optional note.
 
-## The WealthOS Loop
+Each locally stored record updates Today, This Week, This Month, Spending Snapshot, Timeline, and Return Memory.
 
-1. Complete a Weekly or Monthly Check-in
-2. See a calm completion moment
-3. Understand what changed
-4. Receive one relevant Lesson
-5. Receive exactly one useful next step
-6. See the new Timeline chapter
-7. Return later and see that WealthOS remembers
+## Spending Snapshot
+- identifies the data source
+- shows the last update
+- separates records from WealthOS calculations
+- offers timeframe-specific input actions
+- displays recent purchase records
+- removes duplicated metrics
 
-## New
+Source hierarchy:
+1. Quick Add records
+2. Weekly or Monthly Check-in totals
+3. No data yet
 
-- Four-step completion experience
-- Relevant post-check-in context
-- Contextual Lesson selection
-- One Small Step
-- Timeline filing animation
-- Return Memory in the Lobby
-- Local persistence of the most recent interaction
+## Lesson
+Lesson now teaches concrete financial-literacy concepts across foundations, cash flow, saving, debt, credit, investing, taxes, insurance, economics, planning, and benefits.
+
+“Keep in mind” is now **Key idea**.
 
 ## Principle
+**Users enter facts. WealthOS provides context.**
 
-**After every meaningful action, the user should know what happened, why it matters, and what they can do next.**
-
-## Retention
-
-Saved browser data migrates from v0.12.0 and earlier versions.
+## Privacy
+Quick Add records remain in local browser storage during the Private Preview.
 
 ## Publish
-
 Replace:
 - index.html
 - styles.css
@@ -42,5 +40,4 @@ Replace:
 - WEALTHOS_DESIGN_SYSTEM.md
 
 Suggested commit:
-
-`Build the first complete WealthOS loop`
+`Add Quick Add and clarify Spending Snapshot sources`
