@@ -359,3 +359,49 @@ A visually strong interface is not enough. Every observation, lesson trigger, Ro
 ### Trust rule
 
 **WealthOS only speaks with the confidence its data deserves.**
+
+## v0.21.0 — Record Integrity
+
+### Why this exists
+
+A trusted financial system must allow people to correct mistakes without silently rewriting history.
+
+### What changed
+
+- Added a searchable Record Library.
+- Added record detail and source transparency.
+- Added revision numbers and historical states.
+- Added safe corrections with before-and-after audit snapshots.
+- Added Archive for accounts, bills, and debts.
+- Added Reversal for financial activity.
+- Added Core reconciliation after every change.
+- Added calm data-quality warnings.
+- Updated calculations to ignore archived and reversed activity where appropriate.
+
+### Trust rule
+
+**A user can correct financial history without making the past disappear.**
+
+## v0.21.1 — Recurring Activity
+
+### Why this exists
+
+Repeated financial activity should not be mistaken for an unexpected habit or a completed payment.
+
+Users need a way to tell WealthOS what is expected to happen again.
+
+### What changed
+
+- Added recurring schedules to supported Core records.
+- Added weekly, biweekly, monthly, quarterly, annual, and custom frequency.
+- Added fixed versus variable amount behavior.
+- Added next expected date and optional end date.
+- Added “Make recurring” to existing records.
+- Added recurring filters and badges to the Record Library.
+- Added upcoming recurring activity.
+- Added cautious pattern detection for records that may be recurring.
+- Preserved recurrence changes in the audit trail.
+
+### Trust rule
+
+**Recurring creates an expectation. A recorded transaction confirms what actually happened.**

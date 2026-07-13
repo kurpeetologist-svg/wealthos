@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.20.0</title>
+  <title>WealthOS Private Preview v0.21.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -240,6 +240,104 @@
               <span>Knowledge principle</span>
               <p>WealthOS only speaks with the confidence its data deserves.</p>
             </div>
+          </section>
+
+          <section class="record-library" id="recordLibrary">
+            <div class="workspace-section-heading">
+              <div>
+                <span>Core integrity</span>
+                <h3>Record Library</h3>
+                <p>Review, correct, archive, and verify the facts behind WealthOS.</p>
+              </div>
+              <button id="libraryRecordButton" type="button">Record something +</button>
+            </div>
+
+            <div class="library-toolbar">
+              <label>
+                Search
+                <input id="librarySearch" type="search" placeholder="Merchant, account, bill, debt, Roadmap...">
+              </label>
+
+              <label>
+                Type
+                <select id="libraryType">
+                  <option value="all">All records</option>
+                  <option value="expense">Expenses</option>
+                  <option value="income">Income</option>
+                  <option value="account">Accounts</option>
+                  <option value="bill">Recurring bills</option>
+                  <option value="debt">Debts</option>
+                  <option value="debt_payment">Debt payments</option>
+                  <option value="transfer">Transfers</option>
+                  <option value="roadmap_contribution">Roadmap contributions</option>
+                </select>
+              </label>
+
+              <label>
+                Recurrence
+                <select id="libraryRecurrence">
+                  <option value="all">All schedules</option>
+                  <option value="once">One-time</option>
+                  <option value="recurring">Recurring</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="biweekly">Every two weeks</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="annual">Annually</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </label>
+
+              <label>
+                Source
+                <select id="librarySource">
+                  <option value="all">All sources</option>
+                  <option value="manual">Manual</option>
+                  <option value="connected">Connected</option>
+                  <option value="imported">Imported</option>
+                  <option value="calculated">Calculated</option>
+                </select>
+              </label>
+
+              <label>
+                Date from
+                <input id="libraryDateFrom" type="date">
+              </label>
+
+              <label>
+                Date to
+                <input id="libraryDateTo" type="date">
+              </label>
+            </div>
+
+            <div class="library-status-row">
+              <p id="libraryCount">0 records</p>
+              <button id="libraryClearFilters" type="button">Clear filters</button>
+            </div>
+
+            <div class="data-quality-panel" id="dataQualityPanel">
+              <div class="data-quality-heading">
+                <div>
+                  <span>Worth reviewing</span>
+                  <h4>Data quality</h4>
+                </div>
+                <small id="dataQualityCount">0 items</small>
+              </div>
+              <div id="dataQualityList"></div>
+            </div>
+
+            <div class="expected-commitments" id="expectedCommitments">
+              <div class="expected-heading">
+                <div>
+                  <span>Expected, not yet completed</span>
+                  <h4>Upcoming recurring activity</h4>
+                </div>
+                <small id="expectedCommitmentCount">0 upcoming</small>
+              </div>
+              <div id="expectedCommitmentList"></div>
+            </div>
+
+            <div class="record-list" id="recordList"></div>
           </section>
 
           <div class="workspace-detail-heading">
@@ -739,6 +837,159 @@
   </section>
 
 
+
+  <section class="record-detail-modal" id="recordDetailModal" aria-hidden="true">
+    <div class="record-detail-shell">
+      <div class="record-detail-header">
+        <div>
+          <p class="eyebrow" id="recordDetailType">Record</p>
+          <h2 id="recordDetailTitle">Record details</h2>
+          <p id="recordDetailSubtitle"></p>
+        </div>
+        <button class="close-button" id="closeRecordDetail" type="button">Close</button>
+      </div>
+
+      <div class="record-source-card">
+        <span>Source and confidence</span>
+        <strong id="recordDetailSource">Entered manually by you</strong>
+        <p id="recordDetailSourceText">User-reported · Not bank-verified</p>
+      </div>
+
+      <div class="record-detail-grid" id="recordDetailGrid"></div>
+
+      <div class="record-quality-note" id="recordQualityNote" hidden></div>
+
+      <div class="record-history">
+        <div class="record-history-heading">
+          <span>History</span>
+          <h3>Audit trail</h3>
+        </div>
+        <div id="recordAuditList"></div>
+      </div>
+
+      <div class="record-detail-actions" id="recordDetailActions">
+        <button class="secondary-button" id="editRecordButton" type="button">Edit record</button>
+        <button class="secondary-button" id="makeRecurringButton" type="button">Make recurring</button>
+        <button class="secondary-button" id="archiveRecordButton" type="button">Archive</button>
+        <button class="danger-soft-button" id="reverseRecordButton" type="button">Reverse record</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="recurring-modal" id="recurringModal" aria-hidden="true">
+    <div class="record-detail-shell">
+      <div class="record-detail-header">
+        <div>
+          <p class="eyebrow">Recurring activity</p>
+          <h2>Set the expectation.</h2>
+          <p>WealthOS will remember when this may happen again without counting it as completed activity.</p>
+        </div>
+        <button class="close-button" id="closeRecurringModal" type="button">Close</button>
+      </div>
+
+      <form id="recurringForm">
+        <input id="recurringRecordType" type="hidden">
+        <input id="recurringRecordId" type="hidden">
+
+        <div class="record-edit-fields">
+          <label>
+            Schedule
+            <select id="recurringFrequency">
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Every two weeks</option>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="annual">Annually</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+
+          <label>
+            Expected amount
+            <select id="recurringAmountBehavior">
+              <option value="fixed">Usually fixed</option>
+              <option value="variable">Can vary</option>
+            </select>
+          </label>
+
+          <label>
+            Next expected date
+            <input id="recurringNextDate" type="date" required>
+          </label>
+
+          <label>
+            End date <span>Optional</span>
+            <input id="recurringEndDate" type="date">
+          </label>
+
+          <label class="recurring-custom-field">
+            Repeat every
+            <input id="recurringCustomInterval" type="number" min="1" step="1" value="1">
+          </label>
+
+          <label class="recurring-custom-field">
+            Interval
+            <select id="recurringCustomUnit">
+              <option value="days">Days</option>
+              <option value="weeks">Weeks</option>
+              <option value="months">Months</option>
+              <option value="years">Years</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="record-provenance">
+          <span>Important distinction</span>
+          <strong>Expected does not mean paid.</strong>
+          <p>The schedule helps WealthOS forecast and recognize patterns. Actual totals only change when activity is recorded.</p>
+        </div>
+
+        <div class="checkin-modal-actions">
+          <button class="secondary-button" id="cancelRecurring" type="button">Not now</button>
+          <button class="primary-button" type="submit">Save recurring schedule</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="record-edit-modal" id="recordEditModal" aria-hidden="true">
+    <div class="record-detail-shell">
+      <div class="record-detail-header">
+        <div>
+          <p class="eyebrow">Safe correction</p>
+          <h2>Edit this record.</h2>
+          <p>The original values will remain visible in the audit trail.</p>
+        </div>
+        <button class="close-button" id="closeRecordEdit" type="button">Close</button>
+      </div>
+
+      <form id="recordEditForm">
+        <input id="editRecordType" type="hidden">
+        <input id="editRecordId" type="hidden">
+
+        <div class="record-edit-fields" id="recordEditFields"></div>
+
+        <label>
+          Reason for correction <span>Optional</span>
+          <textarea id="editReason" rows="3" maxlength="240" placeholder="Why are you changing this record?"></textarea>
+        </label>
+
+        <div class="record-provenance">
+          <span>History protection</span>
+          <strong>The previous version will not disappear.</strong>
+          <p>WealthOS will save a before-and-after snapshot in the audit trail and recalculate every affected surface.</p>
+        </div>
+
+        <div class="record-error" id="recordEditError" role="alert" hidden></div>
+
+        <div class="checkin-modal-actions">
+          <button class="secondary-button" id="cancelRecordEdit" type="button">Not now</button>
+          <button class="primary-button" type="submit">Save correction</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
   <section class="record-modal" id="recordModal" aria-hidden="true">
     <div class="record-shell">
       <div class="record-header">
@@ -918,6 +1169,61 @@
               <option value="discretionary">Discretionary</option>
             </select>
           </label>
+
+          <fieldset class="recurrence-fields" id="recurrenceFields" data-types="expense income bill debt_payment transfer roadmap_contribution">
+            <legend>Does this happen again?</legend>
+
+            <label>
+              Schedule
+              <select id="recordRecurrence">
+                <option value="once">One-time</option>
+                <option value="weekly">Weekly</option>
+                <option value="biweekly">Every two weeks</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="annual">Annually</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+
+            <label class="recurrence-dependent">
+              Expected amount
+              <select id="recordAmountBehavior">
+                <option value="fixed">Usually fixed</option>
+                <option value="variable">Can vary</option>
+              </select>
+            </label>
+
+            <label class="recurrence-dependent">
+              Next expected date
+              <input id="recordNextExpectedDate" type="date">
+            </label>
+
+            <label class="recurrence-dependent">
+              End date <span>Optional</span>
+              <input id="recordRecurrenceEndDate" type="date">
+            </label>
+
+            <label class="recurrence-dependent recurrence-custom">
+              Repeat every
+              <input id="recordCustomInterval" type="number" min="1" step="1" value="1">
+            </label>
+
+            <label class="recurrence-dependent recurrence-custom">
+              Interval
+              <select id="recordCustomUnit">
+                <option value="days">Days</option>
+                <option value="weeks">Weeks</option>
+                <option value="months">Months</option>
+                <option value="years">Years</option>
+              </select>
+            </label>
+
+            <div class="recurrence-explainer">
+              <strong id="recurrenceExplainerTitle">One-time record</strong>
+              <p id="recurrenceExplainerText">This affects history once and creates no future expectation.</p>
+            </div>
+          </fieldset>
 
           <label data-types="expense income bill account debt debt_payment transfer roadmap_contribution" class="record-note">
             Note <span>Optional</span>

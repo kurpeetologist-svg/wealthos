@@ -1,99 +1,88 @@
-# WealthOS v0.20.0 — The Core
+# WealthOS v0.21.1 — Record Integrity & Recurring Activity
 
-Phase 1, Sprint 1 establishes the canonical data foundation for WealthOS.
+This release replaces v0.21.0 and combines Record Integrity with recurring financial expectations.
 
-## Unified Record capability
+## Recurring activity
 
-The header action is now **Record**. Users can record:
+Users can mark supported records as:
 
-- Expense
+- One-time
+- Weekly
+- Every two weeks
+- Monthly
+- Quarterly
+- Annually
+- Custom
+
+Additional recurrence information includes:
+
+- fixed or variable expected amount
+- next expected date
+- optional end date
+- custom interval
+
+Supported activity:
+
+- Expenses
 - Income
-- Recurring bill
-- Account balance
-- Debt
-- Debt payment
-- Transfer
-- Roadmap contribution
+- Recurring bills
+- Debt payments
+- Transfers
+- Roadmap contributions
 
-Quick Add remains the fast expense path, but it now uses the same Core record engine.
+## Expected is not completed
 
-## Canonical entities
+A recurring schedule creates an expectation.
 
-WealthOS now stores:
+It does **not**:
 
-- `incomes`
-- `expenses`
-- `accounts`
-- `recurringBills`
-- `debts`
-- `debtPayments`
-- `transfers`
-- `roadmaps`
-- `checkins`
-- `memories`
-- `auditLog`
+- count a bill as paid
+- count income as received
+- change an account balance
+- change spending totals
+- update a Roadmap
 
-## Provenance
+Actual financial totals change only when the activity is recorded.
 
-Every new financial record receives source metadata:
+## Record Library
 
-- method
-- reported by
-- confidence
-- verified status
-- imported status
-- creation time
-- update time
+The Library now supports recurrence filters and shows recurring badges.
 
-Manual records are explicitly treated as **user-reported**, not bank-verified.
+Each record detail includes:
 
-## Audit history
+- schedule
+- next expected date
+- amount behavior
+- source
+- revision
+- state
+- audit history
 
-The audit log is append-only. It records:
+Existing one-time records can be converted using **Make recurring**.
 
-- created entities
-- changed debt balances
-- changed Roadmap progress
-- transfers between accounts
-- source method
-- timestamp
+## Upcoming recurring activity
 
-## Derived behavior
+The Library shows recurring activity expected in the next 45 days.
 
-A single record can update:
+This helps users anticipate:
 
-- Workspace
-- Today / This Week / This Month
-- Snapshot
-- account balances
-- debt balances
-- Roadmap progress
-- observations
-- Financial Memory
+- bills
+- subscriptions
+- paychecks
+- scheduled transfers
+- debt payments
+- Roadmap contributions
 
-Transfers are excluded from income and spending.
+## Data quality
 
-Recurring bills are stored as expected obligations and are not treated as paid expenses until the user records payment activity.
+WealthOS can flag repeated similar records and ask whether they may be recurring.
 
-## Knowledge states
-
-The Financial Foundation reports:
-
-- Beginning
-- Partial
-- Growing
-- Established
-
-These states are based on domain coverage and recorded history. They control how confidently WealthOS should speak.
+It does not automatically convert them.
 
 ## Principle
 
-**WealthOS only speaks with the confidence its data deserves.**
-
-## Publish
-
-Replace the entire current build with this directory.
+**Recurring creates an expectation. A recorded transaction confirms what actually happened.**
 
 Suggested commit:
 
-`Build the WealthOS Core data layer and unified Record flow`
+`Add recurring activity and expected commitments to Record Integrity`
