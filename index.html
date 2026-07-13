@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.21.3</title>
+  <title>WealthOS Private Preview v0.21.4</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -330,40 +330,56 @@
                 <strong id="libraryCount">0 records</strong>
                 <span id="libraryStatusText">Showing your most recent records.</span>
               </div>
-              <button id="libraryClearFilters" type="button">Reset view</button>
+
+            <div class="record-results-heading" id="recordResultsHeading">
+              <div>
+                <span id="recordResultsLabel">Recent records</span>
+                <h4 id="recordResultsTitle">Your financial history</h4>
+              </div>
+              <small id="recordResultsMeta"></small>
             </div>
 
-            <div class="library-suggestions" id="librarySuggestions">
+            <div class="record-list" id="recordList"></div>
+
+<div class="library-suggestions" id="librarySuggestions">
               <div class="library-suggestions-heading">
                 <span>Recent</span>
                 <small>Tap one to search again</small>
               </div>
-              <div id="librarySuggestionChips"></div>
-            </div>
 
-            <div class="data-quality-panel" id="dataQualityPanel">
+<div class="data-quality-panel" id="dataQualityPanel">
               <div class="data-quality-heading">
                 <div>
                   <span>Worth reviewing</span>
                   <h4>Data quality</h4>
                 </div>
-                <small id="dataQualityCount">0 items</small>
-              </div>
-              <div id="dataQualityList"></div>
-            </div>
 
-            <div class="expected-commitments" id="expectedCommitments">
+<div class="expected-commitments" id="expectedCommitments">
               <div class="expected-heading">
                 <div>
                   <span>Expected, not yet completed</span>
                   <h4>Upcoming recurring activity</h4>
                 </div>
+              <button id="libraryClearFilters" type="button">Reset view</button>
+            </div>
+
+            
+              <div id="librarySuggestionChips"></div>
+            </div>
+
+            
+                <small id="dataQualityCount">0 items</small>
+              </div>
+              <div id="dataQualityList"></div>
+            </div>
+
+            
                 <small id="expectedCommitmentCount">0 upcoming</small>
               </div>
               <div id="expectedCommitmentList"></div>
             </div>
 
-            <div class="record-list" id="recordList"></div>
+            
           </section>
 
           <div class="workspace-detail-heading">

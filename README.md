@@ -1,82 +1,30 @@
-# WealthOS v0.21.3 — Record Library v2
+# WealthOS v0.21.4 — Record Results Fix
 
-This release replaces v0.21.2.
+This release replaces v0.21.3.
 
-## What changed
+## Problem fixed
 
-The Record Library no longer behaves like a database query form.
+Search correctly found matching records, but results appeared below:
 
-The primary interaction is now one search box:
+- Recent searches
+- Data quality
+- Upcoming recurring activity
 
-> Search your financial history
+This made a successful search look broken.
 
-Search runs as the user types. There is no Search button.
+## Changes
 
-## Search coverage
-
-The primary search checks:
-
-- Merchant
-- Bill name
-- Account
-- Debt
-- Roadmap
-- Category
-- Note
-- Amount
-- Date
-- Month name
-- Record type
-- Source
-- Recurrence
-- Status
-
-## Filters
-
-Common filters are available as quick controls:
-
-- All time
-- This month
-- Last 30 days
-- Recurring
-
-Advanced filters are collapsed behind:
-
-> More filters +
-
-The user never needs to fill multiple boxes to find a transaction.
-
-## Search results
-
-Results are ranked by relevance:
-
-1. Exact title match
-2. Title begins with query
-3. Title contains query
-4. Subtitle match
-5. Other record metadata
-6. Amount match
-
-## Recent searches
-
-Recent search terms are saved during the session and can be selected again.
-
-## Empty states
-
-When no result is found, WealthOS suggests searching by:
-
-- merchant
-- account
-- bill
-- amount
-- category
-- month
-- note
+- Search results now appear immediately under the search summary.
+- Added a visible Search Results heading.
+- Recent searches hide during an active search.
+- Data quality and upcoming activity now appear after results.
+- Matching results can be scrolled into view after typing.
+- No-match guidance appears exactly where results would normally appear.
 
 ## Principle
 
-**People remember financial things—not database fields.**
+**When a user searches, the answer becomes the next thing they see.**
 
 Suggested commit:
 
-`Redesign Record Library around one intelligent search`
+`Move Record Library search results above supporting panels`

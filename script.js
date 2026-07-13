@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.21.3-data';
-const LEGACY_KEYS=['wealthos-v0.21.2-data','wealthos-v0.21.1-data','wealthos-v0.21.0-data','wealthos-v0.20.0-data','wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.21.4-data';
+const LEGACY_KEYS=['wealthos-v0.21.3-data','wealthos-v0.21.2-data','wealthos-v0.21.1-data','wealthos-v0.21.0-data','wealthos-v0.20.0-data','wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -1164,7 +1164,16 @@ function renderRecordLibrary(data){
           ? 'Showing records with recurring schedules.'
           : 'Showing your most recent records.';
 
+  $('recordResultsLabel').textContent=query?'Search results':'Recent records';
+  $('recordResultsTitle').textContent=query
+    ? records.length===1?'1 matching record':`${records.length} matching records`
+    : 'Your financial history';
+  $('recordResultsMeta').textContent=query
+    ? records.length?'Open a result to review or correct it.':'Try another word or clear the search.'
+    : `${total} total record${total===1?'':'s'}`;
+
   $('libraryClearSearch').hidden=!query;
+  $('librarySuggestions').hidden=Boolean(query);
 
   const list=$('recordList');
   list.innerHTML='';
@@ -1173,7 +1182,7 @@ function renderRecordLibrary(data){
     const empty=document.createElement('div');
     empty.className='record-empty';
     empty.innerHTML=query
-      ? `<strong>No record matched “${escapeHtml(query)}.”</strong><span>Try a merchant, account, bill, amount, category, month, or note. You do not need to fill in the other filters.</span>`
+      ? `<strong>No record matched “${escapeHtml(query)}.”</strong><span>Try a merchant, account, bill, amount, category, month, or note. You do not need to fill in any other filter.</span>`
       : `<strong>No records match this view.</strong><span>Reset the view or record something new.</span>`;
     list.append(empty);
   }else{
@@ -1213,9 +1222,9 @@ function renderRecordLibrary(data){
     });
   }
 
+  renderLibrarySuggestions();
   renderDataQuality(data);
   renderExpectedCommitments(data);
-  renderLibrarySuggestions();
 }
 
 function dateAgeDays(dateString){
@@ -3224,7 +3233,16 @@ $('cancelRoadmap').addEventListener('click',closeRoadmapModal);
 $('roadmapModal').addEventListener('click',event=>{if(event.target===$('roadmapModal'))closeRoadmapModal()});
 $('roadmapForm').addEventListener('submit',saveRoadmap);
 $('libraryRecordButton').addEventListener('click',()=>openRecordModal('expense'));
-$('librarySearch').addEventListener('input',()=>renderRecordLibrary(loadData()));
+let librarySearchScrollTimer=null;
+$('librarySearch').addEventListener('input',()=>{
+  renderRecordLibrary(loadData());
+  clearTimeout(librarySearchScrollTimer);
+  librarySearchScrollTimer=setTimeout(()=>{
+    if($('librarySearch').value.trim()&&filteredLibraryRecords(loadData()).length){
+      $('recordResultsHeading').scrollIntoView({behavior:'smooth',block:'start'});
+    }
+  },350);
+});
 $('librarySearch').addEventListener('change',()=>{
   if($('librarySearch').value.trim())rememberLibrarySearch($('librarySearch').value.trim());
 });

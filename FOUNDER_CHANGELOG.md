@@ -442,3 +442,17 @@ The Record Library required users to think like database administrators. Search 
 ### Principle
 
 **People remember financial things—not database fields.**
+
+## v0.21.4 — Record Results Fix
+
+### Observation
+
+Search returned the correct result count, but the actual matching records were positioned beneath supporting panels and appeared missing.
+
+### Decision
+
+Place results immediately after the search status and move supporting information below them.
+
+### Principle
+
+**When a user searches, the answer becomes the next thing they see.**

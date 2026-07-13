@@ -3884,3 +3884,41 @@ body{background:var(--paper);font-family:Manrope,sans-serif;-webkit-font-smoothi
     gap:4px;
   }
 }
+
+/* v0.21.4 — Search results hierarchy fix */
+
+.record-results-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+  margin:18px 0 0;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+}
+
+.record-results-heading span{
+  display:block;
+  color:var(--evergreen);
+  font-size:.64rem;
+  font-weight:800;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+}
+
+.record-results-heading h4{
+  margin:5px 0 0;
+  font-size:1.2rem;
+}
+
+.record-results-heading small{
+  color:var(--muted);
+}
+
+.record-list{
+  margin-bottom:24px;
+}
+
+.library-suggestions[hidden]{
+  display:none!important;
+}
