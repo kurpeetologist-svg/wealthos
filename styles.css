@@ -530,3 +530,32 @@ textarea:focus{
     grid-template-columns:1fr;
   }
 }
+
+/* v0.10.0 — Human Economics */
+body{background-image:linear-gradient(to right,rgba(27,32,28,.022) 1px,transparent 1px),linear-gradient(to bottom,rgba(27,32,28,.018) 1px,transparent 1px);background-size:72px 72px,72px 36px}
+.focus-section{background-image:linear-gradient(to bottom,rgba(27,32,28,.018) 1px,transparent 1px);background-size:100% 36px}
+.financial-ledger{margin-bottom:22px;padding:28px 30px;border:1px solid var(--line);background:#fff}
+.ledger-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.ledger-kicker{margin:0 0 6px;color:var(--evergreen);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.13em}
+.ledger-heading h3{margin:0;font-size:1.45rem;letter-spacing:-.025em}
+.ledger-currency{padding:5px 9px;border:1px solid var(--line);color:var(--muted);font-size:.68rem;font-weight:700;letter-spacing:.1em}
+.ledger-rows{margin-top:8px}.ledger-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:baseline;padding:13px 0;border-bottom:1px solid rgba(218,213,200,.7)}
+.ledger-row span{color:var(--muted);font-size:.84rem}.ledger-row strong,.financial-number,.timeline-amount,.snapshot-value,.snapshot-horizons strong{font-variant-numeric:tabular-nums lining-nums}
+.ledger-total{margin-top:5px;padding-top:18px;border-top:2px solid var(--ink);border-bottom:0}.ledger-total span,.ledger-total strong{color:var(--ink);font-weight:800}
+.ledger-context{max-width:780px;margin:20px 0 0;color:var(--muted);font-size:.86rem}
+.economic-definition{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.definition-toggle{display:flex;align-items:center;gap:10px;padding:0;border:0;background:transparent;color:var(--evergreen);cursor:pointer;font-size:.76rem;font-weight:700}
+.definition-toggle b{width:23px;height:23px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;font-weight:400;transition:transform .25s ease}
+.economic-definition.open .definition-toggle b{transform:rotate(45deg)}
+.definition-detail{display:grid;grid-template-rows:0fr;overflow:hidden;transition:grid-template-rows .3s ease}.economic-definition.open .definition-detail{grid-template-rows:1fr}
+.definition-detail p{min-height:0;max-width:760px;margin:12px 0 0;color:var(--muted);font-size:.82rem}
+.number-meta{display:flex;justify-content:space-between;gap:18px;margin-top:auto;margin-bottom:9px;color:var(--muted);font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.signal-number{margin-top:0}.signal-card{position:relative}.signal-card::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--evergreen)}
+.signal-card[data-signal="attention"]::before{background:var(--attention)}.signal-card[data-signal="progress"]::before{background:var(--progress)}.signal-card[data-signal="next"]::before{background:var(--next)}
+.timeline-month-heading{padding-top:2px;border-top:2px solid var(--ink)}.timeline-month-heading h3{padding-top:14px}
+.timeline-event-button{border-left:1px solid transparent}.timeline-event-button:hover{border-left-color:var(--evergreen)}
+.timeline-marker{width:3px;height:18px;margin-top:2px;border-radius:0;box-shadow:none}.timeline-amount{min-width:110px;text-align:right}
+.snapshot-horizons{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:38px;border:1px solid var(--line);background:var(--line)}
+.snapshot-horizons>div{padding:18px;background:var(--paper)}.snapshot-horizons span{display:block;margin-bottom:7px;color:var(--muted);font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em}
+.lesson-card,.starting-card,.checkin-option,.snapshot-card,.financial-ledger{box-shadow:0 1px 0 rgba(27,32,28,.025)}
+@media(max-width:700px){.financial-ledger{padding:24px}.snapshot-horizons{grid-template-columns:1fr}.timeline-amount{text-align:left}}

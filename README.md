@@ -1,34 +1,21 @@
-# WealthOS v0.9.4 — Lesson
+# WealthOS v0.10.0 — Human Economics
 
-## New
+Sprint 2.1 gives WealthOS a clearer financial identity without turning it into a conventional bank or investing app.
 
-A quiet financial-literacy feature now appears between Today’s Focus and Check-in.
-
-### Lesson
-- One educational idea rotates each day
-- Available to both first-time and returning users
-- Covers saving, spending, debt, investing, credit, income, and planning
-- Includes an optional **Learn why**
-- Remains general and educational rather than pretending to be personalized advice
-
-## Why it belongs
-
-WealthOS is a financial literacy product.
-
-Every visit should leave someone understanding one useful idea they can carry into a future decision.
-
-## Design choice
-
-Lesson is not a pop-up.
-
-It does not interrupt the Lobby or force the user to engage. It remains calm, visible, and optional.
+## Added
+- restrained ledger-inspired texture
+- current-position ledger
+- explicit currency and time-horizon labels
+- tabular monetary numerals
+- percentage and actual-dollar comparisons together
+- statement-style Timeline details
+- monthly and annualized Spending Snapshot pace
+- small economic definitions
 
 ## Principle
-
-**Teach through curiosity, not authority.**
+**Every financial number should show its relationship to choice, time, or consequence.**
 
 ## Publish
-
 Replace:
 - index.html
 - styles.css
@@ -36,5 +23,4 @@ Replace:
 - README.md
 
 Suggested commit:
-
-`Add a daily financial literacy Lesson`
+`Introduce the Human Economics financial identity`

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.9.4</title>
+  <title>WealthOS Private Preview v0.10.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -65,6 +65,24 @@
           </button>
         </div>
 
+        <section class="financial-ledger" id="financialLedger" hidden aria-label="Current financial position">
+          <div class="ledger-heading">
+            <div><p class="ledger-kicker">Current position</p><h3>This month at a glance</h3></div>
+            <span class="ledger-currency" id="ledgerCurrency">USD</span>
+          </div>
+          <div class="ledger-rows">
+            <div class="ledger-row"><span>Income recorded</span><strong id="ledgerIncome">—</strong></div>
+            <div class="ledger-row"><span>Spending recorded</span><strong id="ledgerSpending">—</strong></div>
+            <div class="ledger-row"><span>Saving recorded</span><strong id="ledgerSaving">—</strong></div>
+            <div class="ledger-row ledger-total"><span>Remaining after recorded spending</span><strong id="ledgerRemaining">—</strong></div>
+          </div>
+          <p class="ledger-context" id="ledgerContext"></p>
+          <div class="economic-definition">
+            <button class="definition-toggle" id="flexibleDefinitionToggle" type="button" aria-expanded="false">What does “remaining” mean? <b>+</b></button>
+            <div class="definition-detail"><p><strong>Remaining</strong> is income minus the spending recorded for the month. It is not the same as disposable cash unless all obligations have been entered.</p></div>
+          </div>
+        </section>
+
         <div class="signal-grid" id="signalGrid" hidden>
           <article class="signal-card" data-signal="growth">
             <button class="signal-button" type="button" aria-expanded="false">
@@ -73,7 +91,7 @@
                 <span class="signal-action">Understand why <b>+</b></span>
               </div>
               <h3 id="growthTitle"></h3>
-              <div class="signal-number" id="growthValue"></div>
+              <div class="number-meta"><span id="growthCurrency">USD</span><span>Monthly</span></div><div class="signal-number financial-number" id="growthValue"></div>
               <div class="signal-change" id="growthChange"></div>
               <p class="signal-personal" id="growthPersonal"></p>
             </button>
@@ -93,7 +111,7 @@
                 <span class="signal-action">Review <b>+</b></span>
               </div>
               <h3 id="attentionTitle"></h3>
-              <div class="signal-number" id="attentionValue"></div>
+              <div class="number-meta"><span id="attentionCurrency">USD</span><span id="attentionHorizon">Upcoming</span></div><div class="signal-number financial-number" id="attentionValue"></div>
               <div class="signal-change" id="attentionChange"></div>
               <p class="signal-personal" id="attentionPersonal"></p>
             </button>
@@ -113,7 +131,7 @@
                 <span class="signal-action">Continue <b>+</b></span>
               </div>
               <h3 id="progressTitle"></h3>
-              <div class="signal-number" id="progressValue"></div>
+              <div class="number-meta"><span id="progressCurrency">USD</span><span>Goal progress</span></div><div class="signal-number financial-number" id="progressValue"></div>
               <div class="signal-change" id="progressChange"></div>
               <p class="signal-personal" id="progressPersonal"></p>
             </button>
@@ -133,7 +151,7 @@
                 <span class="signal-action">Take the next step <b>+</b></span>
               </div>
               <h3 id="nextTitle"></h3>
-              <div class="signal-number" id="nextValue"></div>
+              <div class="number-meta"><span id="nextCurrency">USD</span><span>Recommended action</span></div><div class="signal-number financial-number" id="nextValue"></div>
               <div class="signal-change" id="nextChange"></div>
               <p class="signal-personal" id="nextPersonal"></p>
             </button>
@@ -230,7 +248,7 @@
         <section class="timeline-section" id="timeline">
           <div class="timeline-heading">
             <div>
-              <p class="eyebrow">Stories</p>
+              <p class="eyebrow">Financial record</p>
               <h2>Your Timeline</h2>
             </div>
             <p id="timelineSummary">Your Timeline is waiting for its first chapter.</p>
@@ -280,9 +298,12 @@
               <p class="snapshot-label">You spent</p>
               <div class="snapshot-value" id="snapshotValue">—</div>
               <p class="snapshot-context" id="snapshotContext"></p>
-              <div class="snapshot-note">
-                <p id="snapshotNote"></p>
+              <div class="snapshot-horizons">
+                <div><span>Selected period</span><strong id="snapshotSelectedAmount">—</strong></div>
+                <div><span>Monthly pace</span><strong id="snapshotMonthlyPace">—</strong></div>
+                <div><span>Annualized pace</span><strong id="snapshotAnnualPace">—</strong></div>
               </div>
+              <div class="snapshot-note"><p id="snapshotNote"></p></div>
             </div>
           </div>
         </section>
@@ -495,7 +516,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.9.4</span>
+    <span>Version 0.10.0</span>
   </footer>
 
   <script src="script.js"></script>

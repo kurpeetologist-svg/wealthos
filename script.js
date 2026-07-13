@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.9.4-data';
-const LEGACY_KEYS=['wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.10.0-data';
+const LEGACY_KEYS=['wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -80,7 +80,7 @@ function stats(h){
 }
 function showState(isReturning){
   $('firstVisitLobby').hidden=isReturning;$('returningLobby').hidden=!isReturning;
-  $('firstVisitFocus').hidden=isReturning;$('signalGrid').hidden=!isReturning;
+  $('firstVisitFocus').hidden=isReturning;$('financialLedger').hidden=!isReturning;$('signalGrid').hidden=!isReturning;
   $('firstVisitCheckin').hidden=isReturning;$('returningCheckin').hidden=!isReturning;$('connectionChoice').hidden=!isReturning;
   $('firstVisitTimeline').hidden=isReturning;$('timelineGroups').hidden=!isReturning;
   $('firstVisitSnapshot').hidden=isReturning;$('returningSnapshot').hidden=!isReturning;
@@ -174,6 +174,22 @@ function renderLesson(){
   $('lessonKeepInMind').textContent=lesson.keep;
 }
 
+
+function latestMonthlySaving(data){
+  const monthly=[...(data.checkins||[])].filter(item=>item.type==='monthly').sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  return monthly.length?n(monthly[0].saved):0;
+}
+function renderFinancialLedger(data,fmt){
+  const income=n(data.income?.current),spending=n(data.spending?.monthly),saving=latestMonthlySaving(data),remaining=income-spending;
+  $('ledgerCurrency').textContent=data.profile.currency;
+  $('ledgerIncome').textContent=fmt.format(income);
+  $('ledgerSpending').textContent=fmt.format(spending);
+  $('ledgerSaving').textContent=fmt.format(saving);
+  $('ledgerRemaining').textContent=fmt.format(remaining);
+  $('ledgerContext').textContent=income<=0
+    ? 'Add monthly income during a Check-in to place spending, saving, and remaining funds in context.'
+    : `Recorded spending represents ${(spending/income*100).toFixed(0)}% of monthly income. Recorded saving represents ${(saving/income*100).toFixed(0)}%.`;
+}
 function render(data){
   greeting();
   renderLesson();
@@ -181,13 +197,15 @@ function render(data){
   showState(returning);
   if(!returning)return;
   const fmt=money(data.profile.currency),h=sortedHistory(data),s=stats(h),cur=n(s.cur.amount),prev=s.prev?n(s.prev.amount):null,delta=prev===null?null:cur-prev,pct=prev>0?delta/prev*100:null,source=data.income.source||'Income';
+  renderFinancialLedger(data,fmt);
+  ['growthCurrency','attentionCurrency','progressCurrency','nextCurrency'].forEach(id=>$(id).textContent=data.profile.currency);
   $('financialState').textContent=delta===null||delta>=0?'Your financial life is moving in the right direction.':'Your financial life is steady, with room to rebuild momentum.';
   $('attentionState').textContent='Your Focus is ready.';
   $('todayDate').textContent=new Intl.DateTimeFormat(undefined,{weekday:'long',month:'long',day:'numeric'}).format(new Date());
 
   $('growthValue').textContent=fmt.format(cur);
   $('growthTitle').textContent=s.isRecord?`${source} reached a new monthly high`:delta>0?`${source} increased this month`:delta<0?`${source} decreased this month`:`${source} held steady this month`;
-  $('growthChange').textContent=pct===null?'Your first recorded month':`${delta>=0?'+':''}${pct.toFixed(0)}% vs last month`;
+  $('growthChange').textContent=pct===null?'Your first recorded month':`${delta>=0?'+':''}${pct.toFixed(0)}% · ${delta>=0?'+':'−'}${fmt.format(Math.abs(delta))} vs last month`;
   $('growthPersonal').textContent=s.isRecord?`This is your strongest ${source.toLowerCase()} month since you started WealthOS.`:delta===null?'This is the first chapter in your Timeline.':`Your ${source.toLowerCase()} is ${fmt.format(Math.abs(delta))} ${delta>=0?'higher':'lower'} than last month.`;
   $('growthStoryChanged').textContent=s.prev?`${source} moved from ${fmt.format(prev)} to ${fmt.format(cur)}.`:`You recorded ${fmt.format(cur)} for ${formatMonth(data.income.currentMonth)}.`;
   $('growthStoryMatters').textContent=s.isRecord?'This establishes a new reference point for future progress.':`Your recorded monthly average is ${fmt.format(s.avg)}.`;
@@ -195,6 +213,7 @@ function render(data){
   $('growthSource').textContent='Source: Monthly Check-ins · WealthOS calculates the comparison.';
 
   const td=daysUntil(data.taxes.dueDate),te=n(data.taxes.estimate),tr=n(data.taxes.reserved),short=Math.max(0,te-tr),funded=te>0&&tr>=te;
+  $('attentionHorizon').textContent=td===null?'No date':td<0?'Past due':'Time horizon';
   $('attentionTitle').textContent=te===0?'Add tax details when they become relevant':funded?'Your quarterly tax payment is fully reserved':'Your quarterly tax reserve has room to grow';
   $('attentionValue').textContent=te===0?'Ready when you are':td===null?'Date not added':td<0?`${Math.abs(td)} days late`:`${td} days`;
   $('attentionChange').textContent=te===0?'WealthOS will help you prepare':funded?`${fmt.format(tr)} reserved`:`${fmt.format(short)} remaining`;
@@ -297,9 +316,12 @@ function renderSnapshot(data,fmt,period){
   }else{
     $('snapshotContext').textContent='Add monthly income to place this spending in context.';
   }
+  $('snapshotSelectedAmount').textContent=fmt.format(amount);
+  $('snapshotMonthlyPace').textContent=fmt.format(monthlyEquivalent);
+  $('snapshotAnnualPace').textContent=fmt.format(monthlyEquivalent*12);
   $('snapshotNote').textContent=amount===0
-    ? 'Your Snapshot is ready for its first spending check-in. Add a simple total in About You whenever you are ready.'
-    : 'This is a snapshot, not a judgment. As WealthOS remembers more check-ins, it will become better at showing what is typical for you.';
+    ? 'Your Snapshot is ready for its first spending check-in. Add an approximate total whenever you are ready.'
+    : 'This is a snapshot, not a judgment. Time horizons show how a repeated spending pattern could affect the larger picture.';
   document.querySelectorAll('.period-button').forEach(button=>button.classList.toggle('active',button.dataset.period===period));
 }
 
@@ -452,6 +474,11 @@ $('closeContribution').addEventListener('click',closeContribution);
 $('cancelContribution').addEventListener('click',closeContribution);
 $('contributionForm').addEventListener('submit',saveContribution);
 $('contributionModal').addEventListener('click',event=>{if(event.target===$('contributionModal'))closeContribution()});
+$('flexibleDefinitionToggle').addEventListener('click',()=>{
+  const box=$('flexibleDefinitionToggle').closest('.economic-definition');
+  const open=box.classList.toggle('open');
+  $('flexibleDefinitionToggle').setAttribute('aria-expanded',String(open));
+});
 $('lessonToggle').addEventListener('click',()=>{
   const card=$('lessonCard');
   const open=card.classList.toggle('open');
