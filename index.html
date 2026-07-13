@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.15.1</title>
+  <title>WealthOS Private Preview v0.16.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -46,7 +46,7 @@
           <p class="attention-state" id="attentionState"></p>
           <div class="lobby-date" id="todayDate"></div>
           <a class="enter-link" href="#focus">
-            <span>Your Focus is ready.</span>
+            <span>Open your Workspace.</span>
             <b>↓</b>
           </a>
         </div>
@@ -57,10 +57,10 @@
       <div class="section-shell">
         <div class="section-heading">
           <div>
-            <div class="material-label"><span class="material-mark note-mark"></span><p class="eyebrow">Today’s note</p></div>
-            <h2>Today’s Focus</h2>
+            <div class="material-label"><span class="material-mark note-mark"></span><p class="eyebrow">Your financial workspace</p></div>
+            <h2>Workspace</h2>
           </div>
-          <p id="focusIntro">We'll surface the four most important things to know after your first check-in.</p>
+          <p id="focusIntro">One useful next step, today’s picture, and what WealthOS is beginning to notice.</p>
         </div>
 
         <div id="firstVisitFocus" class="starting-card material-sheet material-note">
@@ -71,6 +71,89 @@
             Begin Your Story <span>→</span>
           </button>
         </div>
+
+        <section class="workspace" id="workspace" hidden aria-label="WealthOS Workspace">
+          <article class="workspace-focus">
+            <div class="workspace-object-label">
+              <span>Today’s Focus</span>
+              <small id="workspaceFocusTime">About 30 seconds</small>
+            </div>
+            <h3 id="workspaceFocusTitle">Record today’s spending.</h3>
+            <p id="workspaceFocusText">One small record gives today a clearer financial picture.</p>
+            <button id="workspaceFocusAction" type="button">Quick Add <b>→</b></button>
+          </article>
+
+          <div class="workspace-grid">
+            <article class="workspace-panel workspace-today">
+              <div class="workspace-panel-heading">
+                <div>
+                  <span>Today</span>
+                  <h3>Today’s Snapshot</h3>
+                </div>
+                <a href="#spendingSnapshot">Open Snapshot →</a>
+              </div>
+              <div class="workspace-today-values">
+                <div><span>Income this month</span><strong id="workspaceIncome">—</strong></div>
+                <div><span>Spent today</span><strong id="workspaceSpentToday">—</strong></div>
+                <div><span>Saved toward goals</span><strong id="workspaceSaved">—</strong></div>
+              </div>
+            </article>
+
+            <article class="workspace-panel workspace-activity">
+              <div class="workspace-panel-heading">
+                <div>
+                  <span>Working memory</span>
+                  <h3>Today’s Activity</h3>
+                </div>
+                <button id="workspaceQuickAdd" type="button">Quick Add +</button>
+              </div>
+              <div id="workspaceActivityList" class="workspace-activity-list"></div>
+            </article>
+
+            <article class="workspace-panel workspace-observation">
+              <div class="workspace-panel-heading">
+                <div>
+                  <span>Observation</span>
+                  <h3>What WealthOS noticed</h3>
+                </div>
+                <a href="#spendingSnapshot">See context →</a>
+              </div>
+              <p class="workspace-observation-title" id="workspaceObservationTitle"></p>
+              <p id="workspaceObservationSummary"></p>
+            </article>
+
+            <article class="workspace-panel workspace-continue">
+              <div class="workspace-panel-heading">
+                <div>
+                  <span>Continue</span>
+                  <h3 id="workspaceContinueTitle">Your latest financial moment</h3>
+                </div>
+              </div>
+              <p id="workspaceContinueText"></p>
+              <button id="workspaceContinueAction" type="button">Continue <b>→</b></button>
+            </article>
+
+            <article class="workspace-panel workspace-lesson">
+              <div class="workspace-panel-heading">
+                <div>
+                  <span>Bookmarked</span>
+                  <h3>Lesson waiting</h3>
+                </div>
+                <small>About 2 minutes</small>
+              </div>
+              <p class="workspace-lesson-category" id="workspaceLessonCategory"></p>
+              <h4 id="workspaceLessonTitle"></h4>
+              <p id="workspaceLessonSummary"></p>
+              <a href="#lesson">Open Lesson →</a>
+            </article>
+          </div>
+
+          <div class="workspace-detail-heading">
+            <span>Financial materials</span>
+            <h3>Your detailed Signals and records</h3>
+            <p>Use these when you want to look more closely.</p>
+          </div>
+        </section>
 
         <section class="financial-ledger material-sheet material-ledger desk-object desk-paycheck" id="financialLedger" hidden aria-label="Current financial position"><span class="sheet-tab">Current month</span>
           <div class="ledger-heading">
@@ -435,15 +518,18 @@
               <div class="recent-receipts" id="recentReceipts">
                 <div class="recent-receipts-heading">
                   <div>
-                    <span>Recent records</span>
-                    <h3 id="recentReceiptsTitle">Today’s receipts</h3>
+                    <span>Supporting activity</span>
+                    <h3 id="recentReceiptsTitle">Today’s Activity</h3>
                   </div>
                   <button id="addAnotherExpense" type="button">Quick Add +</button>
                 </div>
                 <div id="recentReceiptsList"></div>
               </div>
 
-              <div class="snapshot-note"><p id="snapshotNote"></p></div>
+              <div class="snapshot-note snapshot-closing-observation">
+                <span>One more thing</span>
+                <p id="snapshotNote"></p>
+              </div>
             </div>
           </div>
         </section>
@@ -793,7 +879,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.15.1</span>
+    <span>Version 0.16.0</span>
   </footer>
 
   <script src="script.js"></script>

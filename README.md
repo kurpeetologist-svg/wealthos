@@ -1,33 +1,46 @@
-# WealthOS v0.15.1 — Context Library
+# WealthOS v0.16.0 — Workspace
 
-This release implements Behind the Number as a conversational completion experience.
+This release changes the returning-user homepage from a sequence of sections into an active financial Workspace.
 
-## What changed
+## Workspace hierarchy
 
-- Behind the Number no longer looks like a separate feature card.
-- WealthOS speaks immediately after confirming an action.
-- Every explanation includes:
-  - a concise concept
-  - a short explanation
-- A reusable Context Library replaces a handful of disconnected examples.
-- Merchant names and notes can later support alias-based context matching.
-- Weekly and Monthly Check-ins use the same Context Library structure.
+1. Today’s Focus
+2. Today’s Snapshot
+3. Today’s Activity
+4. What WealthOS Noticed
+5. Continue
+6. Lesson Waiting
+7. Detailed Signals and records
 
-## Lesson vs. Behind the Number
+## “What should I do next?”
 
-**Lesson** is a deeper, independent financial-literacy curriculum.
+The Workspace chooses one primary action based on current information:
 
-**Behind the Number** is an immediate conversation caused by the user’s action.
+- Record today’s spending
+- Complete a Weekly Check-in
+- Close the month
+- Continue a savings goal
+- Review Spending Snapshot
 
-## Included
+Only one action is emphasized at a time.
 
-- `CONTEXT_LIBRARY.md`
-- updated Founder Changelog
-- updated WealthOS Design System
+## Observation Engine
+
+The same Observation Engine now powers:
+
+- Workspace
+- Spending Snapshot
+- Snapshot closing explanation
+
+Developer-facing text about where numbers came from has been replaced with useful implications or honest statements about limited history.
 
 ## Principle
 
-**Context should feel like WealthOS speaking—not like another feature asking for attention.**
+**The Workspace should orient the user, offer one useful next step, and send them back into real life with more clarity.**
+
+## Retention
+
+Saved data migrates automatically from v0.15.1 and earlier versions.
 
 ## Publish
 
@@ -44,4 +57,4 @@ Replace:
 
 Suggested commit:
 
-`Integrate Behind the Number with a reusable Context Library`
+`Build the WealthOS Workspace and unify observations`

@@ -215,3 +215,35 @@ Placement, timing, and voice determine whether contextual education feels like a
 ### Principle
 
 **Context should feel like WealthOS speaking—not like another feature asking for attention.**
+
+## v0.16.0 — Workspace
+
+### Why this exists
+
+WealthOS had meaningful features, but returning users still encountered them as a long sequence of page sections.
+
+A financial operating system should immediately answer:
+
+> **What should I do next?**
+
+### What changed
+
+- The returning-user home experience is now called Workspace.
+- One primary action is emphasized at a time.
+- Today’s financial picture is visible without opening a detailed report.
+- Recent activity serves as the app’s working memory.
+- What WealthOS Noticed appears directly in the Workspace.
+- The latest financial moment can be continued without searching.
+- Lesson sits quietly as a bookmarked resource.
+- Detailed Signals remain available below the Workspace.
+- Developer-facing Snapshot copy was replaced with useful observation language.
+
+### What we learned
+
+A Workspace is not another collection of cards.
+
+It is an environment that gives the user orientation, continuity, and one clear invitation.
+
+### Principle
+
+**The Workspace should orient the user, offer one useful next step, and send them back into real life with more clarity.**

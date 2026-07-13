@@ -88,3 +88,19 @@ The interaction sequence is:
 6. Let the user leave or continue naturally.
 
 The product should feel as though WealthOS noticed the action and responded, not as though another feature was inserted into the page.
+
+## Workspace Language
+
+WealthOS does not use “Dashboard” as its primary product metaphor.
+
+The Workspace is the surface where the user’s financial activity, observations, learning, and next actions come together.
+
+A returning-user Workspace should answer:
+
+1. Where do I stand today?
+2. What happened recently?
+3. What is WealthOS beginning to notice?
+4. What is the single most useful thing I can do next?
+5. Where can I continue from the last visit?
+
+The Workspace should not maximize time in app. It should create enough clarity for the user to return to real life confidently.

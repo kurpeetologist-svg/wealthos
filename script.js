@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.15.1-data';
-const LEGACY_KEYS=['wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.16.0-data';
+const LEGACY_KEYS=['wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -92,12 +92,12 @@ function stats(h){
 }
 function showState(isReturning){
   $('firstVisitLobby').hidden=isReturning;$('returningLobby').hidden=!isReturning;
-  $('firstVisitFocus').hidden=isReturning;$('financialLedger').hidden=!isReturning;$('savingsEnvelope').hidden=!isReturning;$('signalGrid').hidden=!isReturning;$('continueExploring').hidden=!isReturning;
+  $('firstVisitFocus').hidden=isReturning;$('workspace').hidden=!isReturning;$('financialLedger').hidden=!isReturning;$('savingsEnvelope').hidden=!isReturning;$('signalGrid').hidden=!isReturning;$('continueExploring').hidden=!isReturning;
   $('firstVisitCheckin').hidden=isReturning;$('returningCheckin').hidden=!isReturning;$('connectionChoice').hidden=!isReturning;
   $('firstVisitTimeline').hidden=isReturning;$('timelineGroups').hidden=!isReturning;
   $('firstVisitSnapshot').hidden=isReturning;$('returningSnapshot').hidden=!isReturning;
   $('aboutTrigger').hidden=!isReturning;
-  $('focusIntro').textContent=isReturning?'Four Signals to help you understand what matters today.':"We'll surface the four most important things to know after your first check-in.";
+  $('focusIntro').textContent=isReturning?'One useful next step, today’s picture, and what WealthOS is beginning to notice.':"We'll surface the four most important things to know after your first check-in.";
 }
 
 const lessons=[
@@ -174,6 +174,176 @@ function renderSavingsEnvelope(data,fmt){
     $('envelopeLabel').textContent='Saved';$('envelopeValue').textContent=fmt.format(0);
   }
 }
+
+function checkinInCurrentWeek(data){
+  const start=startOfWeek(new Date());
+  return (data.checkins||[]).some(item=>{
+    if(item.type!=='weekly'||!item.date)return false;
+    const date=new Date(`${item.date}T12:00:00`);
+    return date>=start;
+  });
+}
+
+function monthlyCheckinExists(data){
+  return (data.checkins||[]).some(item=>item.type==='monthly'&&String(item.date).slice(0,7)===currentMonthKey());
+}
+
+function chooseWorkspaceFocus(data){
+  const todayRecords=expensesForPeriod(data,'daily');
+  if(!todayRecords.length){
+    return{
+      title:'Record today’s spending.',
+      text:'One small record gives today a clearer financial picture.',
+      label:'Quick Add',
+      time:'About 20 seconds',
+      action:'quickAdd'
+    };
+  }
+
+  if(!checkinInCurrentWeek(data)){
+    return{
+      title:'Turn this week into a reference point.',
+      text:'A Weekly Check-in helps WealthOS distinguish today from the wider week.',
+      label:'Weekly Check-in',
+      time:'About 30 seconds',
+      action:'weekly'
+    };
+  }
+
+  if(new Date().getDate()>=25&&!monthlyCheckinExists(data)){
+    return{
+      title:'Close the month with clarity.',
+      text:'Record income, spending, and saving before the next month begins.',
+      label:'Monthly Check-in',
+      time:'About 60 seconds',
+      action:'monthly'
+    };
+  }
+
+  if(data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved)){
+    return{
+      title:`Continue ${data.challenge.name||'your savings goal'}.`,
+      text:'One contribution can keep the goal moving without turning today into a full financial review.',
+      label:'Add contribution',
+      time:'About 20 seconds',
+      action:'contribution'
+    };
+  }
+
+  return{
+    title:'See what today added to your story.',
+    text:'Your Snapshot is ready with today’s records and WealthOS’s latest observation.',
+    label:'Review Snapshot',
+    time:'About 30 seconds',
+    action:'snapshot'
+  };
+}
+
+function chooseWorkspaceContinue(data){
+  const memory=data.memory||{};
+  if(memory.lastInteraction==='expense'){
+    return{
+      title:'Continue with today’s picture.',
+      text:memory.lastSummary||'Your latest purchase is now part of Today, This Week, and This Month.',
+      label:'View Snapshot',
+      action:'snapshot'
+    };
+  }
+
+  if(memory.lastInteraction==='checkin'){
+    return{
+      title:'Return to the chapter you added.',
+      text:memory.lastSummary||'Your latest check-in is now part of your Timeline.',
+      label:'Open Timeline',
+      action:'timeline'
+    };
+  }
+
+  if(data.challenge.enabled&&n(data.challenge.target)>0){
+    return{
+      title:`Continue ${data.challenge.name||'your savings goal'}.`,
+      text:'Your goal folder is ready whenever you want to add another contribution.',
+      label:'Open goal',
+      action:'contribution'
+    };
+  }
+
+  return{
+    title:'Build your first weekly reference point.',
+    text:'A Weekly Check-in gives WealthOS something broader than one day to remember.',
+    label:'Weekly Check-in',
+    action:'weekly'
+  };
+}
+
+function performWorkspaceAction(action){
+  if(action==='quickAdd'){openQuickAdd();return}
+  if(action==='weekly'||action==='monthly'){openCheckin(action);return}
+  if(action==='contribution'){openContribution();return}
+  if(action==='timeline'){location.hash='timeline';return}
+  if(action==='lesson'){location.hash='lesson';return}
+  location.hash='spendingSnapshot';
+}
+
+function renderWorkspaceActivity(data,fmt){
+  const list=$('workspaceActivityList');
+  list.innerHTML='';
+  const records=expensesForPeriod(data,'daily').slice(0,4);
+
+  if(!records.length){
+    const empty=document.createElement('p');
+    empty.className='workspace-empty';
+    empty.textContent='Nothing recorded today yet. Quick Add is ready when something happens.';
+    list.append(empty);
+    return;
+  }
+
+  records.forEach(item=>{
+    const row=document.createElement('article');
+    row.className='workspace-activity-item';
+    row.innerHTML=`
+      <span class="workspace-activity-mark">${categoryInitial(item.category)}</span>
+      <div>
+        <strong>${item.merchant||item.category}</strong>
+        <small>${item.category}</small>
+      </div>
+      <strong class="workspace-activity-amount">${fmt.format(n(item.amount))}</strong>
+    `;
+    list.append(row);
+  });
+}
+
+function renderWorkspace(data,fmt){
+  const focus=chooseWorkspaceFocus(data);
+  $('workspaceFocusTitle').textContent=focus.title;
+  $('workspaceFocusText').textContent=focus.text;
+  $('workspaceFocusAction').innerHTML=`${focus.label} <b>→</b>`;
+  $('workspaceFocusAction').dataset.action=focus.action;
+  $('workspaceFocusTime').textContent=focus.time;
+
+  $('workspaceIncome').textContent=fmt.format(n(data.income.current));
+  $('workspaceSpentToday').textContent=fmt.format(expenseTotal(expensesForPeriod(data,'daily')));
+  const saved=data.challenge.enabled?n(data.challenge.saved):n(data.emergency.balance);
+  $('workspaceSaved').textContent=fmt.format(saved);
+
+  renderWorkspaceActivity(data,fmt);
+
+  const observation=buildObservation(data,fmt,'daily');
+  $('workspaceObservationTitle').textContent=observation.title;
+  $('workspaceObservationSummary').textContent=observation.summary;
+
+  const continuation=chooseWorkspaceContinue(data);
+  $('workspaceContinueTitle').textContent=continuation.title;
+  $('workspaceContinueText').textContent=continuation.text;
+  $('workspaceContinueAction').innerHTML=`${continuation.label} <b>→</b>`;
+  $('workspaceContinueAction').dataset.action=continuation.action;
+
+  const lesson=lessons[new Date().getDate()%lessons.length];
+  $('workspaceLessonCategory').textContent=lesson.category;
+  $('workspaceLessonTitle').textContent=lesson.title;
+  $('workspaceLessonSummary').textContent=lesson.summary;
+}
+
 function render(data){
   greeting();
   renderLesson();
@@ -182,6 +352,7 @@ function render(data){
   assembleFinancialDesk();
   if(!returning)return;
   const fmt=money(data.profile.currency),h=sortedHistory(data),s=stats(h),cur=n(s.cur.amount),prev=s.prev?n(s.prev.amount):null,delta=prev===null?null:cur-prev,pct=prev>0?delta/prev*100:null,source=data.income.source||'Income';
+  renderWorkspace(data,fmt);
   renderFinancialLedger(data,fmt);
   renderSavingsEnvelope(data,fmt);
   $('incomeSlipMonth').textContent=formatMonth(data.income.currentMonth);
@@ -543,7 +714,7 @@ function strongestCategory(totals){
   return [...totals.entries()].sort((a,b)=>b[1]-a[1])[0]||null;
 }
 
-function renderSnapshotInsight(data,fmt,period){
+function buildObservation(data,fmt,period){
   const currentKey=currentMonthKey();
   const previousKey=previousMonthKey();
   const currentTotals=categoryTotalsForMonth(data,currentKey);
@@ -594,8 +765,10 @@ function renderSnapshotInsight(data,fmt,period){
       todayRecords.forEach(item=>todayTotals.set(item.category,(todayTotals.get(item.category)||0)+n(item.amount)));
       const top=strongestCategory(todayTotals);
       if(top){
+        const total=expenseTotal(todayRecords);
+        const share=total>0?top[1]/total*100:0;
         title=`${top[0]} accounts for most of today’s recorded spending.`;
-        summary=`${fmt.format(top[1])} of today’s total is in ${top[0].toLowerCase()}.`;
+        summary=`${fmt.format(top[1])}—about ${share.toFixed(0)}% of today’s total—is in ${top[0].toLowerCase()}.`;
         reason='Daily observations describe today’s composition only. WealthOS does not treat one day as a lasting habit.';
       }
     }
@@ -617,9 +790,14 @@ function renderSnapshotInsight(data,fmt,period){
     }
   }
 
-  $('snapshotInsightTitle').textContent=title;
-  $('snapshotInsightSummary').textContent=summary;
-  $('snapshotInsightReason').textContent=reason;
+  return {title,summary,reason};
+}
+
+function renderSnapshotInsight(data,fmt,period){
+  const observation=buildObservation(data,fmt,period);
+  $('snapshotInsightTitle').textContent=observation.title;
+  $('snapshotInsightSummary').textContent=observation.summary;
+  $('snapshotInsightReason').textContent=observation.reason;
 }
 
 function renderSnapshot(data,fmt,period){
@@ -645,7 +823,10 @@ function renderSnapshot(data,fmt,period){
     $('snapshotUpdateButton').textContent='Update monthly check-in →';
   }
   $('snapshotUpdateButton').dataset.period=period;renderSnapshotInsight(data,fmt,period);renderRecentReceipts(data,period,fmt);
-  $('snapshotNote').textContent=amount===0?'Users enter the spending facts. WealthOS calculates the context.':'These figures are calculated from your records and check-ins. They are not separate inputs.';
+  const closingObservation=buildObservation(data,fmt,period);
+  $('snapshotNote').textContent=amount===0
+    ? 'Once activity is recorded, WealthOS will begin separating isolated events from patterns.'
+    : closingObservation.reason;
   document.querySelectorAll('.period-button').forEach(button=>button.classList.toggle('active',button.dataset.period===period));
 }
 
@@ -916,6 +1097,9 @@ $('challengeEnabled').onchange=toggleChallenge;$('aboutForm').onsubmit=e=>{e.pre
 $('clearPreviewButton').onclick=()=>{if(confirm('Start fresh on this browser? This removes the saved Private Preview data.')){localStorage.removeItem(STORAGE_KEY);for(const k of LEGACY_KEYS)localStorage.removeItem(k);$('closePanel').click();render(blankData());location.hash='lobby'}};
 document.querySelectorAll('.signal-button').forEach(b=>b.onclick=()=>{const card=b.closest('.signal-card'),open=card.classList.toggle('open');b.setAttribute('aria-expanded',String(open))});
 document.querySelectorAll('.period-button').forEach(button=>button.addEventListener('click',()=>{const data=loadData();renderSnapshot(data,money(data.profile.currency),button.dataset.period)}));
+$('workspaceFocusAction').addEventListener('click',()=>performWorkspaceAction($('workspaceFocusAction').dataset.action));
+$('workspaceContinueAction').addEventListener('click',()=>performWorkspaceAction($('workspaceContinueAction').dataset.action));
+$('workspaceQuickAdd').addEventListener('click',openQuickAdd);
 $('quickAddTrigger').addEventListener('click',openQuickAdd);
 $('addAnotherExpense').addEventListener('click',openQuickAdd);
 $('closeQuickAdd').addEventListener('click',closeQuickAdd);
