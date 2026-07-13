@@ -35,3 +35,32 @@ Continue exploring is a bridge—not the final answer.
 Sprint 2.2 will build the actual WealthOS loop:
 
 **Check in → Understand → Learn → Take one small action → Return**
+
+## v0.11.0 — Living Cards
+
+### Why this exists
+
+The Financial Desk gave WealthOS a coherent material language, but the interface still felt closer to a report than an app.
+
+A comparison with Stripe clarified the gap: Stripe's cards feel powerful because they contain tangible product demonstrations and working surfaces. WealthOS cards mainly presented finished information.
+
+### What changed
+
+- Signal cards now contain functional financial objects.
+- Card compositions vary according to purpose.
+- Check-ins preview what the user will enter.
+- Spending Snapshot behaves more like a receipt.
+- Next Step visibly invites action.
+- The interface has more depth and responsiveness without using gradients.
+
+### What we learned
+
+Materials create identity.
+
+Instruments create action.
+
+WealthOS needs both.
+
+### Principle
+
+**Cards are working surfaces, not containers for reports.**

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.10.1</title>
+  <title>WealthOS Private Preview v0.11.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -91,6 +91,20 @@
                 <span class="signal-action">Understand why <b>+</b></span>
               </div>
               <h3 id="growthTitle"></h3>
+              <div class="living-object income-slip" aria-label="Income summary">
+                <div class="object-topline">
+                  <span>Income record</span>
+                  <span id="incomeSlipMonth">Current month</span>
+                </div>
+                <div class="income-slip-row">
+                  <span id="incomeSlipSource">Income</span>
+                  <strong id="incomeSlipAmount">—</strong>
+                </div>
+                <div class="income-slip-row muted-row">
+                  <span>Compared with prior month</span>
+                  <strong id="incomeSlipDelta">—</strong>
+                </div>
+              </div>
               <div class="number-meta"><span id="growthCurrency">USD</span><span>Monthly</span></div><div class="signal-number financial-number" id="growthValue"></div>
               <div class="signal-change" id="growthChange"></div>
               <p class="signal-personal" id="growthPersonal"></p>
@@ -111,6 +125,19 @@
                 <span class="signal-action">Review <b>+</b></span>
               </div>
               <h3 id="attentionTitle"></h3>
+              <div class="living-object obligation-tracker" aria-label="Upcoming obligation">
+                <div class="object-topline">
+                  <span>Upcoming obligation</span>
+                  <span id="obligationStatus">Not added</span>
+                </div>
+                <div class="obligation-bar" aria-hidden="true">
+                  <span id="obligationFill"></span>
+                </div>
+                <div class="obligation-meta">
+                  <div><span>Estimated</span><strong id="obligationEstimate">—</strong></div>
+                  <div><span>Reserved</span><strong id="obligationReserved">—</strong></div>
+                </div>
+              </div>
               <div class="number-meta"><span id="attentionCurrency">USD</span><span id="attentionHorizon">Upcoming</span></div><div class="signal-number financial-number" id="attentionValue"></div>
               <div class="signal-change" id="attentionChange"></div>
               <p class="signal-personal" id="attentionPersonal"></p>
@@ -131,6 +158,16 @@
                 <span class="signal-action">Continue <b>+</b></span>
               </div>
               <h3 id="progressTitle"></h3>
+              <div class="living-object goal-tracker" aria-label="Goal progress">
+                <div class="goal-ring" id="goalRing">
+                  <span id="goalPercent">0%</span>
+                </div>
+                <div class="goal-copy">
+                  <span id="goalLabel">Your goal</span>
+                  <strong id="goalRemaining">Ready to begin</strong>
+                  <small id="goalSubcopy">Record a contribution to start.</small>
+                </div>
+              </div>
               <div class="number-meta"><span id="progressCurrency">USD</span><span>Goal progress</span></div><div class="signal-number financial-number" id="progressValue"></div>
               <div class="signal-change" id="progressChange"></div>
               <p class="signal-personal" id="progressPersonal"></p>
@@ -151,6 +188,11 @@
                 <span class="signal-action">Take the next step <b>+</b></span>
               </div>
               <h3 id="nextTitle"></h3>
+              <div class="living-object next-action-preview">
+                <span class="action-status">Suggested action</span>
+                <strong id="nextActionPreview">Review your current information</strong>
+                <span id="nextPreviewButton" class="object-action" role="button" tabindex="0">Take action <b>→</b></span>
+              </div>
               <div class="number-meta"><span id="nextCurrency">USD</span><span>Recommended action</span></div><div class="signal-number financial-number" id="nextValue"></div>
               <div class="signal-change" id="nextChange"></div>
               <p class="signal-personal" id="nextPersonal"></p>
@@ -165,10 +207,10 @@
           </article>
         </div>
 
-        <nav class="continue-exploring" id="continueExploring" hidden aria-label="Continue exploring WealthOS">
+        <nav class="continue-exploring" id="continueExploring" hidden aria-label="What can I do next? WealthOS">
           <div>
-            <p class="continue-kicker">Continue exploring</p>
-            <h3>Choose the next conversation.</h3>
+            <p class="continue-kicker">What can I do next?</p>
+            <h3>Choose one useful next move.</h3>
           </div>
           <div class="continue-links">
             <a href="#lesson">
@@ -204,6 +246,10 @@
           </div>
 
           <article class="lesson-card material-sheet material-notebook" id="lessonCard"><span class="bookmark-tab" aria-hidden="true"></span>
+            <div class="lesson-side-rail" aria-hidden="true">
+              <span>01</span>
+              <span>READ</span>
+            </div>
             <div class="lesson-copy">
               <p class="lesson-category" id="lessonCategory"></p>
               <h3 id="lessonTitle"></h3>
@@ -251,12 +297,20 @@
             <button class="checkin-option" type="button" data-open-checkin="weekly">
               <span class="checkin-option-label">Weekly Check-in</span>
               <strong>How has this week looked?</strong>
+              <div class="tool-preview">
+                <span>Spent this week</span>
+                <strong>Enter total →</strong>
+              </div>
               <span>About 30 seconds</span>
             </button>
 
             <button class="checkin-option" type="button" data-open-checkin="monthly">
               <span class="checkin-option-label">Monthly Check-in</span>
               <strong>Close the month with clarity.</strong>
+              <div class="tool-preview">
+                <span>Income · Spending · Saving</span>
+                <strong>Review month →</strong>
+              </div>
               <span>About 60 seconds</span>
             </button>
           </div>
@@ -327,6 +381,13 @@
               <p class="snapshot-label">You spent</p>
               <div class="snapshot-value" id="snapshotValue">—</div>
               <p class="snapshot-context" id="snapshotContext"></p>
+
+              <div class="receipt-lines" id="receiptLines" aria-label="Spending composition">
+                <div><span>Recorded total</span><strong id="receiptRecorded">—</strong></div>
+                <div><span>Share of income</span><strong id="receiptIncomeShare">—</strong></div>
+                <div><span>Current pace</span><strong id="receiptPace">—</strong></div>
+              </div>
+
               <div class="snapshot-horizons">
                 <div><span>Selected period</span><strong id="snapshotSelectedAmount">—</strong></div>
                 <div><span>Monthly pace</span><strong id="snapshotMonthlyPace">—</strong></div>
@@ -545,7 +606,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.10.1</span>
+    <span>Version 0.11.0</span>
   </footer>
 
   <script src="script.js"></script>

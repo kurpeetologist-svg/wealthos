@@ -1,42 +1,49 @@
-# WealthOS v0.10.1 — Financial Desk
+# WealthOS v0.11.0 — Living Cards
 
-This release introduces the first complete WealthOS Materials system.
+This release moves WealthOS from passive financial reporting toward an active financial app.
 
-## WealthOS Materials
+## What changed
 
-- **Today’s Focus** — a note currently on the financial desk
-- **Lesson** — a bookmarked page
-- **Check-in** — a working form
-- **Timeline** — filed financial records
-- **Spending Snapshot** — a receipt summary
-- **Current position** — a monthly ledger sheet
+Each major Signal now includes a tangible, functional financial object:
 
-The system uses physical financial artifacts as subtle interface metaphors without becoming skeuomorphic or decorative.
+- Growth — income slip
+- Attention — obligation and reserve tracker
+- Progress — goal tracker
+- Next Step — actionable recommendation surface
 
-## Continue exploring
+Other sections were also made more app-like:
 
-Returning users now see a calm path after Today’s Focus:
+- Lesson now behaves like an interactive learning surface
+- Check-in cards preview the exact action available
+- Spending Snapshot includes a receipt-style breakdown
+- “Continue exploring” is now framed as “What can I do next?”
+- Cards use stronger depth, hover states, controls, and composition variety
 
-- Lesson
-- Check-in
-- Spending Snapshot
-- Timeline
+## What did not change
 
-This does not yet solve the full “there is nothing to do” problem. It makes the next available conversations visible while Sprint 2.2 develops the real product loop.
+WealthOS remains:
 
-## Design principle
+- calm
+- nonjudgmental
+- decisions-first
+- educational
+- free of gradients and finance clichés
+- careful not to pretend it knows more than the user has entered
 
-**Design with financial materials, not financial decoration.**
+## Principle
 
-WealthOS does not use money bags, coins, piggy banks, stock-market imagery, or decorative dollar signs.
+**Cards are working surfaces, not containers for reports.**
+
+Every major card should help a user understand, decide, or act.
 
 ## Retention
 
-Saved browser data migrates automatically from v0.10.0 and earlier Private Preview releases.
+Saved browser data migrates automatically from v0.10.1 and earlier Private Preview releases.
 
 ## Publish
 
 Replace:
+
 - index.html
 - styles.css
 - script.js
@@ -45,4 +52,4 @@ Replace:
 
 Suggested commit:
 
-`Introduce the WealthOS Financial Desk`
+`Turn WealthOS cards into working financial surfaces`

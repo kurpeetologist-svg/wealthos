@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.10.1-data';
-const LEGACY_KEYS=['wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.11.0-data';
+const LEGACY_KEYS=['wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -198,6 +198,10 @@ function render(data){
   if(!returning)return;
   const fmt=money(data.profile.currency),h=sortedHistory(data),s=stats(h),cur=n(s.cur.amount),prev=s.prev?n(s.prev.amount):null,delta=prev===null?null:cur-prev,pct=prev>0?delta/prev*100:null,source=data.income.source||'Income';
   renderFinancialLedger(data,fmt);
+  $('incomeSlipMonth').textContent=formatMonth(data.income.currentMonth);
+  $('incomeSlipSource').textContent=source;
+  $('incomeSlipAmount').textContent=fmt.format(cur);
+  $('incomeSlipDelta').textContent=delta===null?'First record':`${delta>=0?'+':'−'}${fmt.format(Math.abs(delta))}`;
   ['growthCurrency','attentionCurrency','progressCurrency','nextCurrency'].forEach(id=>$(id).textContent=data.profile.currency);
   $('financialState').textContent=delta===null||delta>=0?'Your financial life is moving in the right direction.':'Your financial life is steady, with room to rebuild momentum.';
   $('attentionState').textContent='Your Focus is ready.';
@@ -213,6 +217,11 @@ function render(data){
   $('growthSource').textContent='Source: Monthly Check-ins · WealthOS calculates the comparison.';
 
   const td=daysUntil(data.taxes.dueDate),te=n(data.taxes.estimate),tr=n(data.taxes.reserved),short=Math.max(0,te-tr),funded=te>0&&tr>=te;
+  const taxPct=te>0?Math.min(100,tr/te*100):0;
+  $('obligationStatus').textContent=te===0?'Not added':funded?'Fully reserved':`${taxPct.toFixed(0)}% reserved`;
+  $('obligationEstimate').textContent=te>0?fmt.format(te):'—';
+  $('obligationReserved').textContent=te>0?fmt.format(tr):'—';
+  $('obligationFill').style.width=`${taxPct}%`;
   $('attentionHorizon').textContent=td===null?'No date':td<0?'Past due':'Time horizon';
   $('attentionTitle').textContent=te===0?'Add tax details when they become relevant':funded?'Your quarterly tax payment is fully reserved':'Your quarterly tax reserve has room to grow';
   $('attentionValue').textContent=te===0?'Ready when you are':td===null?'Date not added':td<0?`${Math.abs(td)} days late`:`${td} days`;
@@ -226,6 +235,13 @@ function render(data){
 
   const eb=n(data.emergency.balance),ess=n(data.emergency.essentials),tm=n(data.emergency.targetMonths,6),months=ess>0?eb/ess:0,target=ess*tm,remaining=Math.max(0,target-eb),complete=ess>0&&eb>=target;
   if(data.challenge.enabled&&n(data.challenge.target)>0){
+    const savedForObject=n(data.challenge.saved),targetForObject=n(data.challenge.target);
+    const pctForObject=targetForObject>0?Math.min(100,Math.round(savedForObject/targetForObject*100)):0;
+    $('goalRing').style.setProperty('--progress',`${pctForObject*3.6}deg`);
+    $('goalPercent').textContent=`${pctForObject}%`;
+    $('goalLabel').textContent=data.challenge.name||'Savings goal';
+    $('goalRemaining').textContent=pctForObject>=100?'Goal complete':`${fmt.format(Math.max(0,targetForObject-savedForObject))} remaining`;
+    $('goalSubcopy').textContent=savedForObject===0?'Record your first contribution to begin.':'Each contribution becomes part of your Timeline.';
     const saved=n(data.challenge.saved),targetC=n(data.challenge.target),rem=Math.max(0,targetC-saved),per=Math.min(100,Math.round(saved/targetC*100));
     $('progressTitle').textContent=rem===0?`Your ${data.challenge.name} challenge is complete`:saved===0?`Your ${data.challenge.name} challenge is ready to begin`:`Your ${data.challenge.name} challenge is moving forward`;
     $('progressValue').textContent=fmt.format(saved);
@@ -234,6 +250,12 @@ function render(data){
     $('progressSource').textContent='Source: Savings Challenge and recorded contributions.';
     $('progressAction').textContent=rem===0?'Update goal':saved===0?'Record first contribution':'Record contribution';
   }else{
+    const emergencyPct=target>0?Math.min(100,Math.round(eb/target*100)):0;
+    $('goalRing').style.setProperty('--progress',`${emergencyPct*3.6}deg`);
+    $('goalPercent').textContent=`${emergencyPct}%`;
+    $('goalLabel').textContent='Emergency fund';
+    $('goalRemaining').textContent=target>0?`${fmt.format(Math.max(0,target-eb))} remaining`:'Ready when you are';
+    $('goalSubcopy').textContent=ess>0?'Measured against your selected coverage target.':'Add monthly essentials to calculate coverage.';
     $('progressTitle').textContent=complete?'Your emergency fund is complete':ess>0?'Your emergency fund is still building':'Set an emergency-fund target when you are ready';
     $('progressValue').textContent=ess>0?fmt.format(eb):'Ready when you are';
     $('progressChange').textContent=ess>0?`${months.toFixed(1)} months covered`:'Add monthly essentials';
@@ -248,6 +270,7 @@ function render(data){
   else if(ess>0&&!complete)next={t:'Continue building your emergency fund',v:fmt.format(Math.min(remaining,n(data.emergency.monthlyContribution)||remaining)),c:`${months.toFixed(1)} of ${tm} months covered`,p:'Your emergency fund remains a strong next foundation.'};
   else if(data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved))next={t:`Continue your ${data.challenge.name} challenge`,v:fmt.format(n(data.challenge.target)-n(data.challenge.saved)),c:'Remaining goal',p:'Your next contribution keeps the challenge moving.'};
   else next={t:'No financial action is required today',v:'On track',c:'Review when something changes',p:'Your current information does not require an immediate step.'};
+  $('nextActionPreview').textContent=next.t;
   $('nextTitle').textContent=next.t;$('nextValue').textContent=next.v;$('nextChange').textContent=next.c;$('nextPersonal').textContent=next.p;$('nextStoryWhy').textContent=next.p;$('nextStoryChanges').textContent='This recommendation is based only on the information you chose to add.';$('nextStoryMove').textContent='Complete the linked action or update your information when priorities change.';
   $('nextSource').textContent='Source: Growth, Attention, and Progress Signals · WealthOS selects one priority.';
   $('nextAction').textContent=te>0&&short>0?'Update tax reserve':ess>0&&!complete?'Update emergency fund':data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved)?'Record contribution':'Review About You';
@@ -319,6 +342,9 @@ function renderSnapshot(data,fmt,period){
   $('snapshotSelectedAmount').textContent=fmt.format(amount);
   $('snapshotMonthlyPace').textContent=fmt.format(monthlyEquivalent);
   $('snapshotAnnualPace').textContent=fmt.format(monthlyEquivalent*12);
+  $('receiptRecorded').textContent=fmt.format(amount);
+  $('receiptIncomeShare').textContent=monthlyIncome>0?`${(((period==='monthly'?amount:monthlyEquivalent)/monthlyIncome)*100).toFixed(0)}%`:'—';
+  $('receiptPace').textContent=fmt.format(monthlyEquivalent);
   $('snapshotNote').textContent=amount===0
     ? 'Your Snapshot is ready for its first spending check-in. Add an approximate total whenever you are ready.'
     : 'This is a snapshot, not a judgment. Time horizons show how a repeated spending pattern could affect the larger picture.';
@@ -470,6 +496,8 @@ $('progressAction').addEventListener('click',()=>{
   else openAboutSection('Emergency fund');
 });
 $('nextAction').addEventListener('click',routeNextAction);
+$('nextPreviewButton').addEventListener('click',event=>{event.stopPropagation();routeNextAction()});
+$('nextPreviewButton').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();routeNextAction()}});
 $('closeContribution').addEventListener('click',closeContribution);
 $('cancelContribution').addEventListener('click',closeContribution);
 $('contributionForm').addEventListener('submit',saveContribution);
