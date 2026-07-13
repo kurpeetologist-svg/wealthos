@@ -88,3 +88,36 @@ We formalized the WealthOS Design System v1.0 around one metaphor:
 
 ### Principle
 **Motion should explain, never entertain.**
+
+## v0.13.0 — The First Complete Loop
+
+### Why this exists
+
+Private-preview feedback exposed a fundamental gap:
+
+> After entering information, users did not know what to do next.
+
+WealthOS had valuable sections, but it did not yet behave like one continuous product experience.
+
+### What changed
+
+- Check-ins now end with a calm completion moment.
+- WealthOS explains what changed.
+- A Lesson follows the action.
+- Exactly one Small Step invites the user forward.
+- The Timeline visibly receives a new chapter.
+- The next visit remembers the previous check-in.
+
+### The Loop
+
+**Check in → Understand → Learn → Take one step → Remember → Return**
+
+### What we learned
+
+A useful feature is not enough.
+
+The user needs closure, meaning, and continuity.
+
+### Principle
+
+**After every meaningful action, the user should know what happened, why it matters, and what they can do next.**

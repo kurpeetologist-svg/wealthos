@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.12.0-data';
-const LEGACY_KEYS=['wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.13.0-data';
+const LEGACY_KEYS=['wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -17,7 +17,8 @@ const blankData=()=>({
   emergency:{balance:0,essentials:0,targetMonths:6,monthlyContribution:0},
   challenge:{enabled:false,name:'',target:0,saved:0,startDate:'',durationWeeks:12,frequency:'weekly'},
   spending:{daily:0,weekly:0,monthly:0},
-  checkins:[]
+  checkins:[],
+  memory:{lastInteraction:null,lastCheckinType:null,lastCheckinDate:null,lastSummary:null}
 });
 
 function n(v,f=0){const x=Number(v);return Number.isFinite(x)?x:f}
@@ -43,6 +44,12 @@ function migrate(raw){
   d.challenge={enabled:Boolean(raw.challenge?.enabled),name:String(raw.challenge?.name||''),target:n(raw.challenge?.target),saved:n(raw.challenge?.saved),startDate:String(raw.challenge?.startDate||''),durationWeeks:Math.max(1,n(raw.challenge?.durationWeeks,12)),frequency:['weekly','biweekly','monthly'].includes(raw.challenge?.frequency)?raw.challenge.frequency:'weekly'};
   d.spending={daily:Math.max(0,n(raw.spending?.daily)),weekly:Math.max(0,n(raw.spending?.weekly)),monthly:Math.max(0,n(raw.spending?.monthly))};
   d.checkins=Array.isArray(raw.checkins)?raw.checkins:[];
+  d.memory={
+    lastInteraction:raw.memory?.lastInteraction||null,
+    lastCheckinType:raw.memory?.lastCheckinType||null,
+    lastCheckinDate:raw.memory?.lastCheckinDate||null,
+    lastSummary:raw.memory?.lastSummary||null
+  };
   return d;
 }
 function loadData(){
@@ -233,6 +240,7 @@ function render(data){
   $('incomeSlipAmount').textContent=fmt.format(cur);
   $('incomeSlipDelta').textContent=delta===null?'First record':`${delta>=0?'+':'−'}${fmt.format(Math.abs(delta))}`;
   ['growthCurrency','attentionCurrency','progressCurrency','nextCurrency'].forEach(id=>$(id).textContent=data.profile.currency);
+  renderReturnMemory(data);
   $('financialState').textContent=delta===null||delta>=0?'Your financial life is moving in the right direction.':'Your financial life is steady, with room to rebuild momentum.';
   $('attentionState').textContent='Your Focus is ready.';
   $('todayDate').textContent=new Intl.DateTimeFormat(undefined,{weekday:'long',month:'long',day:'numeric'}).format(new Date());
@@ -308,8 +316,9 @@ function render(data){
   renderSnapshot(data,fmt,'weekly');
   populateAbout(data);
 }
-function timelineEvent(title,description,amount){
+function timelineEvent(title,description,amount,isFresh=false){
   const a=document.createElement('article');a.className='timeline-event';
+  if(isFresh)a.classList.add('loop-added');
   const b=document.createElement('button');b.className='timeline-event-button';b.type='button';b.setAttribute('aria-expanded','false');
   const marker=document.createElement('span');marker.className='timeline-marker';
   const copy=document.createElement('div');copy.className='timeline-copy';copy.innerHTML=`<h4>${title}</h4><p>${description}</p><span class="story-tone">Reflection</span>`;
@@ -348,7 +357,7 @@ function renderTimeline(data,h,fmt,source){
     const description=isWeekly
       ? `You reflected on approximately ${fmt.format(n(checkin.spent))} of spending this week.`
       : `You closed the month with ${fmt.format(n(checkin.income))} of income and ${fmt.format(n(checkin.spent))} of spending.`;
-    events.append(timelineEvent(title,description,amount));
+    events.append(timelineEvent(title,description,amount,Boolean(checkin.isFresh)));
   });
 }
 function renderSnapshot(data,fmt,period){
@@ -414,7 +423,7 @@ function saveCheckin(event){
   if(type==='weekly'){
     const spent=Math.max(0,n($('weeklySpentInput').value));
     data.spending.weekly=spent;
-    data.checkins.push({id:Date.now(),type,date,spent,note});
+    data.checkins.push({id:Date.now(),type,date,spent,note,isFresh:true});
   }else{
     const income=Math.max(0,n($('monthlyIncomeInput').value));
     const spent=Math.max(0,n($('monthlySpentInput').value));
@@ -427,14 +436,27 @@ function saveCheckin(event){
     }else if(saved>0){
       data.emergency.balance=n(data.emergency.balance)+saved;
     }
-    data.checkins.push({id:Date.now(),type,date,income,spent,saved,note});
+    data.checkins.push({id:Date.now(),type,date,income,spent,saved,note,isFresh:true});
   }
 
   data.onboardingComplete=true;
+  const latest=data.checkins.at(-1);
+  data.memory={
+    lastInteraction:'checkin',
+    lastCheckinType:type,
+    lastCheckinDate:date,
+    lastSummary:type==='weekly'
+      ? `You completed a weekly check-in and recorded approximately ${money(data.profile.currency).format(n(latest.spent))} of spending.`
+      : `You completed a monthly check-in and added a new chapter to your Timeline.`,
+  };
   saveData(data);
   closeCheckin();
   render(data);
-  location.hash='spendingSnapshot';
+  openLoop(type,data);
+
+  // Preserve the animation for this render only.
+  latest.isFresh=false;
+  saveData(data);
 }
 
 
@@ -486,6 +508,139 @@ function routeNextAction(){
   openAboutSection('You');
 }
 
+
+function chooseLoopLesson(type,data){
+  if(type==='weekly'){
+    return {
+      category:'Spending',
+      title:'A weekly total is more useful when it becomes part of a pattern.',
+      summary:'One week creates a reference point. Repeated check-ins reveal what is typical for you.'
+    };
+  }
+  if(n(data.checkins?.at(-1)?.saved)>0){
+    return {
+      category:'Saving',
+      title:'Saving becomes more powerful when it is repeated.',
+      summary:'A single contribution matters. A consistent contribution becomes a financial habit.'
+    };
+  }
+  return {
+    category:'Planning',
+    title:'Closing the month gives the next month a clearer starting point.',
+    summary:'A monthly check-in turns income and spending into information you can use.'
+  };
+}
+
+function chooseLoopNextStep(type,data){
+  if(type==='weekly'){
+    return {
+      title:'Review your Spending Snapshot.',
+      text:'See how this week compares with your monthly income and current pace.',
+      action:'snapshot'
+    };
+  }
+  if(data.challenge.enabled&&n(data.challenge.target)>n(data.challenge.saved)){
+    return {
+      title:'Continue your savings goal.',
+      text:'Your monthly check-in is complete. One contribution can keep the goal moving.',
+      action:'contribution'
+    };
+  }
+  return {
+    title:'Review the chapter you just added.',
+    text:'Your Timeline now remembers this check-in as part of your financial story.',
+    action:'timeline'
+  };
+}
+
+function buildLoopPayload(type,data){
+  const fmt=money(data.profile.currency);
+  const latest=(data.checkins||[]).at(-1)||{};
+  const lesson=chooseLoopLesson(type,data);
+  const next=chooseLoopNextStep(type,data);
+
+  if(type==='weekly'){
+    const spent=n(latest.spent);
+    const income=n(data.income.current);
+    const monthlyEquivalent=spent*4.345;
+    const pct=income>0?monthlyEquivalent/income*100:null;
+    return {
+      completion:`You recorded approximately ${fmt.format(spent)} of spending this week.`,
+      label:'This week',
+      value:fmt.format(spent),
+      context:pct===null
+        ? 'This check-in is now part of your Timeline. Add monthly income to place weekly spending in context.'
+        : `At this pace, weekly spending equals about ${pct.toFixed(0)}% of monthly income.`,
+      lesson,
+      next
+    };
+  }
+
+  const income=n(latest.income);
+  const spent=n(latest.spent);
+  const saved=n(latest.saved);
+  const remaining=income-spent;
+  return {
+    completion:`You closed the month with ${fmt.format(income)} of income and ${fmt.format(spent)} of spending.`,
+    label:'This month',
+    value:fmt.format(remaining),
+    context:`After recorded spending, ${fmt.format(remaining)} remains. You also recorded ${fmt.format(saved)} of saving.`,
+    lesson,
+    next
+  };
+}
+
+function showLoopStep(step){
+  document.querySelectorAll('.loop-step').forEach(section=>{
+    section.classList.toggle('active',Number(section.dataset.loopStep)===step);
+  });
+  document.querySelectorAll('.loop-progress span').forEach((bar,index)=>{
+    bar.classList.toggle('active',index<step);
+  });
+  $('loopModal').dataset.current=String(step);
+}
+
+function openLoop(type,data){
+  const payload=buildLoopPayload(type,data);
+  $('loopCompletionSummary').textContent=payload.completion;
+  $('loopContextLabel').textContent=payload.label;
+  $('loopContextValue').textContent=payload.value;
+  $('loopContextText').textContent=payload.context;
+  $('loopLessonCategory').textContent=payload.lesson.category;
+  $('loopLessonTitle').textContent=payload.lesson.title;
+  $('loopLessonSummary').textContent=payload.lesson.summary;
+  $('loopNextTitle').textContent=payload.next.title;
+  $('loopNextText').textContent=payload.next.text;
+  $('loopActionButton').dataset.action=payload.next.action;
+  showLoopStep(1);
+  $('loopModal').classList.add('open');
+  $('loopModal').setAttribute('aria-hidden','false');
+}
+
+function closeLoop(){
+  $('loopModal').classList.remove('open');
+  $('loopModal').setAttribute('aria-hidden','true');
+}
+
+function runLoopAction(){
+  const action=$('loopActionButton').dataset.action;
+  closeLoop();
+  if(action==='snapshot'){location.hash='spendingSnapshot';return}
+  if(action==='timeline'){location.hash='timeline';return}
+  if(action==='contribution'){openContribution();return}
+  location.hash='focus';
+}
+
+function renderReturnMemory(data){
+  const memory=data.memory||{};
+  if(!memory.lastInteraction||!memory.lastSummary){
+    $('returnMemory').hidden=true;
+    return;
+  }
+  $('returnMemory').hidden=false;
+  $('returnMemoryText').textContent=memory.lastSummary;
+}
+
 function populateAbout(d){
   fillCurrency($('currencyInput'),d.profile.currency);$('nameInput').value=d.profile.name;$('incomeSourceName').value=d.income.source;$('incomeMonth').value=d.income.currentMonth;$('incomeCurrent').value=d.income.current??'';$('taxDueDate').value=d.taxes.dueDate;$('taxEstimate').value=d.taxes.estimate;$('taxReserved').value=d.taxes.reserved;$('emergencyBalance').value=d.emergency.balance;$('essentialExpenses').value=d.emergency.essentials||'';$('targetMonths').value=d.emergency.targetMonths;$('emergencyContribution').value=d.emergency.monthlyContribution;$('challengeEnabled').checked=d.challenge.enabled;$('challengeName').value=d.challenge.name;$('challengeTarget').value=d.challenge.target;$('challengeSaved').value=d.challenge.saved;$('challengeStart').value=d.challenge.startDate;$('challengeDuration').value=d.challenge.durationWeeks;$('challengeFrequency').value=d.challenge.frequency;toggleChallenge();renderHistoryManager(d);
 }
@@ -528,6 +683,14 @@ $('progressAction').addEventListener('click',()=>{
 $('nextAction').addEventListener('click',routeNextAction);
 $('nextPreviewButton').addEventListener('click',event=>{event.stopPropagation();routeNextAction()});
 $('nextPreviewButton').addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();routeNextAction()}});
+document.querySelectorAll('.loop-next').forEach(button=>button.addEventListener('click',()=>{
+  const current=n($('loopModal').dataset.current,1);
+  showLoopStep(Math.min(4,current+1));
+}));
+$('loopFinishButton').addEventListener('click',closeLoop);
+$('loopActionButton').addEventListener('click',runLoopAction);
+$('loopModal').addEventListener('click',event=>{if(event.target===$('loopModal'))closeLoop()});
+
 $('envelopeAction').addEventListener('click',()=>{
   const envelope=$('savingsEnvelope');
   envelope.classList.toggle('open');

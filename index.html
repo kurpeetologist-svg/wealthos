@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.12.0</title>
+  <title>WealthOS Private Preview v0.13.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -35,6 +35,10 @@
         </div>
 
         <div id="returningLobby" hidden>
+          <div class="return-memory" id="returnMemory" hidden>
+            <span>Last time in WealthOS</span>
+            <p id="returnMemoryText"></p>
+          </div>
           <p class="financial-state" id="financialState"></p>
           <p class="attention-state" id="attentionState"></p>
           <div class="lobby-date" id="todayDate"></div>
@@ -363,7 +367,7 @@
             </button>
           </div>
 
-          <div class="timeline-groups filed-records" id="timelineGroups" hidden></div>
+          <div class="timeline-groups filed-records" id="timelineGroups" hidden aria-live="polite"></div>
         </section>
 
         <section class="snapshot-section desk-object desk-receipt" id="spendingSnapshot">
@@ -524,6 +528,55 @@
     </div>
   </section>
 
+  <section class="loop-modal" id="loopModal" aria-hidden="true">
+    <div class="loop-shell">
+      <div class="loop-progress" aria-hidden="true">
+        <span class="active"></span><span></span><span></span><span></span>
+      </div>
+
+      <section class="loop-step active" data-loop-step="1">
+        <p class="eyebrow">Check-in complete</p>
+        <div class="completion-stamp" aria-hidden="true">✓</div>
+        <h2>Your financial story has been updated.</h2>
+        <p id="loopCompletionSummary">Your latest check-in is now part of your Timeline.</p>
+        <button class="primary-button loop-next" type="button">See what changed</button>
+      </section>
+
+      <section class="loop-step" data-loop-step="2">
+        <p class="eyebrow">What changed</p>
+        <div class="loop-object context-object">
+          <span id="loopContextLabel">This week</span>
+          <strong id="loopContextValue">—</strong>
+          <p id="loopContextText"></p>
+        </div>
+        <button class="primary-button loop-next" type="button">Continue</button>
+      </section>
+
+      <section class="loop-step" data-loop-step="3">
+        <p class="eyebrow">Relevant lesson</p>
+        <div class="loop-object lesson-object">
+          <span id="loopLessonCategory">Financial Literacy</span>
+          <h2 id="loopLessonTitle"></h2>
+          <p id="loopLessonSummary"></p>
+        </div>
+        <button class="primary-button loop-next" type="button">One small step</button>
+      </section>
+
+      <section class="loop-step" data-loop-step="4">
+        <p class="eyebrow">One small step</p>
+        <div class="loop-object next-step-object">
+          <span>Suggested next move</span>
+          <h2 id="loopNextTitle"></h2>
+          <p id="loopNextText"></p>
+        </div>
+        <div class="loop-actions">
+          <button class="secondary-button" id="loopFinishButton" type="button">Finish for now</button>
+          <button class="primary-button" id="loopActionButton" type="button">Take this step</button>
+        </div>
+      </section>
+    </div>
+  </section>
+
   <section class="contribution-modal" id="contributionModal" aria-hidden="true">
     <div class="contribution-shell">
       <div class="checkin-modal-top">
@@ -622,7 +675,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.12.0</span>
+    <span>Version 0.13.0</span>
   </footer>
 
   <script src="script.js"></script>
