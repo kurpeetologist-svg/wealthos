@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.10.0-data';
-const LEGACY_KEYS=['wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.10.1-data';
+const LEGACY_KEYS=['wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -80,7 +80,7 @@ function stats(h){
 }
 function showState(isReturning){
   $('firstVisitLobby').hidden=isReturning;$('returningLobby').hidden=!isReturning;
-  $('firstVisitFocus').hidden=isReturning;$('financialLedger').hidden=!isReturning;$('signalGrid').hidden=!isReturning;
+  $('firstVisitFocus').hidden=isReturning;$('financialLedger').hidden=!isReturning;$('signalGrid').hidden=!isReturning;$('continueExploring').hidden=!isReturning;
   $('firstVisitCheckin').hidden=isReturning;$('returningCheckin').hidden=!isReturning;$('connectionChoice').hidden=!isReturning;
   $('firstVisitTimeline').hidden=isReturning;$('timelineGroups').hidden=!isReturning;
   $('firstVisitSnapshot').hidden=isReturning;$('returningSnapshot').hidden=!isReturning;

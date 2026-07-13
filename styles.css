@@ -559,3 +559,317 @@ body{background-image:linear-gradient(to right,rgba(27,32,28,.022) 1px,transpare
 .snapshot-horizons>div{padding:18px;background:var(--paper)}.snapshot-horizons span{display:block;margin-bottom:7px;color:var(--muted);font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em}
 .lesson-card,.starting-card,.checkin-option,.snapshot-card,.financial-ledger{box-shadow:0 1px 0 rgba(27,32,28,.025)}
 @media(max-width:700px){.financial-ledger{padding:24px}.snapshot-horizons{grid-template-columns:1fr}.timeline-amount{text-align:left}}
+
+/* v0.10.1 — Financial Desk / WealthOS Materials */
+
+.material-label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.material-label .eyebrow{
+  margin-bottom:18px;
+}
+
+.material-mark{
+  flex:0 0 auto;
+  display:inline-block;
+  margin-bottom:18px;
+}
+
+.note-mark{
+  width:18px;
+  height:14px;
+  border:1px solid var(--line);
+  background:#fff;
+  box-shadow:3px 3px 0 var(--evergreen-soft);
+}
+
+.bookmark-mark{
+  width:10px;
+  height:20px;
+  background:var(--evergreen);
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 72%,0 100%);
+}
+
+.form-mark{
+  width:17px;
+  height:20px;
+  border:1px solid var(--line);
+  background:
+    linear-gradient(var(--evergreen),var(--evergreen)) 4px 5px/9px 1px no-repeat,
+    linear-gradient(var(--line),var(--line)) 4px 10px/9px 1px no-repeat,
+    linear-gradient(var(--line),var(--line)) 4px 15px/7px 1px no-repeat,
+    #fff;
+}
+
+.folder-mark{
+  width:21px;
+  height:15px;
+  margin-top:3px;
+  border:1px solid var(--line);
+  background:#fff;
+  position:relative;
+}
+
+.folder-mark::before{
+  content:"";
+  position:absolute;
+  left:2px;
+  top:-5px;
+  width:9px;
+  height:5px;
+  border:1px solid var(--line);
+  border-bottom:0;
+  background:#fff;
+}
+
+.receipt-mark{
+  width:14px;
+  height:20px;
+  border:1px solid var(--line);
+  background:
+    linear-gradient(var(--line),var(--line)) 3px 5px/8px 1px no-repeat,
+    linear-gradient(var(--line),var(--line)) 3px 10px/8px 1px no-repeat,
+    linear-gradient(var(--evergreen),var(--evergreen)) 3px 15px/5px 1px no-repeat,
+    #fff;
+}
+
+.material-sheet{
+  position:relative;
+  isolation:isolate;
+}
+
+.material-sheet::after{
+  content:"";
+  position:absolute;
+  inset:7px -7px -7px 7px;
+  z-index:-1;
+  border:1px solid rgba(218,213,200,.7);
+  background:rgba(255,255,255,.38);
+}
+
+.material-note::before{
+  content:"";
+  position:absolute;
+  top:-1px;
+  right:34px;
+  width:86px;
+  height:10px;
+  background:var(--evergreen-soft);
+  border:1px solid var(--line);
+  border-top:0;
+}
+
+.material-form::before{
+  content:"";
+  position:absolute;
+  top:24px;
+  left:-7px;
+  width:14px;
+  height:38px;
+  border:1px solid var(--line);
+  background:var(--paper);
+}
+
+.material-folder::before{
+  content:"";
+  position:absolute;
+  top:-13px;
+  left:28px;
+  width:118px;
+  height:13px;
+  border:1px solid var(--line);
+  border-bottom:0;
+  background:#fff;
+}
+
+.material-ledger{
+  padding-top:40px;
+}
+
+.sheet-tab{
+  position:absolute;
+  top:0;
+  right:28px;
+  padding:7px 12px;
+  border:1px solid var(--line);
+  border-top:0;
+  background:var(--paper);
+  color:var(--muted);
+  font-size:.62rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.11em;
+}
+
+.material-notebook{
+  overflow:visible;
+}
+
+.bookmark-tab{
+  position:absolute;
+  top:-1px;
+  right:48px;
+  width:18px;
+  height:50px;
+  background:var(--evergreen);
+  clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);
+}
+
+.material-receipt{
+  overflow:visible;
+}
+
+.material-receipt::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-8px;
+  height:8px;
+  background:
+    radial-gradient(circle at 8px 0, transparent 7px, #fff 7.5px) 0 0/16px 8px repeat-x;
+  border-left:1px solid var(--line);
+  border-right:1px solid var(--line);
+}
+
+.receipt-cut{
+  height:1px;
+  margin:-10px 0 26px;
+  background:
+    repeating-linear-gradient(to right,var(--line) 0 7px,transparent 7px 13px);
+}
+
+.filed-records .timeline-month{
+  position:relative;
+}
+
+.filed-records .timeline-month::before{
+  content:"FILE";
+  position:absolute;
+  top:0;
+  left:0;
+  color:var(--muted);
+  font-size:.58rem;
+  font-weight:700;
+  letter-spacing:.12em;
+}
+
+.filed-records .timeline-month-heading{
+  padding-top:22px;
+}
+
+.continue-exploring{
+  display:grid;
+  grid-template-columns:minmax(220px,.7fr) minmax(0,1.6fr);
+  gap:28px;
+  margin-top:28px;
+  padding:28px;
+  border:1px solid var(--line);
+  background:var(--paper);
+}
+
+.continue-kicker{
+  margin:0 0 8px;
+  color:var(--evergreen);
+  font-size:.66rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+}
+
+.continue-exploring h3{
+  margin:0;
+  font-size:1.42rem;
+  line-height:1.15;
+  letter-spacing:-.025em;
+}
+
+.continue-links{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:1px;
+  border:1px solid var(--line);
+  background:var(--line);
+}
+
+.continue-links a{
+  display:grid;
+  grid-template-columns:1fr auto;
+  grid-template-areas:
+    "small arrow"
+    "large arrow";
+  gap:5px 20px;
+  min-height:112px;
+  padding:18px;
+  background:#fff;
+  color:var(--ink);
+  text-decoration:none;
+  transition:background .2s ease;
+}
+
+.continue-links a:hover,
+.continue-links a:focus-visible{
+  background:var(--evergreen-soft);
+  outline:none;
+}
+
+.continue-links span{
+  grid-area:small;
+  color:var(--muted);
+  font-size:.72rem;
+}
+
+.continue-links strong{
+  grid-area:large;
+  align-self:end;
+  font-size:1rem;
+}
+
+.continue-links b{
+  grid-area:arrow;
+  align-self:center;
+  color:var(--evergreen);
+  font-size:1.15rem;
+}
+
+.brandbar{
+  box-shadow:0 1px 0 rgba(27,32,28,.025);
+}
+
+.financial-ledger,
+.lesson-card,
+.snapshot-card,
+.checkin-option,
+.starting-card,
+.continue-exploring{
+  border-radius:1px;
+}
+
+@media(max-width:900px){
+  .continue-exploring{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:700px){
+  .continue-links{
+    grid-template-columns:1fr;
+  }
+
+  .material-sheet::after{
+    inset:5px -5px -5px 5px;
+  }
+
+  .bookmark-tab{
+    right:28px;
+  }
+
+  .filed-records .timeline-month::before{
+    position:static;
+    display:block;
+    margin-bottom:5px;
+  }
+}

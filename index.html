@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.10.0</title>
+  <title>WealthOS Private Preview v0.10.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -50,13 +50,13 @@
       <div class="section-shell">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Headquarters</p>
+            <div class="material-label"><span class="material-mark note-mark"></span><p class="eyebrow">Today’s note</p></div>
             <h2>Today’s Focus</h2>
           </div>
           <p id="focusIntro">We'll surface the four most important things to know after your first check-in.</p>
         </div>
 
-        <div id="firstVisitFocus" class="starting-card">
+        <div id="firstVisitFocus" class="starting-card material-sheet material-note">
           <p class="starting-kicker">Your first check-in</p>
           <h3>Clarity begins with understanding where you stand.</h3>
           <p>Begin your story, and WealthOS will turn your information into calm, useful Signals.</p>
@@ -65,7 +65,7 @@
           </button>
         </div>
 
-        <section class="financial-ledger" id="financialLedger" hidden aria-label="Current financial position">
+        <section class="financial-ledger material-sheet material-ledger" id="financialLedger" hidden aria-label="Current financial position"><span class="sheet-tab">Current month</span>
           <div class="ledger-heading">
             <div><p class="ledger-kicker">Current position</p><h3>This month at a glance</h3></div>
             <span class="ledger-currency" id="ledgerCurrency">USD</span>
@@ -165,16 +165,45 @@
           </article>
         </div>
 
+        <nav class="continue-exploring" id="continueExploring" hidden aria-label="Continue exploring WealthOS">
+          <div>
+            <p class="continue-kicker">Continue exploring</p>
+            <h3>Choose the next conversation.</h3>
+          </div>
+          <div class="continue-links">
+            <a href="#lesson">
+              <span>Learn one useful idea</span>
+              <strong>Lesson</strong>
+              <b>→</b>
+            </a>
+            <a href="#checkin">
+              <span>Reflect on what changed</span>
+              <strong>Check-in</strong>
+              <b>→</b>
+            </a>
+            <a href="#spendingSnapshot">
+              <span>Put spending in context</span>
+              <strong>Snapshot</strong>
+              <b>→</b>
+            </a>
+            <a href="#timeline">
+              <span>Look back at the record</span>
+              <strong>Timeline</strong>
+              <b>→</b>
+            </a>
+          </div>
+        </nav>
+
         <section class="lesson-section" id="lesson">
           <div class="lesson-heading">
             <div>
-              <p class="eyebrow">Financial Literacy</p>
+              <div class="material-label"><span class="material-mark bookmark-mark"></span><p class="eyebrow">Bookmarked</p></div>
               <h2>Lesson</h2>
             </div>
             <p>One useful idea to carry into your next financial decision.</p>
           </div>
 
-          <article class="lesson-card" id="lessonCard">
+          <article class="lesson-card material-sheet material-notebook" id="lessonCard"><span class="bookmark-tab" aria-hidden="true"></span>
             <div class="lesson-copy">
               <p class="lesson-category" id="lessonCategory"></p>
               <h3 id="lessonTitle"></h3>
@@ -203,13 +232,13 @@
         <section class="checkin-section" id="checkin">
           <div class="checkin-heading">
             <div>
-              <p class="eyebrow">Check-in</p>
+              <div class="material-label"><span class="material-mark form-mark"></span><p class="eyebrow">Working form</p></div>
               <h2>Take a moment.</h2>
             </div>
             <p>A check-in is a short reflection—not a full accounting exercise.</p>
           </div>
 
-          <div id="firstVisitCheckin" class="starting-card checkin-start">
+          <div id="firstVisitCheckin" class="starting-card checkin-start material-sheet material-form">
             <p class="starting-kicker">Your first check-in</p>
             <h3>Begin with where you stand today.</h3>
             <p>After you begin your story, you can return here for quick weekly or monthly updates.</p>
@@ -248,13 +277,13 @@
         <section class="timeline-section" id="timeline">
           <div class="timeline-heading">
             <div>
-              <p class="eyebrow">Financial record</p>
+              <div class="material-label"><span class="material-mark folder-mark"></span><p class="eyebrow">Filed record</p></div>
               <h2>Your Timeline</h2>
             </div>
             <p id="timelineSummary">Your Timeline is waiting for its first chapter.</p>
           </div>
 
-          <div id="firstVisitTimeline" class="starting-card timeline-start">
+          <div id="firstVisitTimeline" class="starting-card timeline-start material-sheet material-folder">
             <p class="starting-kicker">Your first chapter</p>
             <h3>Every month becomes a chapter.</h3>
             <p>We'll remember the moments that shaped your financial journey.</p>
@@ -264,19 +293,19 @@
             </button>
           </div>
 
-          <div class="timeline-groups" id="timelineGroups" hidden></div>
+          <div class="timeline-groups filed-records" id="timelineGroups" hidden></div>
         </section>
 
         <section class="snapshot-section" id="spendingSnapshot">
           <div class="snapshot-heading">
             <div>
-              <p class="eyebrow">Spending</p>
+              <div class="material-label"><span class="material-mark receipt-mark"></span><p class="eyebrow">Receipt summary</p></div>
               <h2>Spending Snapshot</h2>
             </div>
             <p>Understand your spending in context—not in isolation.</p>
           </div>
 
-          <div id="firstVisitSnapshot" class="starting-card snapshot-start">
+          <div id="firstVisitSnapshot" class="starting-card snapshot-start material-sheet material-receipt">
             <p class="starting-kicker">A clearer picture begins here</p>
             <h3>Every purchase tells part of your story.</h3>
             <p>After your first check-in, WealthOS can begin showing how your spending relates to your income.</p>
@@ -293,7 +322,7 @@
               <button class="period-button" type="button" data-period="monthly">Monthly</button>
             </div>
 
-            <div class="snapshot-card">
+            <div class="snapshot-card material-sheet material-receipt"><div class="receipt-cut" aria-hidden="true"></div>
               <p class="snapshot-period" id="snapshotPeriod">This week</p>
               <p class="snapshot-label">You spent</p>
               <div class="snapshot-value" id="snapshotValue">—</div>
@@ -516,7 +545,7 @@
 
   <footer>
     <span>WealthOS · Private Preview</span>
-    <span>Version 0.10.0</span>
+    <span>Version 0.10.1</span>
   </footer>
 
   <script src="script.js"></script>
