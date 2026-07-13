@@ -55,3 +55,21 @@ The interface clearly distinguishes:
 - estimates and projections
 
 Every calculated number should identify its source whenever practical.
+
+## Educational Language
+
+WealthOS uses two distinct educational systems.
+
+### Lesson
+A complete, independent financial-literacy concept.
+
+### Behind the Number
+A brief explanation caused by the user’s immediate action.
+
+Behind the Number should:
+
+- appear inline with completion
+- take only a few seconds to understand
+- avoid assigning another task
+- explain rather than praise
+- disappear after the moment unless later preserved as part of a Reflection Receipt

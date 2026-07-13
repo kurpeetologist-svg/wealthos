@@ -1,32 +1,45 @@
-# WealthOS v0.14.1 — What WealthOS Noticed
+# WealthOS v0.15.0 — Behind the Number
 
-This patch restores interpretation to Spending Snapshot.
+This release adds contextual financial education immediately after a meaningful action.
 
-## Snapshot hierarchy
+## Lesson vs. Behind the Number
 
-1. Facts
-2. What WealthOS noticed
-3. Supporting records
+### Lesson
+- independent financial-literacy curriculum
+- complete concepts
+- available whether or not the user has just acted
 
-## Rule-based insights
+### Behind the Number
+- triggered by the user’s action
+- immediate
+- brief
+- contextual
+- requires no separate reading task
 
-WealthOS can now surface observations such as:
+## Current triggers
 
-- restaurant spending decreased compared with last month
-- a category increased compared with last month
-- a category is holding steady
-- the largest current category
-- the largest category today or this week
+### Quick Add
+Categories trigger concise explanations about:
 
-The application only describes a trend when comparable history exists. Otherwise, it clearly says that more history is needed.
+- discretionary spending
+- variable and fixed expenses
+- recurring expenses
+- sinking funds
+- housing
+- transportation
+- health costs
+- taxes
+
+### Check-ins
+Weekly and Monthly Check-ins receive a short explanation of the financial concept behind the newly recorded totals.
 
 ## Principle
 
-**Data tells the user what happened. Interpretation helps them understand why it matters.**
+**Lessons build long-term literacy. Context explains the user’s financial life in the moment.**
 
 ## Retention
 
-Saved data migrates from v0.14.0 and earlier releases.
+Saved data migrates automatically from v0.14.1 and earlier versions.
 
 ## Publish
 
@@ -37,7 +50,9 @@ Replace:
 - script.js
 - README.md
 - FOUNDER_CHANGELOG.md
+- WEALTHOS_DESIGN_SYSTEM.md
+- PROTECTED_IDEAS.md
 
 Suggested commit:
 
-`Restore interpretation with What WealthOS Noticed`
+`Add Behind the Number contextual explanations`

@@ -1637,3 +1637,94 @@ body.desk-ready .desk-object{opacity:1;transform:none}
     align-items:flex-start;
   }
 }
+
+/* v0.15.0 — Behind the Number */
+
+.expense-toast{
+  display:block;
+  width:min(480px,calc(100% - 48px));
+  padding:0;
+  overflow:hidden;
+}
+
+.expense-toast-header{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:14px;
+  align-items:center;
+  padding:17px;
+  border-bottom:1px solid var(--line);
+}
+
+.expense-toast-close{
+  width:30px;
+  height:30px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:1.25rem;
+}
+
+.action-context,
+.inline-action-context{
+  padding:17px;
+  background:var(--evergreen-soft);
+}
+
+.action-context>span,
+.inline-action-context>span{
+  display:block;
+  margin-bottom:7px;
+  color:var(--evergreen);
+  font-size:.63rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.11em;
+}
+
+.action-context p,
+.inline-action-context p{
+  margin:0;
+  color:var(--ink);
+  font-size:.86rem;
+  line-height:1.55;
+}
+
+.expense-toast-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding:13px 17px;
+  background:#fff;
+}
+
+.expense-toast-actions button{
+  padding:9px 11px;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-size:.74rem;
+  font-weight:800;
+}
+
+.expense-toast-actions button:first-child{
+  color:var(--muted);
+}
+
+.expense-toast-actions button:last-child{
+  color:var(--evergreen);
+}
+
+.inline-action-context{
+  max-width:640px;
+  margin:-10px 0 28px;
+  border-left:3px solid var(--evergreen);
+}
+
+@media(max-width:700px){
+  .expense-toast{
+    width:calc(100% - 28px);
+  }
+}

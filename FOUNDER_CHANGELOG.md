@@ -162,3 +162,30 @@ WealthOS should not only show users their data. It should help them notice meani
 ### Principle
 
 **Data tells the user what happened. Interpretation helps them understand why it matters.**
+
+## v0.15.0 — Behind the Number
+
+### Why this exists
+
+Users asked WealthOS to teach them something relevant to the action they had just completed, but turning every next step into another Lesson would make the product feel like homework.
+
+We separated two educational systems.
+
+### Lesson
+
+A structured financial-literacy curriculum that exists independently of user activity.
+
+### Behind the Number
+
+A brief explanation triggered by a user’s action and presented immediately inside the completion moment.
+
+### What changed
+
+- Quick Add now explains the financial concept connected to the recorded category.
+- Weekly and Monthly Check-ins receive action-specific context.
+- Context requires no separate page or reading task.
+- Context appears once, in the moment, rather than becoming another permanent feature.
+
+### Principle
+
+**Lessons build long-term literacy. Context explains the user’s financial life in the moment.**

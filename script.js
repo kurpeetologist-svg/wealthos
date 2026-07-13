@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.14.1-data';
-const LEGACY_KEYS=['wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.15.0-data';
+const LEGACY_KEYS=['wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -278,6 +278,48 @@ function timelineEvent(title,description,amount,isFresh=false){
   a.append(b,story);b.onclick=()=>{const open=a.classList.toggle('open');b.setAttribute('aria-expanded',String(open))};return a;
 }
 
+
+const actionContexts={
+  Coffee:'Coffee is usually discretionary spending: optional spending rather than a fixed obligation such as rent or insurance.',
+  'Food & Dining':'Dining is generally a variable expense, which means its total can change more easily than a fixed cost such as housing.',
+  Groceries:'Groceries are usually essential spending, but the amount can still vary with household size, location, and shopping habits.',
+  Transportation:'Transportation may combine fixed costs, such as a car payment, with variable costs, such as fuel, fares, and rides.',
+  Housing:'Housing is often a household’s largest fixed expense. Because it is difficult to change quickly, it strongly shapes monthly cash flow.',
+  Utilities:'Utilities are recurring obligations, but some portions may vary with usage, season, and local rates.',
+  Shopping:'Shopping is commonly categorized as discretionary spending unless the purchase was necessary for work, health, or daily living.',
+  Health:'Health spending can include predictable costs, such as premiums, and less predictable costs, such as deductibles or urgent care.',
+  Entertainment:'Entertainment is discretionary spending. That does not make it bad; it means the amount can be adjusted when priorities change.',
+  Travel:'A sinking fund can spread a future travel cost across smaller contributions instead of placing the full expense in one month.',
+  Subscriptions:'Subscriptions are recurring expenses. Their individual amounts may look small, but repeated charges accumulate across a year.',
+  Taxes:'Taxes may be withheld from pay, paid through estimated installments, or settled when a return is filed, depending on income and local rules.',
+  Other:'Categorizing a purchase helps WealthOS compare similar spending over time and explain where money is going.'
+};
+
+function contextForExpense(expense){
+  return actionContexts[expense.category]||actionContexts.Other;
+}
+
+function contextForCheckin(type,data){
+  const latest=(data.checkins||[]).at(-1)||{};
+  if(type==='weekly'){
+    return 'A weekly spending total is a short-term reference point. Several weekly records are needed before WealthOS can distinguish a one-time event from a recurring pattern.';
+  }
+
+  const income=n(latest.income);
+  const spent=n(latest.spent);
+  const saved=n(latest.saved);
+
+  if(saved>0){
+    return 'Saving is part of cash flow: it redirects money from present spending toward a future purpose. Repeated contributions make progress easier to measure.';
+  }
+
+  if(income>0&&spent>income){
+    return 'When recorded spending exceeds income, monthly cash flow is negative. One month does not define financial health, but the difference is worth understanding.';
+  }
+
+  return 'A monthly check-in compares money coming in with money going out. That relationship is the foundation of cash-flow planning.';
+}
+
 function localDateKey(date=new Date()){const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');return `${y}-${m}-${d}`}
 function startOfWeek(date=new Date()){const result=new Date(date);result.setHours(0,0,0,0);const day=result.getDay(),offset=day===0?6:day-1;result.setDate(result.getDate()-offset);return result}
 function expensesForPeriod(data,period){
@@ -308,7 +350,15 @@ function openQuickAdd(){
 }
 function closeQuickAdd(){$('quickAddModal').classList.remove('open');$('quickAddModal').setAttribute('aria-hidden','true')}
 let expenseToastTimer=null;
-function showExpenseToast(expense,data){const fmt=money(data.profile.currency);$('expenseToastTitle').textContent=`${expense.category} recorded.`;$('expenseToastText').textContent=`${fmt.format(expense.amount)} was added to today, this week, and this month.`;$('expenseToast').classList.add('show');clearTimeout(expenseToastTimer);expenseToastTimer=setTimeout(()=>$('expenseToast').classList.remove('show'),4800)}
+function showExpenseToast(expense,data){
+  const fmt=money(data.profile.currency);
+  $('expenseToastTitle').textContent=`${expense.category} recorded.`;
+  $('expenseToastText').textContent=`${fmt.format(expense.amount)} was added to today, this week, and this month.`;
+  $('expenseContextText').textContent=contextForExpense(expense);
+  $('expenseToast').classList.add('show');
+  clearTimeout(expenseToastTimer);
+  expenseToastTimer=setTimeout(()=>$('expenseToast').classList.remove('show'),9000);
+}
 function saveQuickAdd(event){
   event.preventDefault();const amount=Math.max(0,n($('quickAddAmount').value));if(amount<=0)return;
   const data=loadData(),expense={id:Date.now(),amount,category:$('quickAddCategory').value||'Other',merchant:$('quickAddMerchant').value.trim(),note:$('quickAddNote').value.trim(),date:$('quickAddDate').value||localDateKey()};
@@ -649,6 +699,7 @@ function buildLoopPayload(type,data){
       context:pct===null
         ? 'This check-in is now part of your Timeline. Add monthly income to place weekly spending in context.'
         : `At this pace, weekly spending equals about ${pct.toFixed(0)}% of monthly income.`,
+      actionContext:contextForCheckin(type,data),
       lesson,
       next
     };
@@ -663,6 +714,7 @@ function buildLoopPayload(type,data){
     label:'This month',
     value:fmt.format(remaining),
     context:`After recorded spending, ${fmt.format(remaining)} remains. You also recorded ${fmt.format(saved)} of saving.`,
+    actionContext:contextForCheckin(type,data),
     lesson,
     next
   };
@@ -684,6 +736,7 @@ function openLoop(type,data){
   $('loopContextLabel').textContent=payload.label;
   $('loopContextValue').textContent=payload.value;
   $('loopContextText').textContent=payload.context;
+  $('loopActionContext').textContent=payload.actionContext;
   $('loopLessonCategory').textContent=payload.lesson.category;
   $('loopLessonTitle').textContent=payload.lesson.title;
   $('loopLessonSummary').textContent=payload.lesson.summary;
@@ -754,6 +807,8 @@ $('cancelQuickAdd').addEventListener('click',closeQuickAdd);
 $('quickAddModal').addEventListener('click',event=>{if(event.target===$('quickAddModal'))closeQuickAdd()});
 $('quickAddForm').addEventListener('submit',saveQuickAdd);
 $('expenseToastView').addEventListener('click',()=>{$('expenseToast').classList.remove('show');location.hash='spendingSnapshot'});
+$('expenseToastDone').addEventListener('click',()=>$('expenseToast').classList.remove('show'));
+$('expenseToastClose').addEventListener('click',()=>$('expenseToast').classList.remove('show'));
 
 $('snapshotInsightWhy').addEventListener('click',()=>{
   const insight=$('snapshotInsight');

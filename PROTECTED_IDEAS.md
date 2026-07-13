@@ -40,7 +40,7 @@ Long-term references to goals, habits, lessons, milestones, and changes.
 
 Debt payoff, emergency funds, home savings, travel, investing, and retirement.
 
-## Contextual Explainers
+## Contextual Explainers — Foundation implemented as Behind the Number in v0.15.0
 
 Country-specific and concept-specific education such as taxes, SSS, Pag-IBIG, PhilHealth, credit utilization, retirement accounts, and insurance.
 
