@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.19.0</title>
+  <title>WealthOS Private Preview v0.20.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
 </head>
 <body class="desk-pending">
   <header class="brandbar">
-    <a class="brand" href="#lobby" aria-label="WealthOS Headquarters">Wealth<span>OS</span></a>
+    <a class="brand" href="#lobby" aria-label="WealthOS Workspace">Wealth<span>OS</span></a>
     <nav class="headquarters-nav" aria-label="Primary navigation">
       <a href="#focus">Workspace</a>
       <a href="#roadmaps">Roadmaps</a>
@@ -22,7 +22,7 @@
     <div class="brand-actions">
       <span class="header-date" id="headerDate"></span>
       <button class="quick-add-trigger" id="quickAddTrigger" type="button">
-        <span>Quick Add</span><b>+</b>
+        <span>Record</span><b>+</b>
       </button>
       <button class="about-trigger" id="aboutTrigger" type="button" hidden>About You</button>
     </div>
@@ -30,9 +30,9 @@
 
   <main>
     <section class="lobby" id="lobby">
-      <div class="lobby-inner"><div class="desk-assembly-label" id="deskAssemblyLabel">Preparing your financial headquarters…</div>
-        <p class="headquarters-kicker">Your financial headquarters</p>
-        <h1>Headquarters</h1>
+      <div class="lobby-inner"><div class="desk-assembly-label" id="deskAssemblyLabel">Preparing your financial workspace…</div>
+        <p class="headquarters-kicker">Your financial workspace</p>
+        <h1>Workspace</h1>
         <p class="headquarters-greeting" id="greeting">Good morning!</p>
         <p class="reflection" id="reflection">Let's see where you stand today.</p>
         <aside class="headquarters-note" aria-label="WealthOS principle">
@@ -202,6 +202,44 @@
               <a href="#timeline">Open Timeline →</a>
             </div>
             <div class="memory-strip" id="memoryStrip"></div>
+          </section>
+
+          <section class="core-foundation" id="coreFoundation">
+            <div class="workspace-section-heading">
+              <div>
+                <span>The WealthOS Core</span>
+                <h3>Your Financial Foundation</h3>
+                <p>What WealthOS knows, where it came from, and what still needs context.</p>
+              </div>
+              <button id="foundationRecordButton" type="button">Record something +</button>
+            </div>
+
+            <div class="foundation-grid">
+              <article class="foundation-summary">
+                <span>Knowledge state</span>
+                <strong id="foundationState">Beginning</strong>
+                <p id="foundationStateText">WealthOS is still learning the shape of your financial life.</p>
+              </article>
+
+              <article class="foundation-summary">
+                <span>Records</span>
+                <strong id="foundationRecordCount">0</strong>
+                <p id="foundationRecordText">No financial records yet.</p>
+              </article>
+
+              <article class="foundation-summary">
+                <span>Source</span>
+                <strong id="foundationSource">Manual</strong>
+                <p>Manual records are treated as user-reported facts—not bank-verified activity.</p>
+              </article>
+            </div>
+
+            <div class="foundation-entities" id="foundationEntities"></div>
+
+            <div class="foundation-principle">
+              <span>Knowledge principle</span>
+              <p>WealthOS only speaks with the confidence its data deserves.</p>
+            </div>
           </section>
 
           <div class="workspace-detail-heading">
@@ -695,6 +733,209 @@
         <div class="checkin-modal-actions">
           <button class="secondary-button" id="cancelCheckin" type="button">Not now</button>
           <button class="primary-button" type="submit">Save Check-in</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+
+  <section class="record-modal" id="recordModal" aria-hidden="true">
+    <div class="record-shell">
+      <div class="record-header">
+        <div>
+          <p class="eyebrow">The WealthOS Core</p>
+          <h2>What happened financially?</h2>
+          <p>Record the fact once. WealthOS will update the places that depend on it.</p>
+        </div>
+        <button class="close-button" id="closeRecordModal" type="button">Close</button>
+      </div>
+
+      <form id="recordForm">
+        <label class="record-type-label">Record type
+          <select id="recordType" required>
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+            <option value="bill">Recurring bill</option>
+            <option value="account">Account balance</option>
+            <option value="debt">Debt</option>
+            <option value="debt_payment">Debt payment</option>
+            <option value="transfer">Transfer</option>
+            <option value="roadmap_contribution">Roadmap contribution</option>
+          </select>
+        </label>
+
+        <div class="record-type-explainer" id="recordTypeExplainer"></div>
+
+        <div class="record-fields" id="recordFields">
+          <label data-types="expense income debt_payment transfer roadmap_contribution">
+            Amount
+            <input id="recordAmount" type="number" min="0.01" step="0.01" inputmode="decimal">
+          </label>
+
+          <label data-types="bill">
+            Expected amount
+            <input id="recordExpectedAmount" type="number" min="0" step="0.01" inputmode="decimal">
+          </label>
+
+          <label data-types="account debt">
+            Current balance
+            <input id="recordBalance" type="number" min="0" step="0.01" inputmode="decimal">
+          </label>
+
+          <label data-types="expense income debt_payment transfer roadmap_contribution">
+            Date
+            <input id="recordDate" type="date">
+          </label>
+
+          <label data-types="expense">
+            Category
+            <select id="recordExpenseCategory">
+              <option>Coffee</option>
+              <option>Food & Dining</option>
+              <option>Groceries</option>
+              <option>Transportation</option>
+              <option>Housing</option>
+              <option>Utilities</option>
+              <option>Shopping</option>
+              <option>Health</option>
+              <option>Entertainment</option>
+              <option>Travel</option>
+              <option>Subscriptions</option>
+              <option>Taxes</option>
+              <option>Insurance</option>
+              <option>Debt</option>
+              <option>Investment</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label data-types="income">
+            Income type
+            <select id="recordIncomeCategory">
+              <option>Salary</option>
+              <option>Freelance</option>
+              <option>Business</option>
+              <option>Benefits</option>
+              <option>Investment income</option>
+              <option>Gift</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label data-types="account">
+            Account type
+            <select id="recordAccountType">
+              <option>Checking</option>
+              <option>Savings</option>
+              <option>Cash</option>
+              <option>Credit Card</option>
+              <option>Investment</option>
+              <option>Loan</option>
+              <option>Wallet</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label data-types="debt">
+            Debt type
+            <select id="recordDebtType">
+              <option>Credit Card</option>
+              <option>Student Loan</option>
+              <option>Car Loan</option>
+              <option>Mortgage</option>
+              <option>Personal Loan</option>
+              <option>Medical Debt</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label data-types="expense income bill account debt">
+            Name or description
+            <input id="recordName" type="text" maxlength="100" placeholder="Employer, merchant, rent, checking account...">
+          </label>
+
+          <label data-types="bill">
+            Frequency
+            <select id="recordFrequency">
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Every two weeks</option>
+              <option value="monthly" selected>Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="annual">Annual</option>
+            </select>
+          </label>
+
+          <label data-types="bill">
+            Next due date
+            <input id="recordDueDate" type="date">
+          </label>
+
+          <label data-types="debt">
+            APR, optional
+            <input id="recordApr" type="number" min="0" step="0.01" placeholder="24.99">
+          </label>
+
+          <label data-types="debt">
+            Minimum payment, optional
+            <input id="recordMinimumPayment" type="number" min="0" step="0.01">
+          </label>
+
+          <label data-types="debt">
+            Payment due date, optional
+            <input id="recordDebtDueDate" type="date">
+          </label>
+
+          <label data-types="debt_payment">
+            Debt
+            <select id="recordDebtId"></select>
+          </label>
+
+          <label data-types="roadmap_contribution">
+            Roadmap
+            <select id="recordRoadmapId"></select>
+          </label>
+
+          <label data-types="transfer">
+            From account
+            <select id="recordFromAccount"></select>
+          </label>
+
+          <label data-types="transfer">
+            To account
+            <select id="recordToAccount"></select>
+          </label>
+
+          <label data-types="expense income bill debt_payment transfer roadmap_contribution">
+            Account, optional
+            <select id="recordAccountId"></select>
+          </label>
+
+          <label data-types="expense">
+            Spending role
+            <select id="recordEssential">
+              <option value="unknown">Let WealthOS keep this neutral</option>
+              <option value="essential">Essential</option>
+              <option value="discretionary">Discretionary</option>
+            </select>
+          </label>
+
+          <label data-types="expense income bill account debt debt_payment transfer roadmap_contribution" class="record-note">
+            Note <span>Optional</span>
+            <textarea id="recordNote" rows="3" maxlength="240" placeholder="Anything worth remembering?"></textarea>
+          </label>
+        </div>
+
+        <div class="record-provenance">
+          <span>Source</span>
+          <strong>Entered manually by you</strong>
+          <p>WealthOS will preserve this as a user-reported record. It will not present it as bank-verified.</p>
+        </div>
+
+        <div class="record-error" id="recordError" role="alert" hidden></div>
+
+        <div class="checkin-modal-actions">
+          <button class="secondary-button" id="cancelRecord" type="button">Not now</button>
+          <button class="primary-button" type="submit">Save record</button>
         </div>
       </form>
     </div>

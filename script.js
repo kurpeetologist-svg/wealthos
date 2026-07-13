@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.19.0-data';
-const LEGACY_KEYS=['wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.20.0-data';
+const LEGACY_KEYS=['wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -20,11 +20,145 @@ const blankData=()=>({
   memories:[],
   spending:{daily:0,weekly:0,monthly:0},
   expenses:[],
+  incomes:[],
+  accounts:[],
+  recurringBills:[],
+  debts:[],
+  debtPayments:[],
+  transfers:[],
+  auditLog:[],
+  schemaVersion:'1.0.0',
   checkins:[],
   memory:{lastInteraction:null,lastCheckinType:null,lastCheckinDate:null,lastSummary:null}
 });
 
 function n(v,f=0){const x=Number(v);return Number.isFinite(x)?x:f}
+
+function coreId(prefix='record'){
+  if(globalThis.crypto?.randomUUID)return `${prefix}-${crypto.randomUUID()}`;
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function manualSource(){
+  const stamp=new Date().toISOString();
+  return{
+    method:'manual',
+    reportedBy:'user',
+    confidence:'reported',
+    verified:false,
+    imported:false,
+    createdAt:stamp,
+    updatedAt:stamp
+  };
+}
+
+function normalizeSource(source){
+  const stamp=new Date().toISOString();
+  return{
+    method:String(source?.method||'manual'),
+    reportedBy:String(source?.reportedBy||'user'),
+    confidence:String(source?.confidence||'reported'),
+    verified:Boolean(source?.verified),
+    imported:Boolean(source?.imported),
+    createdAt:String(source?.createdAt||stamp),
+    updatedAt:String(source?.updatedAt||source?.createdAt||stamp)
+  };
+}
+
+function appendAudit(data,action,entityType,entity,detail=''){
+  data.auditLog=Array.isArray(data.auditLog)?data.auditLog:[];
+  data.auditLog.push({
+    id:coreId('audit'),
+    occurredAt:new Date().toISOString(),
+    action,
+    entityType,
+    entityId:String(entity?.id||''),
+    sourceMethod:String(entity?.source?.method||'manual'),
+    detail:String(detail||'')
+  });
+  if(data.auditLog.length>1000)data.auditLog=data.auditLog.slice(-1000);
+}
+
+function canonicalExpense(item){
+  return{
+    id:String(item.id||coreId('expense')),
+    amount:Math.max(0,n(item.amount)),
+    category:String(item.category||'Other'),
+    merchant:String(item.merchant||item.name||''),
+    note:String(item.note||''),
+    date:String(item.date||localDateKey()),
+    accountId:item.accountId?String(item.accountId):null,
+    essential:['essential','discretionary'].includes(item.essential)?item.essential:'unknown',
+    recurringBillId:item.recurringBillId?String(item.recurringBillId):null,
+    tags:Array.isArray(item.tags)?item.tags.map(String):[],
+    source:normalizeSource(item.source)
+  };
+}
+
+function canonicalIncome(item){
+  return{
+    id:String(item.id||coreId('income')),
+    amount:Math.max(0,n(item.amount)),
+    category:String(item.category||'Other'),
+    sourceName:String(item.sourceName||item.source||'Income'),
+    date:String(item.date||`${item.month||nowMonth}-01`),
+    month:String(item.month||String(item.date||'').slice(0,7)||nowMonth),
+    accountId:item.accountId?String(item.accountId):null,
+    note:String(item.note||''),
+    source:normalizeSource(item.source)
+  };
+}
+
+function currentEntityCount(data){
+  return (data.expenses||[]).length+(data.incomes||[]).length+(data.accounts||[]).length+
+    (data.recurringBills||[]).length+(data.debts||[]).length+(data.debtPayments||[]).length+
+    (data.transfers||[]).length+(data.roadmaps||[]).length;
+}
+
+function knowledgeState(data){
+  const counts={
+    income:(data.incomes||[]).length,
+    expenses:(data.expenses||[]).length,
+    accounts:(data.accounts||[]).length,
+    bills:(data.recurringBills||[]).length,
+    debts:(data.debts||[]).length,
+    roadmaps:(data.roadmaps||[]).length
+  };
+  const domains=Object.values(counts).filter(Boolean).length;
+  const historyDates=[
+    ...(data.incomes||[]).map(x=>x.date),
+    ...(data.expenses||[]).map(x=>x.date),
+    ...(data.checkins||[]).map(x=>x.date)
+  ].filter(Boolean).sort();
+  const daySpan=historyDates.length>1
+    ? Math.max(0,Math.round((new Date(`${historyDates.at(-1)}T12:00:00`)-new Date(`${historyDates[0]}T12:00:00`))/86400000))
+    : 0;
+
+  if(currentEntityCount(data)===0)return{label:'Beginning',text:'WealthOS is still learning the shape of your financial life.',counts,daySpan};
+  if(domains<=2||daySpan<7)return{label:'Partial',text:'There is enough information for basic context, but not enough history for strong patterns.',counts,daySpan};
+  if(domains<=4||daySpan<30)return{label:'Growing',text:'Your records support useful observations. Longer-term conclusions remain cautious.',counts,daySpan};
+  return{label:'Established',text:'WealthOS has a broader foundation, while still distinguishing facts, estimates, and user-reported records.',counts,daySpan};
+}
+
+function syncCanonicalIncomeToLegacy(data){
+  const byMonth=new Map();
+  (data.incomes||[]).forEach(item=>byMonth.set(item.month,(byMonth.get(item.month)||0)+n(item.amount)));
+  const months=[...byMonth.keys()].sort();
+  if(!months.length)return;
+  const latest=months.at(-1);
+  data.income.currentMonth=latest;
+  data.income.current=byMonth.get(latest);
+  const latestRecords=(data.incomes||[]).filter(x=>x.month===latest);
+  data.income.source=latestRecords.length===1?latestRecords[0].sourceName:'Recorded income';
+  data.incomeHistory=months.slice(0,-1).map(month=>({month,amount:byMonth.get(month)}));
+}
+
+function applyAccountDelta(data,accountId,delta){
+  if(!accountId)return;
+  const account=(data.accounts||[]).find(item=>item.id===accountId);
+  if(account)account.balance=n(account.balance)+n(delta);
+}
+
 function saveData(d){localStorage.setItem(STORAGE_KEY,JSON.stringify(d))}
 function hasMeaningfulData(d){return d?.onboardingComplete||n(d?.income?.current)>0||(d?.incomeHistory||[]).length>0}
 function migrate(raw){
@@ -74,10 +208,93 @@ function migrate(raw){
   })):[];
 
   d.spending={daily:Math.max(0,n(raw.spending?.daily)),weekly:Math.max(0,n(raw.spending?.weekly)),monthly:Math.max(0,n(raw.spending?.monthly))};
-  d.expenses=Array.isArray(raw.expenses)?raw.expenses.filter(item=>item&&item.date).map(item=>({
-    id:item.id||Date.now()+Math.random(),amount:Math.max(0,n(item.amount)),category:String(item.category||'Other'),
-    merchant:String(item.merchant||''),note:String(item.note||''),date:String(item.date)
+  d.expenses=Array.isArray(raw.expenses)?raw.expenses.filter(item=>item&&item.date).map(canonicalExpense):[];
+  d.incomes=Array.isArray(raw.incomes)?raw.incomes.map(canonicalIncome):[];
+  if(!d.incomes.length){
+    const legacyIncome=[];
+    (d.incomeHistory||[]).forEach(item=>legacyIncome.push(canonicalIncome({
+      id:`legacy-income-${item.month}`,
+      amount:item.amount,
+      category:'Other',
+      sourceName:d.income.source,
+      month:item.month,
+      date:`${item.month}-01`,
+      source:{method:'manual',reportedBy:'user',confidence:'reported',verified:false,imported:false}
+    })));
+    if(d.income.current!==null&&n(d.income.current)>0){
+      legacyIncome.push(canonicalIncome({
+        id:`legacy-income-${d.income.currentMonth}`,
+        amount:d.income.current,
+        category:'Other',
+        sourceName:d.income.source,
+        month:d.income.currentMonth,
+        date:`${d.income.currentMonth}-01`,
+        source:{method:'manual',reportedBy:'user',confidence:'reported',verified:false,imported:false}
+      }));
+    }
+    d.incomes=legacyIncome;
+  }
+  d.accounts=Array.isArray(raw.accounts)?raw.accounts.filter(Boolean).map(item=>({
+    id:String(item.id||coreId('account')),
+    name:String(item.name||'Account'),
+    type:String(item.type||'Other'),
+    balance:n(item.balance),
+    currency:String(item.currency||d.profile.currency),
+    note:String(item.note||''),
+    source:normalizeSource(item.source)
   })):[];
+  d.recurringBills=Array.isArray(raw.recurringBills)?raw.recurringBills.filter(Boolean).map(item=>({
+    id:String(item.id||coreId('bill')),
+    name:String(item.name||'Recurring bill'),
+    expectedAmount:Math.max(0,n(item.expectedAmount??item.amount)),
+    frequency:String(item.frequency||'monthly'),
+    nextDueDate:String(item.nextDueDate||item.dueDate||''),
+    accountId:item.accountId?String(item.accountId):null,
+    note:String(item.note||''),
+    active:item.active!==false,
+    source:normalizeSource(item.source)
+  })):[];
+  d.debts=Array.isArray(raw.debts)?raw.debts.filter(Boolean).map(item=>({
+    id:String(item.id||coreId('debt')),
+    name:String(item.name||'Debt'),
+    type:String(item.type||'Other'),
+    balance:Math.max(0,n(item.balance)),
+    apr:item.apr===''||item.apr===null?null:Math.max(0,n(item.apr)),
+    minimumPayment:Math.max(0,n(item.minimumPayment)),
+    dueDate:String(item.dueDate||''),
+    accountId:item.accountId?String(item.accountId):null,
+    note:String(item.note||''),
+    source:normalizeSource(item.source)
+  })):[];
+  d.debtPayments=Array.isArray(raw.debtPayments)?raw.debtPayments.filter(Boolean).map(item=>({
+    id:String(item.id||coreId('debt-payment')),
+    debtId:String(item.debtId||''),
+    amount:Math.max(0,n(item.amount)),
+    date:String(item.date||localDateKey()),
+    accountId:item.accountId?String(item.accountId):null,
+    note:String(item.note||''),
+    source:normalizeSource(item.source)
+  })):[];
+  d.transfers=Array.isArray(raw.transfers)?raw.transfers.filter(Boolean).map(item=>({
+    id:String(item.id||coreId('transfer')),
+    fromAccountId:item.fromAccountId?String(item.fromAccountId):null,
+    toAccountId:item.toAccountId?String(item.toAccountId):null,
+    amount:Math.max(0,n(item.amount)),
+    date:String(item.date||localDateKey()),
+    note:String(item.note||''),
+    source:normalizeSource(item.source)
+  })):[];
+  d.auditLog=Array.isArray(raw.auditLog)?raw.auditLog.filter(Boolean).map(item=>({
+    id:String(item.id||coreId('audit')),
+    occurredAt:String(item.occurredAt||new Date().toISOString()),
+    action:String(item.action||'migrated'),
+    entityType:String(item.entityType||'unknown'),
+    entityId:String(item.entityId||''),
+    sourceMethod:String(item.sourceMethod||'manual'),
+    detail:String(item.detail||'')
+  })):[];
+  d.schemaVersion=String(raw.schemaVersion||'1.0.0');
+  syncCanonicalIncomeToLegacy(d);
   d.checkins=Array.isArray(raw.checkins)?raw.checkins:[];
   d.memory={
     lastInteraction:raw.memory?.lastInteraction||null,
@@ -486,6 +703,283 @@ function renderFinancialMemory(data){
   });
 }
 
+
+const RECORD_EXPLAINERS={
+  expense:'Money went out. This updates Today, This Week, This Month, category context, and observations.',
+  income:'Money came in. This updates monthly income, cash-flow context, and the Paycheck object.',
+  bill:'A recurring obligation was identified. WealthOS will treat it as expected—not as already paid.',
+  account:'A manual balance was reported. WealthOS will label it as user-reported until account connections exist.',
+  debt:'An amount owed was reported. WealthOS will not infer affordability or repayment advice from balance alone.',
+  debt_payment:'A payment reduced a recorded debt balance and became part of financial history.',
+  transfer:'Money moved between accounts. Transfers do not count as income or spending.',
+  roadmap_contribution:'Money was assigned to a Roadmap. This updates its progress and Financial Memory.'
+};
+
+function renderRecordSelectOptions(data){
+  const accountOptions='<option value="">No account selected</option>'+
+    (data.accounts||[]).map(item=>`<option value="${item.id}">${item.name} · ${item.type}</option>`).join('');
+  $('recordAccountId').innerHTML=accountOptions;
+  $('recordFromAccount').innerHTML='<option value="">Choose an account</option>'+
+    (data.accounts||[]).map(item=>`<option value="${item.id}">${item.name}</option>`).join('');
+  $('recordToAccount').innerHTML='<option value="">Choose an account</option>'+
+    (data.accounts||[]).map(item=>`<option value="${item.id}">${item.name}</option>`).join('');
+  $('recordDebtId').innerHTML=(data.debts||[]).length
+    ? (data.debts||[]).map(item=>`<option value="${item.id}">${item.name} · ${money(data.profile.currency).format(item.balance)}</option>`).join('')
+    : '<option value="">Record a debt first</option>';
+  $('recordRoadmapId').innerHTML=activeRoadmaps(data).length
+    ? activeRoadmaps(data).map(item=>`<option value="${item.id}">${item.name}</option>`).join('')
+    : '<option value="">Create a Roadmap first</option>';
+}
+
+function updateRecordFields(){
+  const type=$('recordType').value;
+  document.querySelectorAll('#recordFields [data-types]').forEach(label=>{
+    const visible=label.dataset.types.split(/\s+/).includes(type);
+    label.hidden=!visible;
+    label.querySelectorAll('input,select,textarea').forEach(control=>control.disabled=!visible);
+  });
+  $('recordTypeExplainer').textContent=RECORD_EXPLAINERS[type]||'Record a financial fact.';
+  $('recordError').hidden=true;
+}
+
+function resetRecordForm(type='expense'){
+  $('recordForm').reset();
+  $('recordType').value=type;
+  $('recordDate').value=localDateKey();
+  $('recordError').hidden=true;
+  updateRecordFields();
+}
+
+function openRecordModal(type='expense'){
+  const data=loadData();
+  if(!hasMeaningfulData(data)&&!data.onboardingComplete){
+    openOnboarding();
+    return;
+  }
+  renderRecordSelectOptions(data);
+  resetRecordForm(type);
+  $('recordModal').classList.add('open');
+  $('recordModal').setAttribute('aria-hidden','false');
+  setTimeout(()=>{
+    const first=[...document.querySelectorAll('#recordFields input:not([disabled]),#recordFields select:not([disabled])')][0];
+    first?.focus();
+  },80);
+}
+
+function closeRecordModal(){
+  $('recordModal').classList.remove('open');
+  $('recordModal').setAttribute('aria-hidden','true');
+}
+
+function recordError(message){
+  $('recordError').textContent=message;
+  $('recordError').hidden=false;
+}
+
+function saveCoreRecord(event){
+  event.preventDefault();
+  const data=loadData();
+  const type=$('recordType').value;
+  const amount=Math.max(0,n($('recordAmount').value));
+  const date=$('recordDate').value||localDateKey();
+  const note=$('recordNote').value.trim();
+  const source=manualSource();
+  let entity=null;
+
+  if(['expense','income','debt_payment','transfer','roadmap_contribution'].includes(type)&&amount<=0){
+    recordError('Enter an amount greater than zero.');
+    return;
+  }
+
+  if(type==='expense'){
+    entity=canonicalExpense({
+      id:coreId('expense'),
+      amount,
+      category:$('recordExpenseCategory').value||'Other',
+      merchant:$('recordName').value.trim(),
+      date,
+      note,
+      accountId:$('recordAccountId').value||null,
+      essential:$('recordEssential').value,
+      source
+    });
+    data.expenses.push(entity);
+    applyAccountDelta(data,entity.accountId,-amount);
+    data.memory={...(data.memory||{}),lastInteraction:'expense',lastCheckinDate:date,lastSummary:`You recorded ${money(data.profile.currency).format(amount)} for ${entity.category}.`};
+    appendAudit(data,'created','expense',entity,'Manual expense recorded');
+  }
+
+  if(type==='income'){
+    entity=canonicalIncome({
+      id:coreId('income'),
+      amount,
+      category:$('recordIncomeCategory').value||'Other',
+      sourceName:$('recordName').value.trim()||$('recordIncomeCategory').value||'Income',
+      date,
+      month:date.slice(0,7),
+      accountId:$('recordAccountId').value||null,
+      note,
+      source
+    });
+    data.incomes.push(entity);
+    applyAccountDelta(data,entity.accountId,amount);
+    syncCanonicalIncomeToLegacy(data);
+    data.memory={...(data.memory||{}),lastInteraction:'income',lastCheckinDate:date,lastSummary:`You recorded ${money(data.profile.currency).format(amount)} of income.`};
+    appendAudit(data,'created','income',entity,'Manual income recorded');
+  }
+
+  if(type==='account'){
+    const name=$('recordName').value.trim();
+    if(!name){recordError('Give this account a name.');return}
+    entity={
+      id:coreId('account'),
+      name,
+      type:$('recordAccountType').value||'Other',
+      balance:n($('recordBalance').value),
+      currency:data.profile.currency,
+      note,
+      source
+    };
+    data.accounts.push(entity);
+    appendAudit(data,'created','account',entity,'Manual account balance reported');
+  }
+
+  if(type==='bill'){
+    const name=$('recordName').value.trim();
+    if(!name){recordError('Give this recurring bill a name.');return}
+    entity={
+      id:coreId('bill'),
+      name,
+      expectedAmount:Math.max(0,n($('recordExpectedAmount').value)),
+      frequency:$('recordFrequency').value||'monthly',
+      nextDueDate:$('recordDueDate').value,
+      accountId:$('recordAccountId').value||null,
+      note,
+      active:true,
+      source
+    };
+    data.recurringBills.push(entity);
+    appendAudit(data,'created','recurringBill',entity,'Expected recurring bill recorded');
+  }
+
+  if(type==='debt'){
+    const name=$('recordName').value.trim();
+    if(!name){recordError('Give this debt a name.');return}
+    entity={
+      id:coreId('debt'),
+      name,
+      type:$('recordDebtType').value||'Other',
+      balance:Math.max(0,n($('recordBalance').value)),
+      apr:$('recordApr').value===''?null:Math.max(0,n($('recordApr').value)),
+      minimumPayment:Math.max(0,n($('recordMinimumPayment').value)),
+      dueDate:$('recordDebtDueDate').value,
+      accountId:$('recordAccountId').value||null,
+      note,
+      source
+    };
+    data.debts.push(entity);
+    appendAudit(data,'created','debt',entity,'Manual debt balance reported');
+  }
+
+  if(type==='debt_payment'){
+    const debtId=$('recordDebtId').value;
+    const debt=(data.debts||[]).find(item=>item.id===debtId);
+    if(!debt){recordError('Record or choose a debt first.');return}
+    entity={
+      id:coreId('debt-payment'),
+      debtId,
+      amount,
+      date,
+      accountId:$('recordAccountId').value||null,
+      note,
+      source
+    };
+    data.debtPayments.push(entity);
+    const oldBalance=n(debt.balance);
+    debt.balance=Math.max(0,oldBalance-amount);
+    applyAccountDelta(data,entity.accountId,-amount);
+    appendAudit(data,'created','debtPayment',entity,`Debt balance changed from ${oldBalance} to ${debt.balance}`);
+    appendAudit(data,'updated','debt',debt,'Balance reduced by a recorded payment');
+  }
+
+  if(type==='transfer'){
+    const fromAccountId=$('recordFromAccount').value||null;
+    const toAccountId=$('recordToAccount').value||null;
+    if(!fromAccountId||!toAccountId||fromAccountId===toAccountId){
+      recordError('Choose two different accounts for the transfer.');
+      return;
+    }
+    entity={id:coreId('transfer'),fromAccountId,toAccountId,amount,date,note,source};
+    data.transfers.push(entity);
+    applyAccountDelta(data,fromAccountId,-amount);
+    applyAccountDelta(data,toAccountId,amount);
+    appendAudit(data,'created','transfer',entity,'Transfer recorded without counting it as income or spending');
+  }
+
+  if(type==='roadmap_contribution'){
+    const roadmapId=$('recordRoadmapId').value;
+    const roadmap=(data.roadmaps||[]).find(item=>item.id===roadmapId);
+    if(!roadmap){recordError('Create or choose a Roadmap first.');return}
+    entity={
+      id:coreId('roadmap-contribution'),
+      roadmapId,
+      amount,
+      date,
+      accountId:$('recordAccountId').value||null,
+      note,
+      source
+    };
+    const before=n(roadmap.saved);
+    roadmap.saved=Math.min(n(roadmap.target),before+amount);
+    roadmap.status=roadmap.saved>=n(roadmap.target)?'complete':'active';
+    applyAccountDelta(data,entity.accountId,-amount);
+    data.checkins.push({id:entity.id,type:'contribution',date,amount,roadmapId,roadmapName:roadmap.name,source});
+    data.memory={...(data.memory||{}),lastInteraction:'roadmap',lastCheckinDate:date,lastSummary:`You added ${money(data.profile.currency).format(amount)} to ${roadmap.name}.`};
+    appendAudit(data,'created','roadmapContribution',entity,`Roadmap progress changed from ${before} to ${roadmap.saved}`);
+    appendAudit(data,'updated','roadmap',roadmap,'Progress updated by a recorded contribution');
+  }
+
+  data.schemaVersion='1.0.0';
+  data.onboardingComplete=true;
+  syncLegacyChallenge(data);
+  updateFinancialMemories(data);
+  saveData(data);
+  closeRecordModal();
+  render(data);
+
+  if(type==='expense'){
+    showExpenseToast(entity,data);
+  }else{
+    location.hash=type==='roadmap_contribution'?'roadmaps':'coreFoundation';
+  }
+}
+
+function renderCoreFoundation(data){
+  const state=knowledgeState(data);
+  const count=currentEntityCount(data);
+  $('foundationState').textContent=state.label;
+  $('foundationStateText').textContent=state.text;
+  $('foundationRecordCount').textContent=String(count);
+  $('foundationRecordText').textContent=count
+    ? `${count} core record${count===1?'':'s'} across ${Object.values(state.counts).filter(Boolean).length} financial domain${Object.values(state.counts).filter(Boolean).length===1?'':'s'}.`
+    : 'No financial records yet.';
+  $('foundationSource').textContent=(data.accounts||[]).some(x=>x.source?.verified)?'Mixed':'Manual';
+
+  const entries=[
+    ['Income',state.counts.income,'Money coming in'],
+    ['Expenses',state.counts.expenses,'Money going out'],
+    ['Accounts',state.counts.accounts,'Where money lives'],
+    ['Bills',state.counts.bills,'Expected obligations'],
+    ['Debts',state.counts.debts,'Amounts owed'],
+    ['Roadmaps',state.counts.roadmaps,'Where money is going'],
+    ['History',state.daySpan?`${state.daySpan} days`:'New','Recorded time span'],
+    ['Audit log',(data.auditLog||[]).length,'Traceable changes']
+  ];
+  $('foundationEntities').innerHTML=entries.map(([name,value,description])=>
+    `<article class="foundation-entity"><span>${name}</span><strong>${value}</strong><small>${description}</small></article>`
+  ).join('');
+}
+
 function checkinInCurrentWeek(data){
   const start=startOfWeek(new Date());
   return (data.checkins||[]).some(item=>{
@@ -590,7 +1084,7 @@ function chooseWorkspaceContinue(data){
 }
 
 function performWorkspaceAction(action){
-  if(action==='quickAdd'){openQuickAdd();return}
+  if(action==='quickAdd'){openRecordModal('expense');return}
   if(action==='weekly'||action==='monthly'){openCheckin(action);return}
   if(action==='contribution'){openContribution();return}
   if(action==='timeline'){location.hash='timeline';return}
@@ -683,6 +1177,7 @@ function render(data){
   if(!returning)return;
   const fmt=money(data.profile.currency),h=sortedHistory(data),s=stats(h),cur=n(s.cur.amount),prev=s.prev?n(s.prev.amount):null,delta=prev===null?null:cur-prev,pct=prev>0?delta/prev*100:null,source=data.income.source||'Income';
   renderWorkspace(data,fmt);
+  renderCoreFoundation(data);
   renderFinancialLedger(data,fmt);
   renderSavingsEnvelope(data,fmt);
   $('incomeSlipMonth').textContent=formatMonth(data.income.currentMonth);
@@ -1635,11 +2130,17 @@ $('closeRoadmapModal').addEventListener('click',closeRoadmapModal);
 $('cancelRoadmap').addEventListener('click',closeRoadmapModal);
 $('roadmapModal').addEventListener('click',event=>{if(event.target===$('roadmapModal'))closeRoadmapModal()});
 $('roadmapForm').addEventListener('submit',saveRoadmap);
+$('foundationRecordButton').addEventListener('click',()=>openRecordModal('expense'));
+$('closeRecordModal').addEventListener('click',closeRecordModal);
+$('cancelRecord').addEventListener('click',closeRecordModal);
+$('recordModal').addEventListener('click',event=>{if(event.target===$('recordModal'))closeRecordModal()});
+$('recordType').addEventListener('change',updateRecordFields);
+$('recordForm').addEventListener('submit',saveCoreRecord);
 $('workspaceFocusAction').addEventListener('click',()=>performWorkspaceAction($('workspaceFocusAction').dataset.action));
 $('workspaceContinueAction').addEventListener('click',()=>performWorkspaceAction($('workspaceContinueAction').dataset.action));
-$('workspaceQuickAdd').addEventListener('click',openQuickAdd);
-$('quickAddTrigger').addEventListener('click',openQuickAdd);
-$('addAnotherExpense').addEventListener('click',openQuickAdd);
+$('workspaceQuickAdd').addEventListener('click',()=>openRecordModal('expense'));
+$('quickAddTrigger').addEventListener('click',()=>openRecordModal('expense'));
+$('addAnotherExpense').addEventListener('click',()=>openRecordModal('expense'));
 $('closeQuickAdd').addEventListener('click',closeQuickAdd);
 $('cancelQuickAdd').addEventListener('click',closeQuickAdd);
 $('quickAddModal').addEventListener('click',event=>{if(event.target===$('quickAddModal'))closeQuickAdd()});
@@ -1656,8 +2157,8 @@ $('snapshotInsightWhy').addEventListener('click',()=>{
 });
 $('snapshotUpdateButton').addEventListener('click',()=>{
   const period=$('snapshotUpdateButton').dataset.period||'weekly';
-  if(period==='daily'){openQuickAdd();return}
-  if(period==='weekly'){const data=loadData();if(expensesForPeriod(data,'weekly').length){openQuickAdd();return}openCheckin('weekly');return}
+  if(period==='daily'){openRecordModal('expense');return}
+  if(period==='weekly'){const data=loadData();if(expensesForPeriod(data,'weekly').length){openRecordModal('expense');return}openCheckin('weekly');return}
   openCheckin('monthly');
 });
 document.querySelectorAll('[data-open-checkin]').forEach(button=>button.addEventListener('click',()=>openCheckin(button.dataset.openCheckin)));

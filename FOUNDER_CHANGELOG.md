@@ -334,3 +334,28 @@ The product logic and the approved prototype are now mature enough to begin a de
 ### Scope discipline
 
 This release is the first production slice, not the final beautification pass. The next slices will focus on complete flows rather than redesigning the entire application at once.
+
+## v0.20.0 — The WealthOS Core
+
+### Why this exists
+
+WealthOS cannot provide trustworthy context without a reliable financial data layer.
+
+A visually strong interface is not enough. Every observation, lesson trigger, Roadmap update, and future decision-support feature must be grounded in traceable records.
+
+### What changed
+
+- Added a canonical entity model for income, expenses, accounts, recurring bills, debts, debt payments, and transfers.
+- Replaced the narrow header Quick Add action with a unified Record capability.
+- Preserved Quick Add as the fast expense path.
+- Added source and confidence metadata to every new record.
+- Added an append-only audit log.
+- Distinguished expected recurring bills from completed spending.
+- Distinguished transfers from income and expenses.
+- Synchronized canonical income records with the existing Workspace and Snapshot.
+- Added Financial Foundation knowledge states.
+- Preserved migration from every prior Private Preview version.
+
+### Trust rule
+
+**WealthOS only speaks with the confidence its data deserves.**

@@ -2741,3 +2741,254 @@ body{background:var(--paper);font-family:Manrope,sans-serif;-webkit-font-smoothi
 .snapshot-card{border:none;box-shadow:var(--shadow-sm);padding:46px}.snapshot-value{font-family:Newsreader,serif;font-weight:600}.snapshot-insight{background:#e4eee7;border-left:0;box-shadow:var(--shadow-sm)}.snapshot-insight h3{font-family:Newsreader,serif;font-weight:600}.checkin-option,.starting-card,.connection-choice{box-shadow:var(--shadow-sm)}footer{background:var(--evergreen-dark)}
 @media(max-width:1050px){.headquarters-note{display:none}.headquarters-nav{display:none}}
 @media(max-width:700px){.brandbar{padding:0 18px}.brand-actions{gap:10px}.header-date{display:none}.quick-add-trigger{padding:0 12px}.lobby{padding:126px 24px 70px}.lobby h1{font-size:clamp(4.1rem,20vw,6.3rem)}.headquarters-greeting{font-size:1.55rem}.reflection{font-size:.93rem}.workspace-focus{min-height:430px;padding:28px 24px}.workspace-focus h3{font-size:clamp(3rem,15vw,5.2rem)}.workspace-financial-documents{grid-template-columns:1fr}.financial-document{transform:none}}
+
+/* v0.20.0 — The WealthOS Core */
+
+.core-foundation{
+  margin-top:64px;
+  padding-top:30px;
+  border-top:1px solid var(--line);
+}
+
+.foundation-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+.foundation-summary{
+  min-height:180px;
+  padding:22px;
+  border:1px solid var(--line);
+  background:#fff;
+}
+
+.foundation-summary>span,
+.foundation-principle>span{
+  display:block;
+  margin-bottom:10px;
+  color:var(--evergreen);
+  font-size:.63rem;
+  font-weight:800;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+}
+
+.foundation-summary>strong{
+  display:block;
+  margin-bottom:12px;
+  font-family:var(--font-display,Georgia,serif);
+  font-size:2rem;
+  letter-spacing:-.035em;
+}
+
+.foundation-summary>p{
+  margin:0;
+  color:var(--muted);
+  font-size:.82rem;
+  line-height:1.55;
+}
+
+.foundation-entities{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  margin-top:14px;
+  border:1px solid var(--line);
+  background:var(--line);
+}
+
+.foundation-entity{
+  min-height:116px;
+  padding:16px;
+  background:var(--paper);
+}
+
+.foundation-entity span{
+  display:block;
+  margin-bottom:8px;
+  color:var(--muted);
+  font-size:.62rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+
+.foundation-entity strong{
+  display:block;
+  font-size:1.35rem;
+}
+
+.foundation-entity small{
+  display:block;
+  margin-top:7px;
+  color:var(--muted);
+}
+
+.foundation-principle{
+  margin-top:14px;
+  padding:18px 20px;
+  border-left:3px solid var(--evergreen);
+  background:var(--evergreen-soft);
+}
+
+.foundation-principle p{
+  margin:0;
+  font-size:.9rem;
+}
+
+.record-modal{
+  position:fixed;
+  inset:0;
+  z-index:390;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:rgba(27,32,28,.52);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease;
+}
+
+.record-modal.open{
+  opacity:1;
+  pointer-events:auto;
+}
+
+.record-shell{
+  width:min(780px,100%);
+  max-height:94vh;
+  overflow:auto;
+  padding:32px;
+  border:1px solid var(--line);
+  background:var(--surface);
+  box-shadow:0 30px 100px rgba(27,32,28,.26);
+}
+
+.record-header{
+  display:flex;
+  justify-content:space-between;
+  gap:28px;
+  margin-bottom:28px;
+}
+
+.record-header h2{
+  margin:4px 0 10px;
+  font-family:var(--font-display,Georgia,serif);
+  font-size:clamp(2.4rem,5vw,4.6rem);
+  line-height:.95;
+  letter-spacing:-.05em;
+}
+
+.record-header p:not(.eyebrow){
+  max-width:580px;
+  margin:0;
+  color:var(--muted);
+}
+
+.record-type-label{
+  margin-bottom:14px;
+}
+
+.record-type-explainer{
+  margin-bottom:20px;
+  padding:15px 17px;
+  border-left:3px solid var(--evergreen);
+  background:var(--evergreen-soft);
+  color:var(--muted);
+  font-size:.84rem;
+  line-height:1.55;
+}
+
+.record-fields{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.record-fields label[hidden]{
+  display:none!important;
+}
+
+.record-note{
+  grid-column:1/-1;
+}
+
+.record-provenance{
+  margin:20px 0;
+  padding:16px;
+  border:1px solid var(--line);
+  background:var(--paper);
+}
+
+.record-provenance>span{
+  display:block;
+  color:var(--evergreen);
+  font-size:.62rem;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+
+.record-provenance strong{
+  display:block;
+  margin:6px 0;
+}
+
+.record-provenance p{
+  margin:0;
+  color:var(--muted);
+  font-size:.78rem;
+}
+
+.record-error{
+  margin:0 0 16px;
+  padding:12px 14px;
+  border-left:3px solid #a14b3c;
+  background:#fff1ee;
+  color:#703329;
+  font-size:.82rem;
+}
+
+@media(max-width:900px){
+  .foundation-grid{
+    grid-template-columns:1fr;
+  }
+
+  .foundation-entities{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:700px){
+  .record-modal{
+    align-items:end;
+    padding:0;
+  }
+
+  .record-shell{
+    width:100%;
+    max-height:96vh;
+    padding:24px;
+  }
+
+  .record-header{
+    flex-direction:column-reverse;
+  }
+
+  .record-header>.close-button{
+    align-self:flex-end;
+  }
+
+  .record-fields{
+    grid-template-columns:1fr;
+  }
+
+  .record-note{
+    grid-column:auto;
+  }
+
+  .foundation-entities{
+    grid-template-columns:1fr;
+  }
+}
