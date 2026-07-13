@@ -311,3 +311,26 @@ It is harmful when it minimizes a real financial concern or makes the user feel 
 ### Principle
 
 **A small smile can reduce anxiety. A joke should never reduce trust.**
+
+## v0.19.0 — Production Foundation
+
+### Why this exists
+
+The product logic and the approved prototype are now mature enough to begin a deliberate production rebuild rather than continuing cosmetic patches.
+
+### What changed
+
+- Headquarters becomes the formal entry experience.
+- The header now behaves like product navigation instead of a landing-page bar.
+- Editorial serif typography carries major product moments.
+- Paycheck, Receipt, and Envelope objects receive stronger material identity.
+- Workspace, Roadmaps, Memory, Lessons, Snapshot, and Observations inherit one visual system.
+- Existing product logic and stored user data remain intact.
+
+### Build principle
+
+**Use the existing app for truth and the approved prototype for expression.**
+
+### Scope discipline
+
+This release is the first production slice, not the final beautification pass. The next slices will focus on complete flows rather than redesigning the entire application at once.

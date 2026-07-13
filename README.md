@@ -1,60 +1,34 @@
-# WealthOS v0.18.0 — Personality & Craft
+# WealthOS v0.19.0 — Production Foundation
 
-This release adds a consistent WealthOS personality layer without sacrificing clarity or trust.
+This release begins the production rebuild against the approved prototype direction.
 
-## Personality
+## First production slice
 
-WealthOS is:
+- Headquarters entry experience
+- Product-oriented navigation
+- Editorial typography hierarchy
+- Refined evergreen and warm-paper palette
+- Stronger Workspace hero
+- Tangible Paycheck, Receipt, and Envelope objects
+- More deliberate Roadmap, Memory, Observation, Snapshot, and Lesson presentation
+- Responsive mobile adjustments
+- Existing v0.18 data model, Quick Add, Context Library, Roadmaps, Memory, check-ins, and migration behavior retained
 
-- thoughtful
-- warm
-- precise
-- witty
-- occasionally funny
-- never offensive
-- never dismissive
-- never funny at the user’s expense
+## Build strategy
 
-## Where personality appears
+The rebuild separates two sources of truth:
 
-- Today’s Focus
-- Paycheck, Receipt, and Envelope documents
-- What WealthOS Noticed
-- Behind the Number
-- Weekly and Monthly completion moments
-- Category-specific context
+- Existing application: product logic, local data, calculations, migrations, context, and observations
+- Approved prototype: visual hierarchy, object language, navigation, pacing, and motion direction
 
-## Examples
+## Next production slices
 
-- Coffee: “Coffee is not a moral failing. It is, however, very trackable.”
-- Groceries: “One receipt. Several future meals.”
-- Housing: “A fixed expense with main-character energy.”
-- Taxes: “Rarely delightful, frequently relevant.”
-- Subscriptions: “Small monthly charges love becoming annual totals.”
-
-## Principle
-
-**A small smile can reduce anxiety. A joke should never reduce trust.**
-
-## Retention
-
-Saved data migrates automatically from v0.17.0 and earlier versions.
-
-## Publish
-
-Replace:
-
-- index.html
-- styles.css
-- script.js
-- README.md
-- FOUNDER_CHANGELOG.md
-- WEALTHOS_DESIGN_SYSTEM.md
-- WEALTHOS_PERSONALITY_SYSTEM.md
-- ROADMAPS_AND_MEMORY.md
-- CONTEXT_LIBRARY.md
-- PROTECTED_IDEAS.md
+1. Headquarters and Workspace usability review
+2. Quick Add and Behind the Number completion flow
+3. Snapshot and Breathing Room mental model
+4. Roadmaps and Financial Memory detail views
+5. Mobile app shell and reduced-motion behavior
 
 Suggested commit:
 
-`Add WealthOS personality and editorial craft`
+`Begin production rebuild with Headquarters and Workspace foundation`

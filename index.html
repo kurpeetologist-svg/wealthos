@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.18.0</title>
+  <title>WealthOS Private Preview v0.19.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -12,9 +12,15 @@
 </head>
 <body class="desk-pending">
   <header class="brandbar">
-    <a class="brand" href="#lobby">Wealth<span>OS</span></a>
+    <a class="brand" href="#lobby" aria-label="WealthOS Headquarters">Wealth<span>OS</span></a>
+    <nav class="headquarters-nav" aria-label="Primary navigation">
+      <a href="#focus">Workspace</a>
+      <a href="#roadmaps">Roadmaps</a>
+      <a href="#financialMemory">Memory</a>
+      <a href="#lesson">Lessons</a>
+    </nav>
     <div class="brand-actions">
-      <span class="preview-label">Private Preview</span>
+      <span class="header-date" id="headerDate"></span>
       <button class="quick-add-trigger" id="quickAddTrigger" type="button">
         <span>Quick Add</span><b>+</b>
       </button>
@@ -24,9 +30,15 @@
 
   <main>
     <section class="lobby" id="lobby">
-      <div class="lobby-inner"><div class="desk-assembly-label" id="deskAssemblyLabel">Preparing your financial desk…</div>
-        <h1 id="greeting">Good morning!</h1>
+      <div class="lobby-inner"><div class="desk-assembly-label" id="deskAssemblyLabel">Preparing your financial headquarters…</div>
+        <p class="headquarters-kicker">Your financial headquarters</p>
+        <h1>Headquarters</h1>
+        <p class="headquarters-greeting" id="greeting">Good morning!</p>
         <p class="reflection" id="reflection">Let's see where you stand today.</p>
+        <aside class="headquarters-note" aria-label="WealthOS principle">
+          <span>WealthOS principle</span>
+          <p>Nothing needs a dramatic dashboard. One useful thing is ready when you are.</p>
+        </aside>
 
         <div id="firstVisitLobby" class="first-visit-lobby">
           <div class="welcome-rule"></div>
@@ -46,7 +58,7 @@
           <p class="attention-state" id="attentionState"></p>
           <div class="lobby-date" id="todayDate"></div>
           <a class="enter-link" href="#focus">
-            <span>Open your Workspace.</span>
+            <span>Enter Headquarters</span>
             <b>↓</b>
           </a>
         </div>
