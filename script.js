@@ -1,8 +1,8 @@
 
 'use strict';
 
-const STORAGE_KEY='wealthos-v0.21.2-data';
-const LEGACY_KEYS=['wealthos-v0.21.1-data','wealthos-v0.21.0-data','wealthos-v0.20.0-data','wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
+const STORAGE_KEY='wealthos-v0.21.3-data';
+const LEGACY_KEYS=['wealthos-v0.21.2-data','wealthos-v0.21.1-data','wealthos-v0.21.0-data','wealthos-v0.20.0-data','wealthos-v0.19.0-data','wealthos-v0.18.0-data','wealthos-v0.17.0-data','wealthos-v0.16.0-data','wealthos-v0.15.1-data','wealthos-v0.15.0-data','wealthos-v0.14.1-data','wealthos-v0.14.0-data','wealthos-v0.13.0-data','wealthos-v0.12.0-data','wealthos-v0.11.0-data','wealthos-v0.10.1-data','wealthos-v0.10.0-data','wealthos-v0.9.4-data','wealthos-v0.9.3-data','wealthos-v0.9.2.1-data','wealthos-v0.9.2-data','wealthos-v0.9.1-data','wealthos-v0.9-data','wealthos-v0.8-data','wealthos-v0.7-data','wealthos-v0.6-data'];
 const nowMonth=new Date().toISOString().slice(0,7);
 const $=id=>document.getElementById(id);
 
@@ -911,56 +911,285 @@ function findRecord(data,type,id){
   return config?(data[config.collection]||[]).find(item=>String(item.id)===String(id))||null:null;
 }
 
+
+const libraryView={
+  period:'all',
+  recurringOnly:false,
+  recentSearches:[]
+};
+
+function normalizeSearchText(value){
+  return String(value??'')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[$,\s]+/g,' ')
+    .trim();
+}
+
+function monthNameSearch(dateString){
+  if(!dateString)return '';
+  const date=new Date(`${String(dateString).slice(0,10)}T12:00:00`);
+  if(Number.isNaN(date.getTime()))return '';
+  return [
+    date.toLocaleDateString(undefined,{month:'long'}),
+    date.toLocaleDateString(undefined,{month:'short'}),
+    String(date.getFullYear()),
+    date.toLocaleDateString()
+  ].join(' ');
+}
+
+function recordSearchDocument(type,item,data){
+  const accountName=id=>(data.accounts||[]).find(x=>x.id===id)?.name||'';
+  const roadmapName=id=>(data.roadmaps||[]).find(x=>x.id===id)?.name||item.roadmapName||'';
+  const debtName=id=>(data.debts||[]).find(x=>x.id===id)?.name||'';
+  const parts=[
+    recordTitle(type,item,data),
+    recordSubtitle(type,item),
+    type,
+    LIBRARY_TYPES[type]?.label,
+    item.merchant,
+    item.sourceName,
+    item.name,
+    item.category,
+    item.type,
+    item.note,
+    item.amount,
+    item.balance,
+    item.expectedAmount,
+    item.apr,
+    item.frequency,
+    recurrenceLabel(item),
+    normalizeSource(item.source).method,
+    recordStatus(item),
+    recordSortDate(item),
+    monthNameSearch(recordSortDate(item)),
+    accountName(item.accountId),
+    accountName(item.fromAccountId),
+    accountName(item.toAccountId),
+    roadmapName(item.roadmapId),
+    debtName(item.debtId)
+  ];
+  return normalizeSearchText(parts.filter(value=>value!==undefined&&value!==null&&value!=='').join(' '));
+}
+
+function searchScore(query,type,item,data){
+  if(!query)return 0;
+  const q=normalizeSearchText(query);
+  const title=normalizeSearchText(recordTitle(type,item,data));
+  const subtitle=normalizeSearchText(recordSubtitle(type,item));
+  const doc=recordSearchDocument(type,item,data);
+  let score=0;
+  if(title===q)score+=100;
+  else if(title.startsWith(q))score+=70;
+  else if(title.includes(q))score+=50;
+  if(subtitle.includes(q))score+=25;
+  if(doc.includes(q))score+=10;
+  const amount=String(recordAmount(type,item));
+  if(q.replace(/[^\d.]/g,'')&&amount.includes(q.replace(/[^\d.]/g,'')))score+=35;
+  return score;
+}
+
+function libraryPeriodRange(period){
+  const today=new Date();
+  const end=localDateKey(today);
+  if(period==='month'){
+    return{from:`${end.slice(0,7)}-01`,to:end};
+  }
+  if(period==='30days'){
+    const start=new Date(today);
+    start.setDate(start.getDate()-29);
+    return{from:localDateKey(start),to:end};
+  }
+  return{from:'',to:''};
+}
+
+function setLibraryPeriod(period){
+  libraryView.period=period;
+  document.querySelectorAll('[data-library-period]').forEach(button=>{
+    button.classList.toggle('active',button.dataset.libraryPeriod===period);
+  });
+  renderRecordLibrary(loadData());
+}
+
+function setRecurringQuickFilter(enabled){
+  libraryView.recurringOnly=enabled;
+  document.querySelectorAll('[data-library-recurrence="recurring"]').forEach(button=>{
+    button.classList.toggle('active',enabled);
+  });
+  renderRecordLibrary(loadData());
+}
+
+function toggleAdvancedFilters(){
+  const panel=$('libraryAdvancedFilters');
+  const opening=panel.hidden;
+  panel.hidden=!opening;
+  $('libraryMoreFilters').setAttribute('aria-expanded',String(opening));
+  $('libraryMoreFilters').textContent=opening?'Fewer filters −':'More filters +';
+}
+
+function rememberLibrarySearch(query){
+  const value=String(query||'').trim();
+  if(value.length<2)return;
+  libraryView.recentSearches=[
+    value,
+    ...libraryView.recentSearches.filter(item=>item.toLowerCase()!==value.toLowerCase())
+  ].slice(0,5);
+  renderLibrarySuggestions();
+}
+
+function renderLibrarySuggestions(){
+  const holder=$('librarySuggestionChips');
+  const section=$('librarySuggestions');
+  holder.innerHTML='';
+  if(!libraryView.recentSearches.length){
+    section.hidden=true;
+    return;
+  }
+  section.hidden=false;
+  libraryView.recentSearches.forEach(value=>{
+    const button=document.createElement('button');
+    button.className='library-suggestion';
+    button.type='button';
+    button.textContent=value;
+    button.addEventListener('click',()=>{
+      $('librarySearch').value=value;
+      $('libraryClearSearch').hidden=false;
+      renderRecordLibrary(loadData());
+    });
+    holder.append(button);
+  });
+}
+
+function clearLibrarySearch(){
+  const current=$('librarySearch').value.trim();
+  if(current)rememberLibrarySearch(current);
+  $('librarySearch').value='';
+  $('libraryClearSearch').hidden=true;
+  renderRecordLibrary(loadData());
+}
+
+function resetLibraryView(){
+  const current=$('librarySearch').value.trim();
+  if(current)rememberLibrarySearch(current);
+  $('librarySearch').value='';
+  $('libraryClearSearch').hidden=true;
+  $('libraryType').value='all';
+  $('libraryRecurrence').value='all';
+  $('librarySource').value='all';
+  $('libraryDateFrom').value='';
+  $('libraryDateTo').value='';
+  libraryView.period='all';
+  libraryView.recurringOnly=false;
+  document.querySelectorAll('[data-library-period]').forEach(button=>{
+    button.classList.toggle('active',button.dataset.libraryPeriod==='all');
+  });
+  document.querySelectorAll('[data-library-recurrence="recurring"]').forEach(button=>{
+    button.classList.remove('active');
+  });
+  renderRecordLibrary(loadData());
+}
+
+function escapeHtml(value){
+  return String(value??'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+
+function highlightSearch(value,query){
+  const text=String(value??'');
+  const q=String(query||'').trim();
+  if(!q)return escapeHtml(text);
+  const index=text.toLowerCase().indexOf(q.toLowerCase());
+  if(index<0)return escapeHtml(text);
+  return escapeHtml(text.slice(0,index))+
+    `<mark class="record-match">${escapeHtml(text.slice(index,index+q.length))}</mark>`+
+    escapeHtml(text.slice(index+q.length));
+}
+
 function filteredLibraryRecords(data){
-  const query=$('librarySearch').value.trim().toLowerCase();
+  const query=$('librarySearch').value.trim();
+  const normalizedQuery=normalizeSearchText(query);
   const type=$('libraryType').value;
   const source=$('librarySource').value;
   const recurrenceFilter=$('libraryRecurrence').value;
-  const from=$('libraryDateFrom').value;
-  const to=$('libraryDateTo').value;
+  const period=libraryPeriodRange(libraryView.period);
+  const manualFrom=$('libraryDateFrom').value;
+  const manualTo=$('libraryDateTo').value;
+  const from=manualFrom||period.from;
+  const to=manualTo||period.to;
 
-  return libraryRecords(data).filter(({type:recordType,item})=>{
-    if(type!=='all'&&type!==recordType)return false;
-    if(source!=='all'&&normalizeSource(item.source).method!==source)return false;
-    const recurrence=normalizeRecurrence(item);
-    if(recurrenceFilter==='once'&&isRecurring(item))return false;
-    if(recurrenceFilter==='recurring'&&!isRecurring(item))return false;
-    if(!['all','once','recurring'].includes(recurrenceFilter)&&recurrence.frequency!==recurrenceFilter)return false;
-    const date=recordSortDate(item).slice(0,10);
-    if(from&&date&&date<from)return false;
-    if(to&&date&&date>to)return false;
-    if(query){
-      const haystack=JSON.stringify(item).toLowerCase()+recordTitle(recordType,item,data).toLowerCase();
-      if(!haystack.includes(query))return false;
-    }
-    return true;
-  });
+  return libraryRecords(data)
+    .map(record=>({...record,score:searchScore(query,record.type,record.item,data)}))
+    .filter(({type:recordType,item,score})=>{
+      if(type!=='all'&&type!==recordType)return false;
+      if(source!=='all'&&normalizeSource(item.source).method!==source)return false;
+
+      const recurrence=normalizeRecurrence(item);
+      if(libraryView.recurringOnly&&!isRecurring(item))return false;
+      if(recurrenceFilter==='once'&&isRecurring(item))return false;
+      if(recurrenceFilter==='recurring'&&!isRecurring(item))return false;
+      if(!['all','once','recurring'].includes(recurrenceFilter)&&recurrence.frequency!==recurrenceFilter)return false;
+
+      const date=recordSortDate(item).slice(0,10);
+      if(from&&date&&date<from)return false;
+      if(to&&date&&date>to)return false;
+
+      if(normalizedQuery&&!recordSearchDocument(recordType,item,data).includes(normalizedQuery))return false;
+      return true;
+    })
+    .sort((a,b)=>{
+      if(normalizedQuery&&b.score!==a.score)return b.score-a.score;
+      return recordSortDate(b.item).localeCompare(recordSortDate(a.item));
+    });
 }
 
 function renderRecordLibrary(data){
   const fmt=money(data.profile.currency);
+  const query=$('librarySearch').value.trim();
   const records=filteredLibraryRecords(data);
+  const total=libraryRecords(data).length;
+
   $('libraryCount').textContent=`${records.length} record${records.length===1?'':'s'}`;
+  $('libraryStatusText').textContent=query
+    ? `Matching “${query}” across ${total} total record${total===1?'':'s'}.`
+    : libraryView.period==='month'
+      ? 'Showing records from this month.'
+      : libraryView.period==='30days'
+        ? 'Showing records from the last 30 days.'
+        : libraryView.recurringOnly
+          ? 'Showing records with recurring schedules.'
+          : 'Showing your most recent records.';
+
+  $('libraryClearSearch').hidden=!query;
+
   const list=$('recordList');
   list.innerHTML='';
 
   if(!records.length){
-    const empty=document.createElement('p');
+    const empty=document.createElement('div');
     empty.className='record-empty';
-    empty.textContent='No records match these filters.';
+    empty.innerHTML=query
+      ? `<strong>No record matched “${escapeHtml(query)}.”</strong><span>Try a merchant, account, bill, amount, category, month, or note. You do not need to fill in the other filters.</span>`
+      : `<strong>No records match this view.</strong><span>Reset the view or record something new.</span>`;
     list.append(empty);
   }else{
     records.forEach(({type,item})=>{
       const row=document.createElement('article');
       const config=LIBRARY_TYPES[type];
       const status=recordStatus(item);
+      const title=recordTitle(type,item,data);
+      const subtitle=recordSubtitle(type,item);
       row.className='record-row';
       row.tabIndex=0;
       row.innerHTML=`
         <span class="record-row-mark">${config.mark}</span>
         <div class="record-row-main">
-          <strong>${recordTitle(type,item,data)}${isRecurring(item)?`<em class="recurring-badge">${recurrenceLabel(item)}</em>`:''}</strong>
-          <span>${recordSubtitle(type,item)}</span>
+          <strong>${highlightSearch(title,query)}${isRecurring(item)?`<em class="recurring-badge">${recurrenceLabel(item)}</em>`:''}</strong>
+          <span>${highlightSearch(subtitle,query)}</span>
         </div>
         <div class="record-row-meta">
           <strong>${formatDate(recordSortDate(item).slice(0,10))}</strong>
@@ -974,13 +1203,19 @@ function renderRecordLibrary(data){
       `;
       const open=()=>openRecordDetail(type,item.id);
       row.addEventListener('click',open);
-      row.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();open()}});
+      row.addEventListener('keydown',event=>{
+        if(event.key==='Enter'||event.key===' '){
+          event.preventDefault();
+          open();
+        }
+      });
       list.append(row);
     });
   }
 
   renderDataQuality(data);
   renderExpectedCommitments(data);
+  renderLibrarySuggestions();
 }
 
 function dateAgeDays(dateString){
@@ -2989,18 +3224,29 @@ $('cancelRoadmap').addEventListener('click',closeRoadmapModal);
 $('roadmapModal').addEventListener('click',event=>{if(event.target===$('roadmapModal'))closeRoadmapModal()});
 $('roadmapForm').addEventListener('submit',saveRoadmap);
 $('libraryRecordButton').addEventListener('click',()=>openRecordModal('expense'));
-['librarySearch','libraryType','libraryRecurrence','librarySource','libraryDateFrom','libraryDateTo'].forEach(id=>{
-  $(id).addEventListener(id==='librarySearch'?'input':'change',()=>renderRecordLibrary(loadData()));
+$('librarySearch').addEventListener('input',()=>renderRecordLibrary(loadData()));
+$('librarySearch').addEventListener('change',()=>{
+  if($('librarySearch').value.trim())rememberLibrarySearch($('librarySearch').value.trim());
 });
-$('libraryClearFilters').addEventListener('click',()=>{
-  $('librarySearch').value='';
-  $('libraryType').value='all';
-  $('librarySource').value='all';
-  $('libraryRecurrence').value='all';
-  $('libraryDateFrom').value='';
-  $('libraryDateTo').value='';
-  renderRecordLibrary(loadData());
+$('librarySearch').addEventListener('keydown',event=>{
+  if(event.key==='Enter'){
+    event.preventDefault();
+    if($('librarySearch').value.trim())rememberLibrarySearch($('librarySearch').value.trim());
+    renderRecordLibrary(loadData());
+  }
 });
+$('libraryClearSearch').addEventListener('click',clearLibrarySearch);
+$('libraryMoreFilters').addEventListener('click',toggleAdvancedFilters);
+document.querySelectorAll('[data-library-period]').forEach(button=>{
+  button.addEventListener('click',()=>setLibraryPeriod(button.dataset.libraryPeriod));
+});
+document.querySelectorAll('[data-library-recurrence="recurring"]').forEach(button=>{
+  button.addEventListener('click',()=>setRecurringQuickFilter(!libraryView.recurringOnly));
+});
+['libraryType','libraryRecurrence','librarySource','libraryDateFrom','libraryDateTo'].forEach(id=>{
+  $(id).addEventListener('change',()=>renderRecordLibrary(loadData()));
+});
+$('libraryClearFilters').addEventListener('click',resetLibraryView);
 $('recordRecurrence').addEventListener('change',()=>{
   if($('recordType').value==='bill'&&$('recordRecurrence').value==='once'){
     $('recordRecurrence').value='monthly';

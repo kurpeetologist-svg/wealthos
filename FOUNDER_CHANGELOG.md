@@ -422,3 +422,23 @@ The recurring-bill form contained duplicate schedule fields and pushed the Save 
 ### Principle
 
 **A form should never make users wonder whether their work can be saved.**
+
+## v0.21.3 — Record Library v2
+
+### Observation
+
+The Record Library required users to think like database administrators. Search appeared alongside several equally prominent fields, making it unclear whether a button was required or whether every filter needed to be completed.
+
+### Decision
+
+- Make one search bar the primary interaction.
+- Search as the user types.
+- Search across the complete financial record.
+- Keep common filters simple.
+- Hide advanced filters until requested.
+- Rank results by relevance.
+- Use plain-language empty states.
+
+### Principle
+
+**People remember financial things—not database fields.**

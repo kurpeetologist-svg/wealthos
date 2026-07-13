@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="WealthOS Private Preview — build confidence with money, one decision at a time.">
-  <title>WealthOS Private Preview v0.21.2</title>
+  <title>WealthOS Private Preview v0.21.3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Newsreader:wght@500;600&display=swap" rel="stylesheet">
@@ -243,76 +243,102 @@
           </section>
 
           <section class="record-library" id="recordLibrary">
-            <div class="workspace-section-heading">
+            <div class="workspace-section-heading library-heading">
               <div>
                 <span>Core integrity</span>
                 <h3>Record Library</h3>
-                <p>Review, correct, archive, and verify the facts behind WealthOS.</p>
+                <p>Every financial fact you’ve recorded lives here. Search, review, and correct your history whenever you need.</p>
               </div>
               <button id="libraryRecordButton" type="button">Record something +</button>
             </div>
 
-            <div class="library-toolbar">
-              <label>
-                Search
-                <input id="librarySearch" type="search" placeholder="Merchant, account, bill, debt, Roadmap...">
-              </label>
+            <div class="library-search-shell">
+              <div class="library-search-primary">
+                <label for="librarySearch">Search your financial history</label>
+                <div class="library-search-box">
+                  <span aria-hidden="true">⌕</span>
+                  <input id="librarySearch" type="search" autocomplete="off" placeholder="Search merchant, bill, account, amount, note, category...">
+                  <button id="libraryClearSearch" type="button" aria-label="Clear search" hidden>Clear</button>
+                </div>
+                <p>Start typing. WealthOS searches as you type—no button required.</p>
+              </div>
 
-              <label>
-                Type
-                <select id="libraryType">
-                  <option value="all">All records</option>
-                  <option value="expense">Expenses</option>
-                  <option value="income">Income</option>
-                  <option value="account">Accounts</option>
-                  <option value="bill">Recurring bills</option>
-                  <option value="debt">Debts</option>
-                  <option value="debt_payment">Debt payments</option>
-                  <option value="transfer">Transfers</option>
-                  <option value="roadmap_contribution">Roadmap contributions</option>
-                </select>
-              </label>
+              <div class="library-quick-filters">
+                <button class="library-chip active" type="button" data-library-period="all">All time</button>
+                <button class="library-chip" type="button" data-library-period="month">This month</button>
+                <button class="library-chip" type="button" data-library-period="30days">Last 30 days</button>
+                <button class="library-chip" type="button" data-library-recurrence="recurring">Recurring</button>
+                <button id="libraryMoreFilters" class="library-more-filters" type="button" aria-expanded="false">More filters +</button>
+              </div>
 
-              <label>
-                Recurrence
-                <select id="libraryRecurrence">
-                  <option value="all">All schedules</option>
-                  <option value="once">One-time</option>
-                  <option value="recurring">Recurring</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="biweekly">Every two weeks</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="quarterly">Quarterly</option>
-                  <option value="annual">Annually</option>
-                  <option value="custom">Custom</option>
-                </select>
-              </label>
+              <div class="library-advanced-filters" id="libraryAdvancedFilters" hidden>
+                <label>
+                  Type
+                  <select id="libraryType">
+                    <option value="all">All records</option>
+                    <option value="expense">Expenses</option>
+                    <option value="income">Income</option>
+                    <option value="account">Accounts</option>
+                    <option value="bill">Recurring bills</option>
+                    <option value="debt">Debts</option>
+                    <option value="debt_payment">Debt payments</option>
+                    <option value="transfer">Transfers</option>
+                    <option value="roadmap_contribution">Roadmap contributions</option>
+                  </select>
+                </label>
 
-              <label>
-                Source
-                <select id="librarySource">
-                  <option value="all">All sources</option>
-                  <option value="manual">Manual</option>
-                  <option value="connected">Connected</option>
-                  <option value="imported">Imported</option>
-                  <option value="calculated">Calculated</option>
-                </select>
-              </label>
+                <label>
+                  Recurrence
+                  <select id="libraryRecurrence">
+                    <option value="all">All schedules</option>
+                    <option value="once">One-time</option>
+                    <option value="recurring">Recurring</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="biweekly">Every two weeks</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="annual">Annually</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </label>
 
-              <label>
-                Date from
-                <input id="libraryDateFrom" type="date">
-              </label>
+                <label>
+                  Source
+                  <select id="librarySource">
+                    <option value="all">All sources</option>
+                    <option value="manual">Manual</option>
+                    <option value="connected">Connected</option>
+                    <option value="imported">Imported</option>
+                    <option value="calculated">Calculated</option>
+                  </select>
+                </label>
 
-              <label>
-                Date to
-                <input id="libraryDateTo" type="date">
-              </label>
+                <label>
+                  Date from
+                  <input id="libraryDateFrom" type="date">
+                </label>
+
+                <label>
+                  Date to
+                  <input id="libraryDateTo" type="date">
+                </label>
+              </div>
             </div>
 
             <div class="library-status-row">
-              <p id="libraryCount">0 records</p>
-              <button id="libraryClearFilters" type="button">Clear filters</button>
+              <div>
+                <strong id="libraryCount">0 records</strong>
+                <span id="libraryStatusText">Showing your most recent records.</span>
+              </div>
+              <button id="libraryClearFilters" type="button">Reset view</button>
+            </div>
+
+            <div class="library-suggestions" id="librarySuggestions">
+              <div class="library-suggestions-heading">
+                <span>Recent</span>
+                <small>Tap one to search again</small>
+              </div>
+              <div id="librarySuggestionChips"></div>
             </div>
 
             <div class="data-quality-panel" id="dataQualityPanel">
